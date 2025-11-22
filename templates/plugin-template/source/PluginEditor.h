@@ -45,9 +45,6 @@ private:
     // WebView bridge methods
     //==========================================================================
 
-    /** Set up JavaScript bindings for WebView */
-    void setupWebViewBridge();
-
     /** Send parameter update to WebView */
     void sendParameterToWebView(const juce::String& paramId, float value);
 

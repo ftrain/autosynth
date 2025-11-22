@@ -88,6 +88,13 @@ log_info "Plugin code: $PLUGIN_CODE"
 log_info "Target: $TARGET_DIR"
 echo ""
 
+# Create branch name from plugin class (lowercase with hyphens)
+BRANCH_NAME="plugin/$(echo "$PLUGIN_CLASS" | sed 's/\([A-Z]\)/-\L\1/g' | sed 's/^-//')"
+
+# Create and switch to new branch
+log_info "Creating branch: $BRANCH_NAME"
+git checkout -b "$BRANCH_NAME"
+
 # Create target directory
 mkdir -p "$(dirname "$TARGET_DIR")"
 
@@ -156,12 +163,12 @@ fi
 # (Template uses PluginProcessor which is generic, so no renaming needed)
 
 log_info "Plugin created successfully!"
+log_info "Branch: $BRANCH_NAME"
 echo ""
 echo "Next steps:"
 echo ""
-echo "  1. Initialize git submodules:"
+echo "  1. Add git submodules:"
 echo "     cd $TARGET_DIR"
-echo "     git init"
 echo "     git submodule add https://github.com/juce-framework/JUCE.git JUCE"
 echo "     git submodule add https://github.com/surge-synthesizer/sst-basic-blocks.git libs/sst/sst-basic-blocks"
 echo "     git submodule add https://github.com/surge-synthesizer/sst-filters.git libs/sst/sst-filters"
@@ -182,4 +189,6 @@ echo "  4. Start developing!"
 echo "     - Edit source/dsp/Voice.h for DSP"
 echo "     - Edit ui/src/App.tsx for UI"
 echo "     - See README.md for more info"
+echo ""
+echo "  5. When ready, commit and merge to main"
 echo ""

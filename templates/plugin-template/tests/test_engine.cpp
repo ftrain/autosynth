@@ -22,6 +22,7 @@ using Catch::Approx;
 // ============================================================================
 // Test Utilities
 // ============================================================================
+namespace {
 
 bool isBufferSilent(const float* buffer, int numSamples, float threshold = 1e-6f)
 {
@@ -42,6 +43,8 @@ bool isBufferValid(const float* buffer, int numSamples)
     }
     return true;
 }
+
+} // anonymous namespace
 
 // ============================================================================
 // SynthEngine Tests

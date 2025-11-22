@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.22)
 # PROJECT CONFIGURATION
 # TODO: Update these values for your plugin
 # ============================================================================
-project(MyPlugin VERSION 1.0.0 LANGUAGES CXX)
+project(MyPlugin VERSION 1.0.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -22,6 +22,15 @@ set(COMPANY_CODE "Stud")
 # ============================================================================
 option(BUILD_TESTS "Build unit tests" ON)
 option(COPY_PLUGIN_AFTER_BUILD "Copy plugin to system location" TRUE)
+
+# ============================================================================
+# LINUX DEPENDENCIES
+# ============================================================================
+if(UNIX AND NOT APPLE)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
+    pkg_check_modules(WEBKIT2GTK REQUIRED webkit2gtk-4.1)
+endif()
 
 # ============================================================================
 # JUCE
@@ -75,6 +84,14 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/source
     ${CMAKE_SOURCE_DIR}/source/dsp
 )
+
+# Linux GTK/WebKit includes
+if(UNIX AND NOT APPLE)
+    target_include_directories(${PROJECT_NAME} PRIVATE
+        ${GTK3_INCLUDE_DIRS}
+        ${WEBKIT2GTK_INCLUDE_DIRS}
+    )
+endif()
 
 # ============================================================================
 # LINK LIBRARIES

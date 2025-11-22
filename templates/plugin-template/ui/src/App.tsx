@@ -166,7 +166,6 @@ const App: React.FC = () => {
                   min={0}
                   max={1}
                   step={0.01}
-                  orient="vertical"
                   value={paramValues.amp_attack || 0.01}
                   onChange={(e) => handleChange('amp_attack', parseFloat(e.target.value))}
                 />
@@ -178,7 +177,6 @@ const App: React.FC = () => {
                   min={0}
                   max={1}
                   step={0.01}
-                  orient="vertical"
                   value={paramValues.amp_decay || 0.1}
                   onChange={(e) => handleChange('amp_decay', parseFloat(e.target.value))}
                 />
@@ -190,7 +188,6 @@ const App: React.FC = () => {
                   min={0}
                   max={1}
                   step={0.01}
-                  orient="vertical"
                   value={paramValues.amp_sustain || 0.7}
                   onChange={(e) => handleChange('amp_sustain', parseFloat(e.target.value))}
                 />
@@ -202,7 +199,6 @@ const App: React.FC = () => {
                   min={0}
                   max={1}
                   step={0.01}
-                  orient="vertical"
                   value={paramValues.amp_release || 0.3}
                   onChange={(e) => handleChange('amp_release', parseFloat(e.target.value))}
                 />
@@ -221,7 +217,6 @@ const App: React.FC = () => {
                   min={0}
                   max={1}
                   step={0.01}
-                  orient="vertical"
                   value={paramValues.filter_attack || 0.01}
                   onChange={(e) => handleChange('filter_attack', parseFloat(e.target.value))}
                 />
@@ -233,7 +228,6 @@ const App: React.FC = () => {
                   min={0}
                   max={1}
                   step={0.01}
-                  orient="vertical"
                   value={paramValues.filter_decay || 0.2}
                   onChange={(e) => handleChange('filter_decay', parseFloat(e.target.value))}
                 />
@@ -245,7 +239,6 @@ const App: React.FC = () => {
                   min={0}
                   max={1}
                   step={0.01}
-                  orient="vertical"
                   value={paramValues.filter_sustain || 0.5}
                   onChange={(e) => handleChange('filter_sustain', parseFloat(e.target.value))}
                 />
@@ -257,7 +250,6 @@ const App: React.FC = () => {
                   min={0}
                   max={1}
                   step={0.01}
-                  orient="vertical"
                   value={paramValues.filter_release || 0.3}
                   onChange={(e) => handleChange('filter_release', parseFloat(e.target.value))}
                 />
@@ -328,7 +320,7 @@ const App: React.FC = () => {
       )}
 
       {/* Debug info in development */}
-      {process.env.NODE_ENV === 'development' && (
+      {import.meta.env.DEV && (
         <footer className="debug-info">
           <small>
             JUCE: {isConnected ? 'Yes' : 'No'} |
