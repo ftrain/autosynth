@@ -1,0 +1,48 @@
+{
+  "meta": {
+    "name": "Classic Saw Lead",
+    "author": "Studio",
+    "category": "Lead",
+    "tags": ["saw", "bright", "classic", "analog"],
+    "description": "A classic detuned saw lead with filter movement",
+    "version": "1.0.0",
+    "created": "2024-01-01T00:00:00Z",
+    "modified": "2024-01-01T00:00:00Z"
+  },
+  "parameters": {
+    "osc1_waveform": 0.0,
+    "osc1_level": 0.8,
+    "osc1_tune": 0.5,
+
+    "filter_cutoff": 0.6,
+    "filter_reso": 0.3,
+    "filter_env_amount": 0.7,
+
+    "amp_attack": 0.01,
+    "amp_decay": 0.15,
+    "amp_sustain": 0.7,
+    "amp_release": 0.2,
+
+    "filter_attack": 0.01,
+    "filter_decay": 0.25,
+    "filter_sustain": 0.3,
+    "filter_release": 0.2,
+
+    "master_volume": 0.7
+  },
+  "modulation": [
+    {
+      "source": "lfo1",
+      "destination": "osc1_tune",
+      "depth": 0.05
+    },
+    {
+      "source": "velocity",
+      "destination": "filter_cutoff",
+      "depth": 0.3
+    }
+  ],
+  "ui": {
+    "selectedPage": "main"
+  }
+}

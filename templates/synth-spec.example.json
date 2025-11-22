@@ -1,0 +1,104 @@
+{
+  "$schema": "./synth-spec.schema.json",
+  "meta": {
+    "name": "Warm Bass",
+    "id": "WarmBass",
+    "code": "WmBs",
+    "type": "subtractive",
+    "voices": 4,
+    "description": "Moog-style bass synth with tape saturation",
+    "inspiration": ["Minimoog Model D", "Moog Sub 37"]
+  },
+  "voice": {
+    "oscillators": [
+      {
+        "id": "osc1",
+        "sst": "DPWSawOscillator",
+        "features": ["detune", "level"],
+        "preFx": [
+          { "id": "osc1_tape", "sst": "Distortion" }
+        ]
+      },
+      {
+        "id": "osc2",
+        "sst": "DPWSawOscillator",
+        "features": ["detune", "level", "sync"]
+      },
+      {
+        "id": "sub",
+        "sst": "SinOscillator",
+        "features": ["level"]
+      }
+    ],
+    "filters": [
+      {
+        "id": "filter1",
+        "sst": "VintageLadder",
+        "modes": ["LP24"],
+        "keyTracking": true,
+        "envAmount": true
+      }
+    ],
+    "envelopes": [
+      { "id": "env1", "type": "ADSR", "target": "amp" },
+      { "id": "env2", "type": "ADSR", "target": "filter" }
+    ],
+    "lfos": [
+      {
+        "id": "lfo1",
+        "shapes": ["sine", "triangle", "square"],
+        "sync": true,
+        "defaultTarget": "filter_cutoff"
+      }
+    ],
+    "modMatrix": {
+      "slots": 0,
+      "sources": ["lfo1", "env2", "velocity", "modWheel"],
+      "destinations": ["filter_cutoff", "osc1_level", "osc2_level"]
+    }
+  },
+  "effects": [
+    { "id": "delay", "sst": "Delay", "bypass": true }
+  ],
+  "parameters": [
+    { "id": "osc1_level", "name": "Osc 1 Level", "min": 0, "max": 1, "default": 0.8, "category": "osc1", "control": "knob" },
+    { "id": "osc1_detune", "name": "Osc 1 Detune", "min": -1, "max": 1, "default": 0, "unit": "st", "category": "osc1", "control": "knob" },
+    { "id": "osc1_tape", "name": "Osc 1 Tape", "min": 0, "max": 1, "default": 0, "category": "osc1", "control": "knob" },
+    { "id": "osc2_level", "name": "Osc 2 Level", "min": 0, "max": 1, "default": 0.6, "category": "osc2", "control": "knob" },
+    { "id": "osc2_detune", "name": "Osc 2 Detune", "min": -1, "max": 1, "default": 0.1, "unit": "st", "category": "osc2", "control": "knob" },
+    { "id": "osc2_sync", "name": "Osc 2 Sync", "min": 0, "max": 1, "default": 0, "category": "osc2", "control": "toggle" },
+    { "id": "sub_level", "name": "Sub Level", "min": 0, "max": 1, "default": 0.5, "category": "sub", "control": "knob" },
+    { "id": "filter_cutoff", "name": "Cutoff", "min": 20, "max": 20000, "default": 2000, "unit": "Hz", "scale": "log", "category": "filter", "control": "knob", "cc": 74 },
+    { "id": "filter_reso", "name": "Resonance", "min": 0, "max": 1, "default": 0.2, "category": "filter", "control": "knob", "cc": 71 },
+    { "id": "filter_env", "name": "Env Amount", "min": -1, "max": 1, "default": 0.5, "category": "filter", "control": "knob" },
+    { "id": "filter_key", "name": "Key Track", "min": 0, "max": 1, "default": 0.5, "category": "filter", "control": "knob" },
+    { "id": "amp_attack", "name": "Attack", "min": 0.001, "max": 10, "default": 0.01, "unit": "s", "scale": "log", "category": "amp", "control": "adsr" },
+    { "id": "amp_decay", "name": "Decay", "min": 0.001, "max": 10, "default": 0.3, "unit": "s", "scale": "log", "category": "amp", "control": "adsr" },
+    { "id": "amp_sustain", "name": "Sustain", "min": 0, "max": 1, "default": 0.7, "category": "amp", "control": "adsr" },
+    { "id": "amp_release", "name": "Release", "min": 0.001, "max": 10, "default": 0.3, "unit": "s", "scale": "log", "category": "amp", "control": "adsr" },
+    { "id": "flt_attack", "name": "Attack", "min": 0.001, "max": 10, "default": 0.01, "unit": "s", "scale": "log", "category": "filter_env", "control": "adsr" },
+    { "id": "flt_decay", "name": "Decay", "min": 0.001, "max": 10, "default": 0.2, "unit": "s", "scale": "log", "category": "filter_env", "control": "adsr" },
+    { "id": "flt_sustain", "name": "Sustain", "min": 0, "max": 1, "default": 0.3, "category": "filter_env", "control": "adsr" },
+    { "id": "flt_release", "name": "Release", "min": 0.001, "max": 10, "default": 0.5, "unit": "s", "scale": "log", "category": "filter_env", "control": "adsr" },
+    { "id": "lfo_rate", "name": "LFO Rate", "min": 0.01, "max": 50, "default": 2, "unit": "Hz", "scale": "log", "category": "lfo", "control": "knob" },
+    { "id": "lfo_depth", "name": "LFO Depth", "min": 0, "max": 1, "default": 0, "category": "lfo", "control": "knob" },
+    { "id": "delay_time", "name": "Delay Time", "min": 0.01, "max": 2, "default": 0.3, "unit": "s", "category": "delay", "control": "knob" },
+    { "id": "delay_feedback", "name": "Feedback", "min": 0, "max": 0.95, "default": 0.3, "category": "delay", "control": "knob" },
+    { "id": "delay_mix", "name": "Delay Mix", "min": 0, "max": 1, "default": 0, "category": "delay", "control": "knob" },
+    { "id": "master_volume", "name": "Volume", "min": 0, "max": 1, "default": 0.8, "category": "master", "control": "slider" }
+  ],
+  "ui": {
+    "layout": [
+      { "section": "osc1", "label": "Oscillator 1", "params": ["osc1_level", "osc1_detune", "osc1_tape"] },
+      { "section": "osc2", "label": "Oscillator 2", "params": ["osc2_level", "osc2_detune", "osc2_sync"] },
+      { "section": "sub", "label": "Sub", "params": ["sub_level"] },
+      { "section": "filter", "label": "Filter", "params": ["filter_cutoff", "filter_reso", "filter_env", "filter_key"] },
+      { "section": "amp", "label": "Amp Envelope", "params": ["amp_attack", "amp_decay", "amp_sustain", "amp_release"] },
+      { "section": "filter_env", "label": "Filter Envelope", "params": ["flt_attack", "flt_decay", "flt_sustain", "flt_release"] },
+      { "section": "lfo", "label": "LFO", "params": ["lfo_rate", "lfo_depth"] },
+      { "section": "delay", "label": "Delay", "params": ["delay_time", "delay_feedback", "delay_mix"] },
+      { "section": "master", "label": "Master", "params": ["master_volume"] }
+    ],
+    "theme": "dark"
+  }
+}

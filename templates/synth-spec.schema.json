@@ -1,0 +1,306 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://studio.local/synth-spec.schema.json",
+  "title": "Synth Specification",
+  "description": "Single source of truth for synthesizer design. Code generators produce Voice.h, parameters, and UI from this spec.",
+  "type": "object",
+  "required": ["meta", "voice", "parameters"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["name", "id", "type", "voices"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name (e.g., 'Warm Bass')"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+          "description": "Code identifier (e.g., 'WarmBass')"
+        },
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z][a-zA-Z0-9]{3}$",
+          "description": "4-char plugin code (e.g., 'WmBs')"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["subtractive", "fm", "wavetable", "hybrid", "physical"],
+          "description": "Synthesis type"
+        },
+        "voices": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64,
+          "description": "Max polyphony (1 for mono)"
+        },
+        "description": {
+          "type": "string",
+          "description": "One-line description"
+        },
+        "inspiration": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Reference synths"
+        }
+      }
+    },
+    "voice": {
+      "type": "object",
+      "required": ["oscillators", "filters", "envelopes"],
+      "properties": {
+        "oscillators": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "required": ["id", "sst"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^osc[0-9]+$"
+              },
+              "sst": {
+                "type": "string",
+                "enum": [
+                  "DPWSawOscillator",
+                  "SinOscillator",
+                  "PulseOscillator",
+                  "CorrelatedNoise",
+                  "WavetableOscillator"
+                ],
+                "description": "SST oscillator class"
+              },
+              "features": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["detune", "pwm", "sync", "level", "pan", "fm"]
+                }
+              },
+              "preFx": {
+                "type": "array",
+                "items": { "$ref": "#/definitions/effect" },
+                "description": "Per-oscillator effects (e.g., tape saturation)"
+              }
+            }
+          }
+        },
+        "filters": {
+          "type": "array",
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "required": ["id", "sst"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^filter[0-9]+$"
+              },
+              "sst": {
+                "type": "string",
+                "enum": [
+                  "CytomicSVF",
+                  "VintageLadder",
+                  "K35Filter",
+                  "NonlinearFeedback",
+                  "DiodeLadder",
+                  "CombFilter"
+                ],
+                "description": "SST filter class"
+              },
+              "modes": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["LP12", "LP24", "HP12", "HP24", "BP12", "BP24", "Notch"]
+                }
+              },
+              "keyTracking": { "type": "boolean" },
+              "envAmount": { "type": "boolean" }
+            }
+          }
+        },
+        "envelopes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "required": ["id", "type", "target"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^env[0-9]+$"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["ADSR", "DAHDSR", "AD", "AR"],
+                "description": "SST ADSREnvelope or DAHDSREnvelope"
+              },
+              "target": {
+                "type": "string",
+                "enum": ["amp", "filter", "pitch", "pwm", "mod"],
+                "description": "Hardwired target"
+              }
+            }
+          }
+        },
+        "lfos": {
+          "type": "array",
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^lfo[0-9]+$"
+              },
+              "shapes": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["sine", "triangle", "saw", "square", "sampleHold"]
+                },
+                "default": ["sine", "triangle", "saw", "square"]
+              },
+              "sync": { "type": "boolean", "default": true },
+              "bipolar": { "type": "boolean", "default": true },
+              "defaultTarget": { "type": "string" }
+            }
+          }
+        },
+        "modMatrix": {
+          "type": "object",
+          "properties": {
+            "slots": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 16,
+              "description": "Number of assignable mod slots (0 = hardwired only)"
+            },
+            "sources": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Available mod sources"
+            },
+            "destinations": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Available mod destinations"
+            }
+          }
+        }
+      }
+    },
+    "effects": {
+      "type": "array",
+      "maxItems": 8,
+      "items": { "$ref": "#/definitions/effect" },
+      "description": "Global effect chain"
+    },
+    "parameters": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "min", "max", "default", "category"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "description": "Parameter ID for code (e.g., 'filter_cutoff')"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name"
+          },
+          "min": { "type": "number" },
+          "max": { "type": "number" },
+          "default": { "type": "number" },
+          "unit": {
+            "type": "string",
+            "enum": ["", "Hz", "dB", "ms", "s", "%", "st", "ct"],
+            "default": ""
+          },
+          "scale": {
+            "type": "string",
+            "enum": ["linear", "log", "exp", "discrete"],
+            "default": "linear"
+          },
+          "category": {
+            "type": "string",
+            "description": "UI grouping (e.g., 'osc1', 'filter', 'amp')"
+          },
+          "cc": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 127,
+            "description": "Optional MIDI CC mapping"
+          },
+          "control": {
+            "type": "string",
+            "enum": ["knob", "slider", "toggle", "select", "adsr", "lfo"],
+            "default": "knob",
+            "description": "Preferred UI control"
+          }
+        }
+      }
+    },
+    "ui": {
+      "type": "object",
+      "properties": {
+        "layout": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["section", "params"],
+            "properties": {
+              "section": { "type": "string" },
+              "label": { "type": "string" },
+              "params": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          },
+          "description": "UI section layout"
+        },
+        "theme": {
+          "type": "string",
+          "enum": ["dark", "light", "vintage", "modern"],
+          "default": "dark"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "effect": {
+      "type": "object",
+      "required": ["id", "sst"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "sst": {
+          "type": "string",
+          "enum": [
+            "Delay",
+            "Reverb",
+            "Chorus",
+            "Phaser",
+            "Flanger",
+            "Distortion",
+            "Compressor",
+            "EQ"
+          ]
+        },
+        "bypass": { "type": "boolean", "default": true }
+      }
+    }
+  }
+}

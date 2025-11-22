@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://studio.example.com/preset-schema.json",
+  "title": "Synth Preset",
+  "description": "Schema for synthesizer preset files",
+  "type": "object",
+  "required": ["meta", "parameters"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "description": "Preset metadata",
+      "required": ["name", "version"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Preset display name",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "author": {
+          "type": "string",
+          "description": "Preset author name",
+          "maxLength": 64
+        },
+        "category": {
+          "type": "string",
+          "description": "Preset category",
+          "enum": ["Bass", "Lead", "Pad", "Keys", "Pluck", "FX", "Template", "Other"]
+        },
+        "tags": {
+          "type": "array",
+          "description": "Searchable tags",
+          "items": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "maxItems": 10
+        },
+        "description": {
+          "type": "string",
+          "description": "Preset description",
+          "maxLength": 256
+        },
+        "version": {
+          "type": "string",
+          "description": "Plugin version this preset was created with",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        },
+        "created": {
+          "type": "string",
+          "description": "Creation date (ISO 8601)",
+          "format": "date-time"
+        },
+        "modified": {
+          "type": "string",
+          "description": "Last modified date (ISO 8601)",
+          "format": "date-time"
+        }
+      }
+    },
+    "parameters": {
+      "type": "object",
+      "description": "Parameter values (normalized 0-1)",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      }
+    },
+    "modulation": {
+      "type": "array",
+      "description": "Modulation routing assignments",
+      "items": {
+        "type": "object",
+        "required": ["source", "destination", "depth"],
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": "Modulation source ID"
+          },
+          "destination": {
+            "type": "string",
+            "description": "Modulation destination parameter ID"
+          },
+          "depth": {
+            "type": "number",
+            "description": "Modulation depth (-1 to 1)",
+            "minimum": -1,
+            "maximum": 1
+          }
+        }
+      }
+    },
+    "ui": {
+      "type": "object",
+      "description": "UI state (optional)",
+      "properties": {
+        "selectedPage": {
+          "type": "string"
+        },
+        "expandedSections": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
