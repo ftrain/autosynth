@@ -1,6 +1,6 @@
 /**
  * @file PluginEditor.cpp
- * @brief Implementation of the WebView-based editor
+ * @brief WebView-based editor implementation
  */
 
 #include "PluginEditor.h"
@@ -9,22 +9,16 @@
 #include "UIResources.h"
 #endif
 
-//==============================================================================
-// Constructor / Destructor
-//==============================================================================
-
 PluginEditor::PluginEditor(PluginProcessor& p)
     : AudioProcessorEditor(&p)
     , processorRef(p)
 {
     setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
     setResizable(true, true);
-    setResizeLimits(400, 300, 1600, 1200);
+    setResizeLimits(600, 400, 1400, 900);
 
-#if JUCE_WEB_BROWSER
-    // Create WebView with native functions registered in Options
+    // Build WebView options
     auto options = juce::WebBrowserComponent::Options{}
-        .withBackend(juce::WebBrowserComponent::Options::Backend::webview2)
         .withNativeIntegrationEnabled()
         .withNativeFunction("setParameter",
             [this](const juce::Array<juce::var>& args, juce::WebBrowserComponent::NativeFunctionCompletion completion)
@@ -63,38 +57,39 @@ PluginEditor::PluginEditor(PluginProcessor& p)
             {
                 sendAllParametersToWebView();
                 completion({});
-            })
-        .withResourceProvider([](const juce::String& url)
-            -> std::optional<juce::WebBrowserComponent::Resource>
+            });
+
+#ifdef HAS_UI_RESOURCES
+    // Production: serve embedded resources
+    options = options.withResourceProvider(
+        [](const juce::String& url) -> std::optional<juce::WebBrowserComponent::Resource>
         {
-            // Serve embedded UI resources
-            #ifdef HAS_UI_RESOURCES
-            if (url.contains("index.html") || url == "/" || url.isEmpty())
+            // Handle root and index.html requests
+            if (url.isEmpty() || url == "/" || url.endsWith("index.html"))
             {
-                auto data = UIResources::index_html;
-                auto size = UIResources::index_htmlSize;
                 return juce::WebBrowserComponent::Resource{
                     std::vector<std::byte>(
-                        reinterpret_cast<const std::byte*>(data),
-                        reinterpret_cast<const std::byte*>(data) + size
+                        reinterpret_cast<const std::byte*>(UIResources::index_html),
+                        reinterpret_cast<const std::byte*>(UIResources::index_html) + UIResources::index_htmlSize
                     ),
                     "text/html"
                 };
             }
-            #endif
             return std::nullopt;
-        });
+        },
+        juce::URL("http://localhost/"));  // Base URL for resource provider
+#endif
 
     webView = std::make_unique<juce::WebBrowserComponent>(options);
     addAndMakeVisible(*webView);
 
-    // Load UI
-    #ifdef HAS_UI_RESOURCES
-    webView->goToURL("resource://index.html");
-    #else
-    // Development mode - load from local dev server
+    // Load the UI
+#ifdef HAS_UI_RESOURCES
+    // Production: use resource provider
+    webView->goToURL("http://localhost/index.html");
+#else
+    // Development: use Vite dev server
     webView->goToURL("http://localhost:5173");
-    #endif
 #endif
 
     // Setup parameter listener
@@ -107,15 +102,23 @@ PluginEditor::PluginEditor(PluginProcessor& p)
         }
     }
 
-    // Start timer for audio visualization updates
-    startTimerHz(30); // 30fps for visualization
+    startTimerHz(30);
+
+    // Force a resize after a short delay to fix GTK WebView sizing
+    juce::Timer::callAfterDelay(100, [this]() {
+        if (webView)
+        {
+            auto bounds = getLocalBounds();
+            webView->setBounds(0, 0, 0, 0);  // Reset
+            webView->setBounds(bounds);       // Set correct size
+            repaint();
+        }
+    });
 }
 
 PluginEditor::~PluginEditor()
 {
     stopTimer();
-
-    // Remove parameter listeners
     for (auto* param : processorRef.apvts.processor.getParameters())
     {
         if (auto* paramWithID = dynamic_cast<juce::AudioProcessorParameterWithID*>(param))
@@ -125,10 +128,6 @@ PluginEditor::~PluginEditor()
     }
 }
 
-//==============================================================================
-// Component
-//==============================================================================
-
 void PluginEditor::paint(juce::Graphics& g)
 {
     g.fillAll(juce::Colours::black);
@@ -136,45 +135,27 @@ void PluginEditor::paint(juce::Graphics& g)
 
 void PluginEditor::resized()
 {
-#if JUCE_WEB_BROWSER
     if (webView)
-    {
         webView->setBounds(getLocalBounds());
-    }
-#endif
 }
-
-//==============================================================================
-// Timer
-//==============================================================================
 
 void PluginEditor::timerCallback()
 {
     sendAudioDataToWebView();
 }
 
-//==============================================================================
-// WebView Bridge
-//==============================================================================
-
 void PluginEditor::sendParameterToWebView(const juce::String& paramId, float value)
 {
-    if (ignoreParameterCallbacks)
+    if (ignoreParameterCallbacks || !webView)
         return;
 
-#if JUCE_WEB_BROWSER
-    if (webView)
-    {
-        juce::String script = "if (window.onParameterUpdate) window.onParameterUpdate('"
-                            + paramId + "', " + juce::String(value) + ");";
-        webView->evaluateJavascript(script, nullptr);
-    }
-#endif
+    juce::String script = "if (window.onParameterUpdate) window.onParameterUpdate('"
+                        + paramId + "', " + juce::String(value) + ");";
+    webView->evaluateJavascript(script, nullptr);
 }
 
 void PluginEditor::sendAllParametersToWebView()
 {
-#if JUCE_WEB_BROWSER
     if (!webView)
         return;
 
@@ -184,7 +165,6 @@ void PluginEditor::sendAllParametersToWebView()
     {
         if (auto* paramWithID = dynamic_cast<juce::AudioProcessorParameterWithID*>(param))
         {
-            // Get normalized value (0-1)
             float normalizedValue = param->getValue();
             params->setProperty(paramWithID->getParameterID(), normalizedValue);
         }
@@ -194,18 +174,15 @@ void PluginEditor::sendAllParametersToWebView()
     juce::String json = juce::JSON::toString(paramsVar);
     juce::String script = "if (window.onStateUpdate) window.onStateUpdate(" + json + ");";
     webView->evaluateJavascript(script, nullptr);
-#endif
 }
 
 void PluginEditor::sendAudioDataToWebView()
 {
-#if JUCE_WEB_BROWSER
     if (!webView)
         return;
 
     const auto& audioData = processorRef.getVisualizationBuffer();
 
-    // Downsample to 128 samples for efficiency
     juce::Array<juce::var> samples;
     samples.ensureStorageAllocated(128);
 
@@ -219,7 +196,6 @@ void PluginEditor::sendAudioDataToWebView()
     juce::String json = juce::JSON::toString(samplesVar);
     juce::String script = "if (window.onAudioData) window.onAudioData(" + json + ");";
     webView->evaluateJavascript(script, nullptr);
-#endif
 }
 
 void PluginEditor::handleParameterFromWebView(const juce::String& paramId, float value)
@@ -227,16 +203,12 @@ void PluginEditor::handleParameterFromWebView(const juce::String& paramId, float
     ignoreParameterCallbacks = true;
 
     if (auto* param = processorRef.apvts.getParameter(paramId))
-    {
-        // Value from WebView is already normalized 0-1
         param->setValueNotifyingHost(value);
-    }
 
     ignoreParameterCallbacks = false;
 }
 
 void PluginEditor::handleNoteFromWebView(int note, float velocity, bool isNoteOn)
 {
-    // TODO: Implement MIDI injection if needed for on-screen keyboard
     juce::ignoreUnused(note, velocity, isNoteOn);
 }
