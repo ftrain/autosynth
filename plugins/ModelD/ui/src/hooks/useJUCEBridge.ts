@@ -18,11 +18,22 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 declare global {
   interface Window {
     __JUCE__?: {
-      postMessage: (type: string, data: unknown) => void;
-      version?: string;
-      platform?: string;
-      sampleRate?: number;
-      bufferSize?: number;
+      postMessage: (data: string) => void;
+      initialisationData?: {
+        __juce__platform: string[];
+        __juce__functions: string[];
+        __juce__sliders: string[];
+        __juce__toggles: string[];
+        __juce__comboBoxes: string[];
+      };
+      /** JUCE 8 backend object for native function calls */
+      backend?: {
+        addEventListener: (eventId: string, fn: (payload: unknown) => void) => [string, number];
+        removeEventListener: (handle: [string, number]) => void;
+        emitEvent: (eventId: string, payload: unknown) => void;
+        emitByBackend: (eventId: string, payload: string) => void;
+        listeners?: unknown;
+      };
     };
     /** Called by JUCE when a parameter changes */
     onParameterUpdate?: (paramId: string, value: number) => void;
@@ -30,11 +41,6 @@ declare global {
     onStateUpdate?: (state: Record<string, number>) => void;
     /** Called by JUCE with audio visualization data */
     onAudioData?: (samples: number[]) => void;
-    /** Native functions registered by JUCE */
-    setParameter?: (paramId: string, value: number) => void;
-    noteOn?: (note: number, velocity: number) => void;
-    noteOff?: (note: number) => void;
-    requestState?: () => void;
   }
 }
 
@@ -88,8 +94,7 @@ export interface UseJUCEBridgeReturn {
  * Check if running inside JUCE WebView
  */
 const isJUCEWebView = (): boolean => {
-  return typeof window !== 'undefined' &&
-         (window.__JUCE__ !== undefined || window.setParameter !== undefined);
+  return typeof window !== 'undefined' && window.__JUCE__ !== undefined;
 };
 
 /**
@@ -123,6 +128,19 @@ export function useJUCEBridge(options: UseJUCEBridgeOptions = {}): UseJUCEBridge
   useEffect(() => {
     const connected = isJUCEWebView();
     setIsConnected(connected);
+
+    // Debug: log what's available on window.__JUCE__
+    console.log('=== JUCE Bridge Debug ===');
+    console.log('window.__JUCE__:', window.__JUCE__);
+    console.log('Keys:', window.__JUCE__ ? Object.keys(window.__JUCE__) : 'N/A');
+    if (window.__JUCE__) {
+      console.log('backend:', window.__JUCE__.backend);
+      // Log all properties
+      for (const key in window.__JUCE__) {
+        console.log(`  ${key}:`, (window.__JUCE__ as Record<string, unknown>)[key]);
+      }
+    }
+    console.log('=========================');
 
     if (connected && window.__JUCE__) {
       setJuceInfo({
@@ -166,55 +184,40 @@ export function useJUCEBridge(options: UseJUCEBridgeOptions = {}): UseJUCEBridge
     };
   }, [isConnected, enableAudioData]);
 
+  // Helper to call native JUCE functions via emitEvent
+  const callNativeFunction = useCallback((name: string, params: unknown[]) => {
+    if (!isConnected) return;
+    window.__JUCE__?.backend?.emitEvent?.("__juce__invoke", {
+      name,
+      params,
+      resultId: 0,
+    });
+  }, [isConnected]);
+
   // Send parameter to JUCE
   const setParameter = useCallback((paramId: string, value: number) => {
     if (!isConnected) return;
-
-    // Clamp to 0-1 range
     const clampedValue = Math.max(0, Math.min(1, value));
-
-    // Try native function first (JUCE 8 WebView2)
-    if (window.setParameter) {
-      window.setParameter(paramId, clampedValue);
-    }
-    // Fall back to postMessage
-    else if (window.__JUCE__?.postMessage) {
-      window.__JUCE__.postMessage('setParameter', { paramId, value: clampedValue });
-    }
-  }, [isConnected]);
+    callNativeFunction("setParameter", [paramId, clampedValue]);
+  }, [isConnected, callNativeFunction]);
 
   // Request full state from JUCE
   const requestState = useCallback(() => {
     if (!isConnected) return;
-
-    if (window.requestState) {
-      window.requestState();
-    } else if (window.__JUCE__?.postMessage) {
-      window.__JUCE__.postMessage('requestState', {});
-    }
-  }, [isConnected]);
+    callNativeFunction("requestState", []);
+  }, [isConnected, callNativeFunction]);
 
   // MIDI note on
   const noteOn = useCallback((note: number, velocity: number) => {
     if (!isConnected) return;
-
-    if (window.noteOn) {
-      window.noteOn(note, velocity);
-    } else if (window.__JUCE__?.postMessage) {
-      window.__JUCE__.postMessage('noteOn', { note, velocity });
-    }
-  }, [isConnected]);
+    callNativeFunction("noteOn", [note, velocity]);
+  }, [isConnected, callNativeFunction]);
 
   // MIDI note off
   const noteOff = useCallback((note: number) => {
     if (!isConnected) return;
-
-    if (window.noteOff) {
-      window.noteOff(note);
-    } else if (window.__JUCE__?.postMessage) {
-      window.__JUCE__.postMessage('noteOff', { note });
-    }
-  }, [isConnected]);
+    callNativeFunction("noteOff", [note]);
+  }, [isConnected, callNativeFunction]);
 
   // Register parameter change callback
   const onParameterChange = useCallback((callback: (paramId: string, value: number) => void) => {

@@ -22,6 +22,7 @@ using Catch::Approx;
 // ============================================================================
 // Test Utilities
 // ============================================================================
+namespace {
 
 /**
  * Check if buffer contains no NaN or Inf values
@@ -62,6 +63,8 @@ int countZeroCrossings(const float* buffer, int numSamples)
     }
     return crossings;
 }
+
+} // anonymous namespace
 
 // ============================================================================
 // Voice Tests

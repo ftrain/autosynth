@@ -291,34 +291,36 @@ export const SynthADSR = ({
         padding: 'var(--synth-space-xs)',
         gap: 'var(--synth-space-xs)',
       }}>
-        {/* Tab interface */}
-        <div style={{ display: 'flex', gap: 'var(--synth-space-xs)' }}>
-          {tabs.map((tab, index) => (
-            <div
-              key={index}
-              onClick={() => handleTabChange(index)}
-              style={{
-                cursor: 'pointer',
-                userSelect: 'none',
-                padding: 'var(--synth-space-xs) var(--synth-space-sm)',
-                fontSize: 'var(--synth-font-size-xs)',
-                fontWeight: 'var(--synth-font-weight-bold)',
-                transition: 'var(--synth-transition-fast)',
-                borderRadius: 'var(--synth-radius-sm)',
-                background: activeTab === index
-                  ? 'linear-gradient(145deg, #3a3a3a, #252525)'
-                  : 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
-                color: activeTab === index ? '#ffffff' : '#666',
-                boxShadow: activeTab === index
-                  ? 'inset 1px 1px 2px rgba(0,0,0,0.8), 0 0 8px rgba(255,255,255,0.3)'
-                  : '1px 1px 2px rgba(0,0,0,0.6)',
-                textShadow: activeTab === index ? '0 0 4px rgba(255,255,255,0.6)' : 'none',
-              }}
-            >
-              {tab}
-            </div>
-          ))}
-        </div>
+        {/* Tab interface - only show if tabs array has items */}
+        {tabs.length > 0 && (
+          <div style={{ display: 'flex', gap: 'var(--synth-space-xs)' }}>
+            {tabs.map((tab, index) => (
+              <div
+                key={index}
+                onClick={() => handleTabChange(index)}
+                style={{
+                  cursor: 'pointer',
+                  userSelect: 'none',
+                  padding: 'var(--synth-space-xs) var(--synth-space-sm)',
+                  fontSize: 'var(--synth-font-size-xs)',
+                  fontWeight: 'var(--synth-font-weight-bold)',
+                  transition: 'var(--synth-transition-fast)',
+                  borderRadius: 'var(--synth-radius-sm)',
+                  background: activeTab === index
+                    ? 'linear-gradient(145deg, #3a3a3a, #252525)'
+                    : 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
+                  color: activeTab === index ? '#ffffff' : '#666',
+                  boxShadow: activeTab === index
+                    ? 'inset 1px 1px 2px rgba(0,0,0,0.8), 0 0 8px rgba(255,255,255,0.3)'
+                    : '1px 1px 2px rgba(0,0,0,0.6)',
+                  textShadow: activeTab === index ? '0 0 4px rgba(255,255,255,0.6)' : 'none',
+                }}
+              >
+                {tab}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Visualization */}
         <div

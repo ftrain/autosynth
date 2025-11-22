@@ -386,7 +386,17 @@ public:
 
             // Filter envelope modulation
             float filterEnvOut = filterEnv.process();
-            float modCutoff = filterCutoff + filterEnvAmount * filterEnvOut * 10000.0f;
+            float modCutoff;
+
+            if (filterEnvAmount >= 0.0f) {
+                // Positive: envelope opens filter (sweep up from base)
+                modCutoff = filterCutoff + filterEnvAmount * filterEnvOut * 10000.0f;
+            } else {
+                // Negative: inverted - filter starts open, closes at envelope peak
+                // At env=0: cutoff = base + |amt| * 10000 (bright)
+                // At env=1: cutoff = base (dark)
+                modCutoff = filterCutoff + std::abs(filterEnvAmount) * (1.0f - filterEnvOut) * 10000.0f;
+            }
 
             // Keyboard tracking
             if (filterKeyboardTracking > 0.0f)

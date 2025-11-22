@@ -118,13 +118,36 @@ const App: React.FC = () => {
 
   return (
     <div className="synth-container model-d">
-      {/* HEADER */}
+      {/* HEADER + OUTPUT */}
       <header className="synth-header">
-        <h1 className="synth-title">Model D</h1>
-        <span className="synth-subtitle">Minimoog-Style Synthesizer</span>
-        <div className="connection-status">
-          <span className={`status-indicator ${isConnected ? 'connected' : 'disconnected'}`} />
-          {isConnected ? 'Connected' : 'Standalone'}
+        <div className="header-left">
+          <h1 className="synth-title">Model D</h1>
+          <span className="synth-subtitle">Minimoog-Style Synthesizer</span>
+        </div>
+        <div className="header-center">
+          <Oscilloscope
+            label="SCOPE"
+            audioData={audioData}
+            width={300}
+            height={80}
+            color="#00ff88"
+            showGrid={true}
+            showPeaks={true}
+          />
+        </div>
+        <div className="header-right">
+          <SynthKnob
+            label="MASTER"
+            min={-60}
+            max={0}
+            value={getDenormalized('master_volume', paramValues.master_volume ?? 0.9)}
+            onChange={(v) => handleChange('master_volume', getNormalized('master_volume', v))}
+            size="medium"
+          />
+          <div className="connection-status">
+            <span className={`status-indicator ${isConnected ? 'connected' : 'disconnected'}`} />
+            {isConnected ? 'Connected' : 'Standalone'}
+          </div>
         </div>
       </header>
 
@@ -173,47 +196,43 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* FILTER */}
-      <section className="synth-section filter-panel">
-        <h2 className="section-title">Ladder Filter</h2>
-        <div className="knob-row filter-knobs">
-          <SynthKnob
-            label="CUTOFF"
-            min={20}
-            max={20000}
-            value={getDenormalized('filter_cutoff', paramValues.filter_cutoff ?? 0.25)}
-            onChange={(v) => handleChange('filter_cutoff', getNormalized('filter_cutoff', v))}
-          />
-          <SynthKnob
-            label="RESONANCE"
-            min={0}
-            max={1}
-            value={getDenormalized('filter_reso', paramValues.filter_reso ?? 0)}
-            onChange={(v) => handleChange('filter_reso', getNormalized('filter_reso', v))}
-          />
-          <SynthKnob
-            label="ENV AMT"
-            min={-1}
-            max={1}
-            value={getDenormalized('filter_env_amount', paramValues.filter_env_amount ?? 0.75)}
-            onChange={(v) => handleChange('filter_env_amount', getNormalized('filter_env_amount', v))}
-          />
-          <SynthKnob
-            label="KBD TRACK"
-            min={0}
-            max={1}
-            value={getDenormalized('filter_kbd_track', paramValues.filter_kbd_track ?? 0)}
-            onChange={(v) => handleChange('filter_kbd_track', getNormalized('filter_kbd_track', v))}
-          />
-        </div>
-      </section>
-
-      {/* ENVELOPES */}
-      <section className="synth-section envelopes-panel">
-        <h2 className="section-title">Envelopes</h2>
-        <div className="envelope-row">
+      {/* FILTER & ENVELOPES */}
+      <section className="synth-section filter-env-panel">
+        <h2 className="section-title">Filter & Envelopes</h2>
+        <div className="filter-env-row">
+          <div className="filter-controls">
+            <SynthKnob
+              label="CUTOFF"
+              min={20}
+              max={20000}
+              value={getDenormalized('filter_cutoff', paramValues.filter_cutoff ?? 0.25)}
+              onChange={(v) => handleChange('filter_cutoff', getNormalized('filter_cutoff', v))}
+            />
+            <SynthKnob
+              label="RESONANCE"
+              min={0}
+              max={1}
+              value={getDenormalized('filter_reso', paramValues.filter_reso ?? 0)}
+              onChange={(v) => handleChange('filter_reso', getNormalized('filter_reso', v))}
+            />
+            <SynthKnob
+              label="ENV AMT"
+              min={-1}
+              max={1}
+              value={getDenormalized('filter_env_amount', paramValues.filter_env_amount ?? 0.75)}
+              onChange={(v) => handleChange('filter_env_amount', getNormalized('filter_env_amount', v))}
+            />
+            <SynthKnob
+              label="KBD TRACK"
+              min={0}
+              max={1}
+              value={getDenormalized('filter_kbd_track', paramValues.filter_kbd_track ?? 0)}
+              onChange={(v) => handleChange('filter_kbd_track', getNormalized('filter_kbd_track', v))}
+            />
+          </div>
           <SynthADSR
             label="FILTER ENV"
+            tabs={[]}
             attack={getDenormalized('filter_attack', paramValues.filter_attack ?? 0) * 1000}
             decay={getDenormalized('filter_decay', paramValues.filter_decay ?? 0.01) * 1000}
             sustain={(paramValues.filter_sustain ?? 0.5) * 100}
@@ -225,6 +244,7 @@ const App: React.FC = () => {
           />
           <SynthADSR
             label="AMP ENV"
+            tabs={[]}
             attack={getDenormalized('amp_attack', paramValues.amp_attack ?? 0) * 1000}
             decay={getDenormalized('amp_decay', paramValues.amp_decay ?? 0.01) * 1000}
             sustain={(paramValues.amp_sustain ?? 0.7) * 100}
@@ -237,46 +257,6 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* MASTER */}
-      <section className="synth-section master-panel">
-        <h2 className="section-title">Output</h2>
-        <div className="knob-row">
-          <SynthKnob
-            label="MASTER"
-            min={-60}
-            max={0}
-            value={getDenormalized('master_volume', paramValues.master_volume ?? 0.9)}
-            onChange={(v) => handleChange('master_volume', getNormalized('master_volume', v))}
-          />
-          <button className="reset-button" onClick={resetToDefaults}>
-            Reset All
-          </button>
-        </div>
-      </section>
-
-      {/* OSCILLOSCOPE */}
-      <section className="synth-section visualization-panel">
-        <h2 className="section-title">Output</h2>
-        <Oscilloscope
-          label="SCOPE"
-          audioData={audioData}
-          width={380}
-          height={120}
-          color="#00ff88"
-          showGrid={true}
-          showPeaks={true}
-        />
-      </section>
-
-      {import.meta.env.DEV && (
-        <footer className="debug-info">
-          <small>
-            JUCE: {isConnected ? 'Yes' : 'No'} |
-            Sample Rate: {juceInfo.sampleRate || 'N/A'} |
-            Buffer: {juceInfo.bufferSize || 'N/A'}
-          </small>
-        </footer>
-      )}
     </div>
   );
 };

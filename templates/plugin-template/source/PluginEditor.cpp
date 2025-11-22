@@ -22,36 +22,71 @@ PluginEditor::PluginEditor(PluginProcessor& p)
     setResizeLimits(400, 300, 1600, 1200);
 
 #if JUCE_WEB_BROWSER
-    // Create WebView
-    juce::WebBrowserComponent::Options options;
-    options = options.withBackend(juce::WebBrowserComponent::Options::Backend::webview2)
-                     .withNativeIntegrationEnabled()
-                     .withResourceProvider([](const juce::String& url)
-                         -> std::optional<juce::WebBrowserComponent::Resource>
-                     {
-                         // Serve embedded UI resources
-                         #ifdef HAS_UI_RESOURCES
-                         if (url.contains("index.html") || url == "/" || url.isEmpty())
-                         {
-                             auto data = UIResources::index_html;
-                             auto size = UIResources::index_htmlSize;
-                             return juce::WebBrowserComponent::Resource{
-                                 std::vector<std::byte>(
-                                     reinterpret_cast<const std::byte*>(data),
-                                     reinterpret_cast<const std::byte*>(data) + size
-                                 ),
-                                 "text/html"
-                             };
-                         }
-                         #endif
-                         return std::nullopt;
-                     });
+    // Create WebView with native functions registered in Options
+    auto options = juce::WebBrowserComponent::Options{}
+        .withBackend(juce::WebBrowserComponent::Options::Backend::webview2)
+        .withNativeIntegrationEnabled()
+        .withNativeFunction("setParameter",
+            [this](const juce::Array<juce::var>& args, juce::WebBrowserComponent::NativeFunctionCompletion completion)
+            {
+                if (args.size() >= 2)
+                {
+                    juce::String paramId = args[0].toString();
+                    float value = static_cast<float>(args[1]);
+                    handleParameterFromWebView(paramId, value);
+                }
+                completion({});
+            })
+        .withNativeFunction("noteOn",
+            [this](const juce::Array<juce::var>& args, juce::WebBrowserComponent::NativeFunctionCompletion completion)
+            {
+                if (args.size() >= 2)
+                {
+                    int note = static_cast<int>(args[0]);
+                    float velocity = static_cast<float>(args[1]);
+                    handleNoteFromWebView(note, velocity, true);
+                }
+                completion({});
+            })
+        .withNativeFunction("noteOff",
+            [this](const juce::Array<juce::var>& args, juce::WebBrowserComponent::NativeFunctionCompletion completion)
+            {
+                if (args.size() >= 1)
+                {
+                    int note = static_cast<int>(args[0]);
+                    handleNoteFromWebView(note, 0.0f, false);
+                }
+                completion({});
+            })
+        .withNativeFunction("requestState",
+            [this](const juce::Array<juce::var>&, juce::WebBrowserComponent::NativeFunctionCompletion completion)
+            {
+                sendAllParametersToWebView();
+                completion({});
+            })
+        .withResourceProvider([](const juce::String& url)
+            -> std::optional<juce::WebBrowserComponent::Resource>
+        {
+            // Serve embedded UI resources
+            #ifdef HAS_UI_RESOURCES
+            if (url.contains("index.html") || url == "/" || url.isEmpty())
+            {
+                auto data = UIResources::index_html;
+                auto size = UIResources::index_htmlSize;
+                return juce::WebBrowserComponent::Resource{
+                    std::vector<std::byte>(
+                        reinterpret_cast<const std::byte*>(data),
+                        reinterpret_cast<const std::byte*>(data) + size
+                    ),
+                    "text/html"
+                };
+            }
+            #endif
+            return std::nullopt;
+        });
 
     webView = std::make_unique<juce::WebBrowserComponent>(options);
     addAndMakeVisible(*webView);
-
-    // Setup bridge
-    setupWebViewBridge();
 
     // Load UI
     #ifdef HAS_UI_RESOURCES
@@ -121,65 +156,6 @@ void PluginEditor::timerCallback()
 //==============================================================================
 // WebView Bridge
 //==============================================================================
-
-void PluginEditor::setupWebViewBridge()
-{
-#if JUCE_WEB_BROWSER
-    if (!webView)
-        return;
-
-    // Register native functions callable from JavaScript
-    webView->Options::getNativeIntegration()->registerNativeFunction(
-        "setParameter",
-        [this](const juce::Array<juce::var>& args, juce::WebBrowserComponent::NativeFunctionCompletion completion)
-        {
-            if (args.size() >= 2)
-            {
-                juce::String paramId = args[0].toString();
-                float value = static_cast<float>(args[1]);
-                handleParameterFromWebView(paramId, value);
-            }
-            completion({});
-        }
-    );
-
-    webView->Options::getNativeIntegration()->registerNativeFunction(
-        "noteOn",
-        [this](const juce::Array<juce::var>& args, juce::WebBrowserComponent::NativeFunctionCompletion completion)
-        {
-            if (args.size() >= 2)
-            {
-                int note = static_cast<int>(args[0]);
-                float velocity = static_cast<float>(args[1]);
-                handleNoteFromWebView(note, velocity, true);
-            }
-            completion({});
-        }
-    );
-
-    webView->Options::getNativeIntegration()->registerNativeFunction(
-        "noteOff",
-        [this](const juce::Array<juce::var>& args, juce::WebBrowserComponent::NativeFunctionCompletion completion)
-        {
-            if (args.size() >= 1)
-            {
-                int note = static_cast<int>(args[0]);
-                handleNoteFromWebView(note, 0.0f, false);
-            }
-            completion({});
-        }
-    );
-
-    webView->Options::getNativeIntegration()->registerNativeFunction(
-        "requestState",
-        [this](const juce::Array<juce::var>&, juce::WebBrowserComponent::NativeFunctionCompletion completion)
-        {
-            sendAllParametersToWebView();
-            completion({});
-        }
-    );
-#endif
-}
 
 void PluginEditor::sendParameterToWebView(const juce::String& paramId, float value)
 {
