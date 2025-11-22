@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  autosynth:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: autosynth-dev:latest
+    container_name: autosynth-dev
+
+    # Interactive terminal
+    stdin_open: true
+    tty: true
+
+    # Volumes
+    volumes:
+      # Mount the project
+      - .:/workspace
+
+      # X11 socket (Linux)
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+
+      # PulseAudio socket (Linux)
+      - ${XDG_RUNTIME_DIR:-/run/user/1000}/pulse:/run/user/1000/pulse:rw
+      - ${HOME}/.config/pulse:/home/ubuntu/.config/pulse:ro
+
+      # Claude Code config - mount permissive settings
+      - ./docker/claude-settings.json:/home/ubuntu/.claude/settings.json:ro
+
+      # Persist npm cache
+      - autosynth-npm-cache:/home/ubuntu/.npm
+
+      # Persist Claude Code state
+      - autosynth-claude-state:/home/ubuntu/.claude-code
+
+    # Environment for X11 and audio
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+      - PULSE_SERVER=unix:/run/user/1000/pulse/native
+      - XDG_RUNTIME_DIR=/run/user/1000
+      # Audio device access
+      - ALSA_CARD=0
+
+    # Network mode for audio
+    network_mode: host
+
+    # Device access for audio
+    devices:
+      - /dev/snd:/dev/snd
+      - /dev/dri:/dev/dri
+
+    # Security - needed for audio/X11
+    security_opt:
+      - seccomp:unconfined
+
+    # Allow ptrace for debugging
+    cap_add:
+      - SYS_PTRACE
+
+    # IPC for shared memory (audio buffers)
+    ipc: host
+
+    working_dir: /workspace
+
+volumes:
+  autosynth-npm-cache:
+  autosynth-claude-state:

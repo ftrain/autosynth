@@ -25,6 +25,40 @@ This creates a complete plugin structure with:
 - Test infrastructure
 - CI/CD workflow
 
+### Docker Development Environment
+
+For isolated development with X11 display and audio testing capabilities:
+
+```bash
+# Build the Docker image
+./scripts/docker-run.sh build
+
+# Start interactive shell in container
+./scripts/docker-run.sh run
+
+# Start Claude Code directly in container (with full permissions)
+./scripts/docker-run.sh claude
+
+# Test X11 display
+./scripts/docker-run.sh test-x11
+
+# Test audio output (Linux only)
+./scripts/docker-run.sh test-audio
+```
+
+**Requirements:**
+- Docker installed
+- Claude Pro/Max subscription (OAuth login) or API key
+- Linux: X11 and PulseAudio (native support)
+- macOS: XQuartz installed (`brew install --cask xquartz`)
+
+**Features:**
+- Full JUCE build environment (CMake, clang, JUCE dependencies)
+- X11 forwarding for GUI testing
+- PulseAudio/ALSA for audio testing
+- Claude Code with permissive settings (can execute any command)
+- Node.js 20 for React UI development
+
 ### Starting a New Synth Project
 
 Use the **project-coordinator** agent to begin any synth project:
@@ -406,6 +440,12 @@ Bad: "A general purpose synth"
 - Run `git submodule update --init --recursive`
 - Ensure JUCE and SST libraries are properly cloned
 - Check `docs/LLM_SYNTH_PROGRAMMING_GUIDE.md` Section 17 for CI/CD
+
+### Docker Issues
+- **X11 not working on macOS**: Ensure XQuartz is installed and running, then log out and back in
+- **Audio not working**: Linux only; ensure PulseAudio is running (`pulseaudio --start`)
+- **Login not persisting**: Check `.docker-state/claude/` directory exists and is writable
+- **Build fails**: Run `./scripts/docker-run.sh build` to rebuild the image
 
 ## Contributing
 

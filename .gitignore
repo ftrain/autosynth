@@ -31,3 +31,6 @@ npm-debug.log*
 
 *storybook.log
 storybook-static
+
+# Docker persistent state (auth, etc.)
+.docker-state/
