@@ -91,7 +91,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParam
     // AMPLITUDE ENVELOPE
     // =========================================================================
 
-    auto timeRange = juce::NormalisableRange<float>(0.001f, 10.0f, 0.001f, 0.3f);
+    // Linear time range - no skew factor so UI ms values match actual times
+    auto timeRange = juce::NormalisableRange<float>(0.001f, 5.0f, 0.001f);
 
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{"amp_attack", 1},

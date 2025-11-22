@@ -393,6 +393,145 @@ my-synth/
 | `SynthLED` | Status indicator |
 | `SynthSequencer` | Step sequencer |
 
+## JUCE 8 WebView Integration
+
+### How React UI Communicates with JUCE
+
+JUCE 8's WebBrowserComponent uses a specific pattern for JavaScript-to-C++ communication:
+
+**C++ Side (PluginEditor.cpp):**
+```cpp
+auto options = juce::WebBrowserComponent::Options{}
+    .withNativeIntegrationEnabled()
+    .withNativeFunction("setParameter",
+        [this](const juce::Array<juce::var>& args, auto completion) {
+            juce::String paramId = args[0].toString();
+            float value = static_cast<float>(args[1]);
+            handleParameterFromWebView(paramId, value);
+            completion({});
+        });
+```
+
+**JavaScript Side - CRITICAL:**
+Native functions registered with `withNativeFunction` are NOT directly on `window.__JUCE__.backend`.
+They must be called via `emitEvent("__juce__invoke", ...)`:
+
+```typescript
+// CORRECT way to call native functions in JUCE 8:
+window.__JUCE__?.backend?.emitEvent?.("__juce__invoke", {
+  name: "setParameter",    // Function name registered in C++
+  params: [paramId, value], // Arguments as array
+  resultId: 0,              // For async responses (0 if not needed)
+});
+
+// WRONG - these do NOT work:
+window.__JUCE__.backend.setParameter(...)  // undefined
+window.setParameter(...)                    // undefined
+```
+
+### Checking Registered Functions
+
+The list of registered native functions is available at:
+```typescript
+window.__JUCE__?.initialisationData?.__juce__functions
+// Returns: ["noteOff", "noteOn", "requestState", "setParameter"]
+```
+
+### The useJUCEBridge Hook
+
+The `useJUCEBridge` hook in `ui/src/hooks/useJUCEBridge.ts` handles this:
+
+```typescript
+// Helper to call native JUCE functions via emitEvent
+const callNativeFunction = useCallback((name: string, params: unknown[]) => {
+  if (!isConnected) return;
+  window.__JUCE__?.backend?.emitEvent?.("__juce__invoke", {
+    name,
+    params,
+    resultId: 0,
+  });
+}, [isConnected]);
+
+// Send parameter to JUCE
+const setParameter = useCallback((paramId: string, value: number) => {
+  const clampedValue = Math.max(0, Math.min(1, value));
+  callNativeFunction("setParameter", [paramId, clampedValue]);
+}, [callNativeFunction]);
+```
+
+### JUCE -> React Communication
+
+JUCE sends data to React via `evaluateJavascript`:
+
+```cpp
+// C++ sends parameter updates
+juce::String script = "if (window.onParameterUpdate) window.onParameterUpdate('"
+                    + paramId + "', " + juce::String(value) + ");";
+webView->evaluateJavascript(script, nullptr);
+
+// C++ sends audio data for oscilloscope
+juce::String script = "if (window.onAudioData) window.onAudioData(" + json + ");";
+webView->evaluateJavascript(script, nullptr);
+```
+
+React registers handlers in `useJUCEBridge`:
+```typescript
+window.onParameterUpdate = (paramId: string, value: number) => { ... };
+window.onStateUpdate = (state: Record<string, number>) => { ... };
+window.onAudioData = (samples: number[]) => { ... };
+```
+
+## DSP Implementation Notes
+
+### Negative Filter Envelope Amount
+
+When implementing filter envelope modulation with a bipolar amount (positive and negative):
+
+```cpp
+float filterEnvOut = filterEnv.process();
+float modCutoff;
+
+if (filterEnvAmount >= 0.0f) {
+    // Positive: envelope opens filter (sweep up from base)
+    modCutoff = filterCutoff + filterEnvAmount * filterEnvOut * 10000.0f;
+} else {
+    // Negative: inverted - filter starts open, closes at envelope peak
+    // At env=0: cutoff = base + |amt| * 10000 (bright)
+    // At env=1: cutoff = base (dark)
+    modCutoff = filterCutoff + std::abs(filterEnvAmount) * (1.0f - filterEnvOut) * 10000.0f;
+}
+```
+
+**Why invert the envelope for negative amounts?**
+- Simply subtracting would cause the filter to hit the minimum cutoff (20Hz), making everything silent
+- Inverting creates the classic "reversed envelope" effect where the filter starts open and closes
+
+### Linear Envelope Time Ranges
+
+**IMPORTANT:** Use linear time ranges for ADSR parameters so that UI millisecond values match actual times:
+
+```cpp
+// CORRECT - linear range, UI ms values match actual times
+auto timeRange = juce::NormalisableRange<float>(0.001f, 5.0f, 0.001f);
+
+// WRONG - skew factor makes UI values misleading
+auto timeRange = juce::NormalisableRange<float>(0.001f, 10.0f, 0.001f, 0.3f);
+```
+
+### Stepped Knob Options with Negative Ranges
+
+When using `SynthKnob` with options array for ranges like octave (-2 to +2):
+
+```typescript
+// The knob's displayValue must offset by min to get correct array index
+if (options && options.length > 0) {
+  const index = Math.round(handleValue - min);  // Offset by min!
+  return options[Math.max(0, Math.min(index, options.length - 1))];
+}
+```
+
+This ensures octave values like [-2, -1, 0, 1, 2] map correctly to labels ["32'", "16'", "8'", "4'", "2'"].
+
 ## Development Workflow
 
 ### 0. Scaffold Phase

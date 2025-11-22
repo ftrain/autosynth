@@ -207,8 +207,9 @@ export const SynthKnob: React.FC<SynthKnobProps> = ({
       'rgb(255, 100, 50)',   // HIGH - orange
       'rgb(255, 50, 50)',    // MAX - red
     ];
-    const index = Math.round(handleValue);
-    return colors[Math.min(index, colors.length - 1)] || colors[0];
+    // Offset by min to handle ranges like -2 to 2
+    const index = Math.round(handleValue - min);
+    return colors[Math.max(0, Math.min(index, colors.length - 1))] || colors[0];
   };
 
   const ledColor = getLEDColor();
@@ -218,8 +219,9 @@ export const SynthKnob: React.FC<SynthKnobProps> = ({
   const displayValue = (() => {
     // If options array is provided, use it for display
     if (options && options.length > 0) {
-      const index = Math.round(handleValue);
-      return options[Math.min(index, options.length - 1)] ?? '';
+      // Offset by min to handle ranges like -2 to 2
+      const index = Math.round(handleValue - min);
+      return options[Math.max(0, Math.min(index, options.length - 1))] ?? '';
     }
     if (step && step >= 1) {
       return Math.round(handleValue).toString();

@@ -1,217 +1,231 @@
 /**
  * @file useJUCEBridge.ts
- * @brief React hook for JUCE WebView integration
+ * @brief React hook for JUCE 8 WebView integration
+ *
+ * This hook manages bi-directional communication between the React UI
+ * and the JUCE C++ backend via the WebView bridge.
+ *
+ * Communication Flow:
+ *   React -> JUCE: window.__JUCE__.backend.emitEvent("__juce__invoke", ...)
+ *   JUCE -> React: window.onParameterUpdate(), window.onAudioData(), etc.
+ *
+ * IMPORTANT: JUCE 8 native functions registered with withNativeFunction()
+ * are NOT directly accessible on window.__JUCE__.backend. They must be
+ * called via emitEvent("__juce__invoke", { name, params, resultId }).
  */
-
-/// <reference path="../types/juce.d.ts" />
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { JUCEMessage } from '../types/juce';
-import { isJUCEWebView } from '../utils/juce-bridge';
 
 /**
- * Hook options
+ * JUCE bridge window extensions
+ */
+declare global {
+  interface Window {
+    __JUCE__?: {
+      postMessage: (data: string) => void;
+      initialisationData?: {
+        __juce__platform: string[];
+        __juce__functions: string[];
+        __juce__sliders: string[];
+        __juce__toggles: string[];
+        __juce__comboBoxes: string[];
+      };
+      /** JUCE 8 backend object for native function calls */
+      backend?: {
+        addEventListener: (eventId: string, fn: (payload: unknown) => void) => [string, number];
+        removeEventListener: (handle: [string, number]) => void;
+        emitEvent: (eventId: string, payload: unknown) => void;
+        emitByBackend: (eventId: string, payload: string) => void;
+        listeners?: unknown;
+      };
+    };
+    /** Called by JUCE when a parameter changes */
+    onParameterUpdate?: (paramId: string, value: number) => void;
+    /** Called by JUCE with all parameter state */
+    onStateUpdate?: (state: Record<string, number>) => void;
+    /** Called by JUCE with audio visualization data */
+    onAudioData?: (samples: number[]) => void;
+  }
+}
+
+/**
+ * Hook configuration options
  */
 export interface UseJUCEBridgeOptions {
-  /** Enable audio data streaming */
+  /** Enable audio data streaming for visualization */
   enableAudioData?: boolean;
-  /** Audio data channel to listen to */
+  /** Audio channel to receive data from */
   audioChannel?: 'lead' | 'drum' | 'sub' | 'master';
   /** Enable preset management */
   enablePresets?: boolean;
 }
 
 /**
+ * JUCE backend information
+ */
+export interface JUCEInfo {
+  version?: string;
+  platform?: string;
+  sampleRate?: number;
+  bufferSize?: number;
+}
+
+/**
  * Hook return type
  */
 export interface UseJUCEBridgeReturn {
-  /** Is running in JUCE WebView */
-  isJUCE: boolean;
-  /** JUCE backend info */
-  juceInfo: {
-    version?: string;
-    platform?: string;
-    sampleRate?: number;
-    bufferSize?: number;
-  };
-  /** Latest audio data samples */
+  /** Is running inside JUCE WebView */
+  isConnected: boolean;
+  /** JUCE backend information */
+  juceInfo: JUCEInfo;
+  /** Latest audio data samples for visualization */
   audioData: number[];
-  /** Available presets */
-  presets: string[];
-  /** Current preset name */
-  currentPreset: string | null;
-  /** Load a preset */
-  loadPreset: (name: string) => void;
-  /** Save current state as preset */
-  savePreset: (name: string) => void;
-  /** Delete a preset */
-  deletePreset: (name: string) => void;
-  /** Trigger note on */
+  /** Send parameter value to JUCE */
+  setParameter: (paramId: string, value: number) => void;
+  /** Request all parameters from JUCE */
+  requestState: () => void;
+  /** Trigger MIDI note on */
   noteOn: (note: number, velocity: number) => void;
-  /** Trigger note off */
+  /** Trigger MIDI note off */
   noteOff: (note: number) => void;
+  /** Register callback for parameter updates from JUCE */
+  onParameterChange: (callback: (paramId: string, value: number) => void) => void;
+  /** Register callback for full state updates from JUCE */
+  onStateChange: (callback: (state: Record<string, number>) => void) => void;
 }
+
+/**
+ * Check if running inside JUCE WebView
+ */
+const isJUCEWebView = (): boolean => {
+  return typeof window !== 'undefined' && window.__JUCE__ !== undefined;
+};
 
 /**
  * React hook for JUCE WebView integration
  *
- * @remarks
- * Handles bi-directional communication with JUCE C++ backend
- *
  * @example
  * ```tsx
- * const {
- *   isJUCE,
- *   audioData,
- *   presets,
- *   loadPreset,
- *   savePreset,
- * } = useJUCEBridge({
+ * const { isConnected, setParameter, audioData } = useJUCEBridge({
  *   enableAudioData: true,
- *   audioChannel: 'master',
- *   enablePresets: true,
  * });
  *
- * if (isJUCE) {
- *   return <Oscilloscope audioData={audioData} />;
- * }
+ * // Send parameter to JUCE
+ * setParameter('filter_cutoff', 0.5);
+ *
+ * // Display audio waveform
+ * <Oscilloscope data={audioData} />
  * ```
  */
 export function useJUCEBridge(options: UseJUCEBridgeOptions = {}): UseJUCEBridgeReturn {
-  const {
-    enableAudioData = false,
-    audioChannel = 'master',
-    enablePresets = false,
-  } = options;
+  const { enableAudioData = false } = options;
 
+  const [isConnected, setIsConnected] = useState(false);
+  const [juceInfo, setJuceInfo] = useState<JUCEInfo>({});
   const [audioData, setAudioData] = useState<number[]>([]);
-  const [presets, setPresets] = useState<string[]>([]);
-  const [currentPreset, setCurrentPreset] = useState<string | null>(null);
-  const [juceInfo, setJuceInfo] = useState<{
-    version?: string;
-    platform?: string;
-    sampleRate?: number;
-    bufferSize?: number;
-  }>({});
 
-  const isJUCE = isJUCEWebView();
-  const audioDataRef = useRef<number[]>([]);
+  // Callback refs for JUCE -> React communication
+  const parameterCallbackRef = useRef<((paramId: string, value: number) => void) | null>(null);
+  const stateCallbackRef = useRef<((state: Record<string, number>) => void) | null>(null);
 
-  // Initialize JUCE info
+  // Check connection and initialize
   useEffect(() => {
-    if (isJUCE && window.__juce__) {
-      setJuceInfo({
-        version: window.__juce__.version,
-        platform: window.__juce__.platform,
-        sampleRate: window.__juce__.sampleRate,
-        bufferSize: window.__juce__.bufferSize,
-      });
+    const connected = isJUCEWebView();
+    setIsConnected(connected);
+
+    if (connected && window.__JUCE__?.initialisationData) {
+      const platform = window.__JUCE__.initialisationData.__juce__platform?.[0];
+      setJuceInfo({ platform });
     }
-  }, [isJUCE]);
+  }, []);
 
-  // Request initial preset list
+  // Set up JUCE -> React message handlers
   useEffect(() => {
-    if (isJUCE && enablePresets && window.getPresets) {
-      const presetList = window.getPresets();
-      setPresets(presetList);
-    }
-  }, [isJUCE, enablePresets]);
+    if (!isConnected) return;
 
-  // Handle messages from JUCE
-  useEffect(() => {
-    if (!isJUCE) return;
-
-    const handleMessage = (message: JUCEMessage) => {
-      switch (message.type) {
-        case 'audioData':
-          if (enableAudioData && message.channel === audioChannel) {
-            audioDataRef.current = message.samples;
-            setAudioData(message.samples);
-          }
-          break;
-
-        case 'presetList':
-          if (enablePresets) {
-            setPresets(message.presets);
-          }
-          break;
-
-        case 'presetChanged':
-          if (enablePresets) {
-            setCurrentPreset(message.name);
-          }
-          break;
-
-        default:
-          break;
+    // Parameter update handler
+    window.onParameterUpdate = (paramId: string, value: number) => {
+      if (parameterCallbackRef.current) {
+        parameterCallbackRef.current(paramId, value);
       }
     };
 
-    // Set up message handler
-    window.onJUCEMessage = handleMessage;
+    // Full state update handler
+    window.onStateUpdate = (state: Record<string, number>) => {
+      if (stateCallbackRef.current) {
+        stateCallbackRef.current(state);
+      }
+    };
+
+    // Audio data handler
+    if (enableAudioData) {
+      window.onAudioData = (samples: number[]) => {
+        setAudioData(samples);
+      };
+    }
 
     return () => {
-      window.onJUCEMessage = undefined;
+      window.onParameterUpdate = undefined;
+      window.onStateUpdate = undefined;
+      window.onAudioData = undefined;
     };
-  }, [isJUCE, enableAudioData, audioChannel, enablePresets]);
+  }, [isConnected, enableAudioData]);
 
-  // Preset management functions
-  const loadPreset = useCallback(
-    (name: string) => {
-      if (isJUCE && window.loadPreset) {
-        window.loadPreset(name);
-      }
-    },
-    [isJUCE]
-  );
+  // Helper to call native JUCE functions via emitEvent
+  // This is the CORRECT way to call functions registered with withNativeFunction()
+  const callNativeFunction = useCallback((name: string, params: unknown[]) => {
+    if (!isConnected) return;
+    window.__JUCE__?.backend?.emitEvent?.("__juce__invoke", {
+      name,
+      params,
+      resultId: 0,
+    });
+  }, [isConnected]);
 
-  const savePreset = useCallback(
-    (name: string) => {
-      if (isJUCE && window.savePreset) {
-        window.savePreset(name);
-      }
-    },
-    [isJUCE]
-  );
+  // Send parameter to JUCE
+  const setParameter = useCallback((paramId: string, value: number) => {
+    if (!isConnected) return;
+    const clampedValue = Math.max(0, Math.min(1, value));
+    callNativeFunction("setParameter", [paramId, clampedValue]);
+  }, [isConnected, callNativeFunction]);
 
-  const deletePreset = useCallback(
-    (name: string) => {
-      if (isJUCE && window.deletePreset) {
-        window.deletePreset(name);
-      }
-    },
-    [isJUCE]
-  );
+  // Request full state from JUCE
+  const requestState = useCallback(() => {
+    if (!isConnected) return;
+    callNativeFunction("requestState", []);
+  }, [isConnected, callNativeFunction]);
 
-  // MIDI functions
-  const noteOn = useCallback(
-    (note: number, velocity: number) => {
-      if (isJUCE && window.noteOn) {
-        window.noteOn(note, velocity);
-      }
-    },
-    [isJUCE]
-  );
+  // MIDI note on
+  const noteOn = useCallback((note: number, velocity: number) => {
+    if (!isConnected) return;
+    callNativeFunction("noteOn", [note, velocity]);
+  }, [isConnected, callNativeFunction]);
 
-  const noteOff = useCallback(
-    (note: number) => {
-      if (isJUCE && window.noteOff) {
-        window.noteOff(note);
-      }
-    },
-    [isJUCE]
-  );
+  // MIDI note off
+  const noteOff = useCallback((note: number) => {
+    if (!isConnected) return;
+    callNativeFunction("noteOff", [note]);
+  }, [isConnected, callNativeFunction]);
+
+  // Register parameter change callback
+  const onParameterChange = useCallback((callback: (paramId: string, value: number) => void) => {
+    parameterCallbackRef.current = callback;
+  }, []);
+
+  // Register state change callback
+  const onStateChange = useCallback((callback: (state: Record<string, number>) => void) => {
+    stateCallbackRef.current = callback;
+  }, []);
 
   return {
-    isJUCE,
+    isConnected,
     juceInfo,
     audioData,
-    presets,
-    currentPreset,
-    loadPreset,
-    savePreset,
-    deletePreset,
+    setParameter,
+    requestState,
     noteOn,
     noteOff,
+    onParameterChange,
+    onStateChange,
   };
 }
