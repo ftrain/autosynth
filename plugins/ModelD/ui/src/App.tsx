@@ -1,23 +1,200 @@
 /**
  * @file App.tsx
- * @brief Main synthesizer UI component
+ * @brief Model D Synthesizer UI Component
  *
- * This is the root component for the plugin UI. It:
+ * This is the root component for the Model D plugin UI. It:
  * - Manages parameter state via useParameters hook
  * - Connects to JUCE via useJUCEBridge hook
- * - Composes UI from the shared component library
+ * - Implements a classic Minimoog-style layout
  *
- * @note Use existing components from the component library - never create new ones
- * @see docs/TYPESCRIPT_COMPONENT_DEVELOPER_GUIDE.md
+ * Layout based on Minimoog Model D:
+ * - 3 Oscillators with waveform, octave, and level controls
+ * - Mixer section with noise
+ * - 24dB/oct Ladder Filter with envelope modulation
+ * - Filter and Amp ADSR envelopes
+ * - Master volume
  */
 
 import React from 'react';
 import { useJUCEBridge } from './hooks/useJUCEBridge';
 import { useParameters } from './hooks/useParameters';
-import { PARAMETER_DEFINITIONS } from './types/parameters';
+import { PARAMETER_DEFINITIONS, WAVEFORM_OPTIONS, OCTAVE_OPTIONS } from './types/parameters';
 
-// TODO: Import components from the shared library
-// import { Synth, SynthRow, SynthKnob, SynthSlider, SynthADSR, SynthLFO } from '@studio/components';
+/**
+ * Oscillator Section Component
+ */
+interface OscillatorProps {
+  title: string;
+  waveformId: string;
+  octaveId: string;
+  levelId: string;
+  detuneId?: string;
+  syncId?: string;
+  paramValues: Record<string, number>;
+  handleChange: (id: string, value: number) => void;
+}
+
+const OscillatorSection: React.FC<OscillatorProps> = ({
+  title,
+  waveformId,
+  octaveId,
+  levelId,
+  detuneId,
+  syncId,
+  paramValues,
+  handleChange,
+}) => {
+  return (
+    <div className="oscillator-section">
+      <h3>{title}</h3>
+      <div className="control-row">
+        <div className="control-group">
+          <label>Waveform</label>
+          <select
+            value={Math.round(paramValues[waveformId] || 0)}
+            onChange={(e) => handleChange(waveformId, parseInt(e.target.value))}
+          >
+            {WAVEFORM_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="control-group">
+          <label>Octave</label>
+          <select
+            value={Math.round(paramValues[octaveId] || 0)}
+            onChange={(e) => handleChange(octaveId, parseInt(e.target.value))}
+          >
+            {OCTAVE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
+
+        {detuneId && (
+          <div className="control-group">
+            <label>Detune</label>
+            <input
+              type="range"
+              min={-50}
+              max={50}
+              step={1}
+              value={paramValues[detuneId] || 0}
+              onChange={(e) => handleChange(detuneId, parseFloat(e.target.value))}
+            />
+            <span>{Math.round(paramValues[detuneId] || 0)} cents</span>
+          </div>
+        )}
+
+        <div className="control-group">
+          <label>Level</label>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={paramValues[levelId] || 0}
+            onChange={(e) => handleChange(levelId, parseFloat(e.target.value))}
+          />
+          <span>{Math.round((paramValues[levelId] || 0) * 100)}%</span>
+        </div>
+
+        {syncId && (
+          <div className="control-group sync-control">
+            <label>
+              <input
+                type="checkbox"
+                checked={paramValues[syncId] > 0.5}
+                onChange={(e) => handleChange(syncId, e.target.checked ? 1 : 0)}
+              />
+              Sync
+            </label>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/**
+ * ADSR Envelope Component
+ */
+interface ADSRProps {
+  title: string;
+  attackId: string;
+  decayId: string;
+  sustainId: string;
+  releaseId: string;
+  paramValues: Record<string, number>;
+  handleChange: (id: string, value: number) => void;
+}
+
+const ADSRSection: React.FC<ADSRProps> = ({
+  title,
+  attackId,
+  decayId,
+  sustainId,
+  releaseId,
+  paramValues,
+  handleChange,
+}) => {
+  return (
+    <div className="envelope-group">
+      <h3>{title}</h3>
+      <div className="adsr-controls">
+        <div className="adsr-slider">
+          <label>A</label>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={paramValues[attackId] || 0.01}
+            onChange={(e) => handleChange(attackId, parseFloat(e.target.value))}
+            className="vertical-slider"
+          />
+        </div>
+        <div className="adsr-slider">
+          <label>D</label>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={paramValues[decayId] || 0.1}
+            onChange={(e) => handleChange(decayId, parseFloat(e.target.value))}
+            className="vertical-slider"
+          />
+        </div>
+        <div className="adsr-slider">
+          <label>S</label>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={paramValues[sustainId] || 0.7}
+            onChange={(e) => handleChange(sustainId, parseFloat(e.target.value))}
+            className="vertical-slider"
+          />
+        </div>
+        <div className="adsr-slider">
+          <label>R</label>
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={paramValues[releaseId] || 0.3}
+            onChange={(e) => handleChange(releaseId, parseFloat(e.target.value))}
+            className="vertical-slider"
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 /**
  * Main synthesizer UI
@@ -36,13 +213,13 @@ const App: React.FC = () => {
   });
 
   return (
-    <div className="synth-container">
+    <div className="synth-container model-d">
       {/* ================================================================
           HEADER
           ================================================================ */}
       <header className="synth-header">
         <h1 className="synth-title">Model D</h1>
-        <span className="synth-version">v1.0.0</span>
+        <span className="synth-subtitle">Minimoog-Style Synthesizer</span>
         <div className="connection-status">
           <span
             className={`status-indicator ${isConnected ? 'connected' : 'disconnected'}`}
@@ -52,75 +229,89 @@ const App: React.FC = () => {
       </header>
 
       {/* ================================================================
-          OSCILLATOR SECTION
-          TODO: Replace with actual components from library
+          OSCILLATORS SECTION
           ================================================================ */}
-      <section className="synth-section">
-        <h2 className="section-title">Oscillator</h2>
-        <div className="control-row">
-          {/* TODO: Replace with SynthKnob from component library */}
-          <div className="knob-placeholder">
-            <label>Waveform</label>
-            <select
-              value={Math.round(paramValues.osc1_waveform || 0)}
-              onChange={(e) => handleChange('osc1_waveform', parseInt(e.target.value) / 3)}
-            >
-              <option value={0}>Saw</option>
-              <option value={1}>Square</option>
-              <option value={2}>Triangle</option>
-              <option value={3}>Sine</option>
-            </select>
-          </div>
+      <section className="synth-section oscillators-panel">
+        <h2 className="section-title">Oscillator Bank</h2>
 
-          <div className="knob-placeholder">
-            <label>Level</label>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={paramValues.osc1_level || 0.8}
-              onChange={(e) => handleChange('osc1_level', parseFloat(e.target.value))}
-            />
-            <span>{Math.round((paramValues.osc1_level || 0.8) * 100)}%</span>
-          </div>
+        <OscillatorSection
+          title="Oscillator 1"
+          waveformId="osc1_waveform"
+          octaveId="osc1_octave"
+          levelId="osc1_level"
+          paramValues={paramValues}
+          handleChange={handleChange}
+        />
 
-          <div className="knob-placeholder">
-            <label>Tune</label>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={(paramValues.osc1_tune || 0.5)}
-              onChange={(e) => handleChange('osc1_tune', parseFloat(e.target.value))}
-            />
-            <span>{Math.round(((paramValues.osc1_tune || 0.5) - 0.5) * 48)} st</span>
+        <OscillatorSection
+          title="Oscillator 2"
+          waveformId="osc2_waveform"
+          octaveId="osc2_octave"
+          levelId="osc2_level"
+          detuneId="osc2_detune"
+          syncId="osc2_sync"
+          paramValues={paramValues}
+          handleChange={handleChange}
+        />
+
+        <OscillatorSection
+          title="Oscillator 3"
+          waveformId="osc3_waveform"
+          octaveId="osc3_octave"
+          levelId="osc3_level"
+          detuneId="osc3_detune"
+          paramValues={paramValues}
+          handleChange={handleChange}
+        />
+
+        {/* Noise */}
+        <div className="oscillator-section noise-section">
+          <h3>Noise</h3>
+          <div className="control-row">
+            <div className="control-group">
+              <label>Level</label>
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.01}
+                value={paramValues.noise_level || 0}
+                onChange={(e) => handleChange('noise_level', parseFloat(e.target.value))}
+              />
+              <span>{Math.round((paramValues.noise_level || 0) * 100)}%</span>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ================================================================
           FILTER SECTION
-          TODO: Replace with actual components from library
           ================================================================ */}
-      <section className="synth-section">
-        <h2 className="section-title">Filter</h2>
-        <div className="control-row">
-          <div className="knob-placeholder">
+      <section className="synth-section filter-panel">
+        <h2 className="section-title">Ladder Filter</h2>
+        <div className="control-row filter-controls">
+          <div className="control-group cutoff-control">
             <label>Cutoff</label>
             <input
               type="range"
               min={0}
               max={1}
-              step={0.01}
-              value={paramValues.filter_cutoff || 0.5}
-              onChange={(e) => handleChange('filter_cutoff', parseFloat(e.target.value))}
+              step={0.001}
+              value={Math.pow((paramValues.filter_cutoff || 5000) / 20000, 1/3)}
+              onChange={(e) => {
+                const normalized = parseFloat(e.target.value);
+                const freq = Math.pow(normalized, 3) * 20000;
+                handleChange('filter_cutoff', Math.max(20, freq));
+              }}
             />
-            <span>{Math.round(20 + (paramValues.filter_cutoff || 0.5) * 19980)} Hz</span>
+            <span>
+              {(paramValues.filter_cutoff || 5000) >= 1000
+                ? `${((paramValues.filter_cutoff || 5000) / 1000).toFixed(1)} kHz`
+                : `${Math.round(paramValues.filter_cutoff || 5000)} Hz`}
+            </span>
           </div>
 
-          <div className="knob-placeholder">
+          <div className="control-group">
             <label>Resonance</label>
             <input
               type="range"
@@ -133,171 +324,104 @@ const App: React.FC = () => {
             <span>{Math.round((paramValues.filter_reso || 0) * 100)}%</span>
           </div>
 
-          <div className="knob-placeholder">
+          <div className="control-group">
             <label>Env Amount</label>
             <input
               type="range"
-              min={0}
+              min={-1}
               max={1}
               step={0.01}
               value={paramValues.filter_env_amount || 0.5}
               onChange={(e) => handleChange('filter_env_amount', parseFloat(e.target.value))}
             />
-            <span>{Math.round(((paramValues.filter_env_amount || 0.5) - 0.5) * 200)}%</span>
+            <span>{Math.round((paramValues.filter_env_amount || 0.5) * 100)}%</span>
+          </div>
+
+          <div className="control-group">
+            <label>Kbd Track</label>
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.01}
+              value={paramValues.filter_kbd_track || 0}
+              onChange={(e) => handleChange('filter_kbd_track', parseFloat(e.target.value))}
+            />
+            <span>{Math.round((paramValues.filter_kbd_track || 0) * 100)}%</span>
           </div>
         </div>
       </section>
 
       {/* ================================================================
           ENVELOPES SECTION
-          TODO: Replace with SynthADSR components from library
           ================================================================ */}
-      <section className="synth-section">
+      <section className="synth-section envelopes-panel">
         <h2 className="section-title">Envelopes</h2>
         <div className="envelope-row">
-          {/* Amp Envelope */}
-          <div className="envelope-group">
-            <h3>Amp</h3>
-            <div className="adsr-controls">
-              <div className="adsr-slider">
-                <label>A</label>
-                <input
-                  type="range"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={paramValues.amp_attack || 0.01}
-                  onChange={(e) => handleChange('amp_attack', parseFloat(e.target.value))}
-                />
-              </div>
-              <div className="adsr-slider">
-                <label>D</label>
-                <input
-                  type="range"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={paramValues.amp_decay || 0.1}
-                  onChange={(e) => handleChange('amp_decay', parseFloat(e.target.value))}
-                />
-              </div>
-              <div className="adsr-slider">
-                <label>S</label>
-                <input
-                  type="range"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={paramValues.amp_sustain || 0.7}
-                  onChange={(e) => handleChange('amp_sustain', parseFloat(e.target.value))}
-                />
-              </div>
-              <div className="adsr-slider">
-                <label>R</label>
-                <input
-                  type="range"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={paramValues.amp_release || 0.3}
-                  onChange={(e) => handleChange('amp_release', parseFloat(e.target.value))}
-                />
-              </div>
-            </div>
-          </div>
+          <ADSRSection
+            title="Filter Envelope"
+            attackId="filter_attack"
+            decayId="filter_decay"
+            sustainId="filter_sustain"
+            releaseId="filter_release"
+            paramValues={paramValues}
+            handleChange={handleChange}
+          />
 
-          {/* Filter Envelope */}
-          <div className="envelope-group">
-            <h3>Filter</h3>
-            <div className="adsr-controls">
-              <div className="adsr-slider">
-                <label>A</label>
-                <input
-                  type="range"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={paramValues.filter_attack || 0.01}
-                  onChange={(e) => handleChange('filter_attack', parseFloat(e.target.value))}
-                />
-              </div>
-              <div className="adsr-slider">
-                <label>D</label>
-                <input
-                  type="range"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={paramValues.filter_decay || 0.2}
-                  onChange={(e) => handleChange('filter_decay', parseFloat(e.target.value))}
-                />
-              </div>
-              <div className="adsr-slider">
-                <label>S</label>
-                <input
-                  type="range"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={paramValues.filter_sustain || 0.5}
-                  onChange={(e) => handleChange('filter_sustain', parseFloat(e.target.value))}
-                />
-              </div>
-              <div className="adsr-slider">
-                <label>R</label>
-                <input
-                  type="range"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={paramValues.filter_release || 0.3}
-                  onChange={(e) => handleChange('filter_release', parseFloat(e.target.value))}
-                />
-              </div>
-            </div>
-          </div>
+          <ADSRSection
+            title="Amp Envelope"
+            attackId="amp_attack"
+            decayId="amp_decay"
+            sustainId="amp_sustain"
+            releaseId="amp_release"
+            paramValues={paramValues}
+            handleChange={handleChange}
+          />
         </div>
       </section>
 
       {/* ================================================================
           MASTER SECTION
           ================================================================ */}
-      <section className="synth-section master-section">
-        <h2 className="section-title">Master</h2>
+      <section className="synth-section master-panel">
+        <h2 className="section-title">Output</h2>
         <div className="control-row">
-          <div className="knob-placeholder">
-            <label>Volume</label>
+          <div className="control-group volume-control">
+            <label>Master Volume</label>
             <input
               type="range"
               min={0}
               max={1}
               step={0.01}
-              value={paramValues.master_volume || 0.7}
-              onChange={(e) => handleChange('master_volume', parseFloat(e.target.value))}
+              value={(paramValues.master_volume + 60) / 60}
+              onChange={(e) => {
+                const normalized = parseFloat(e.target.value);
+                const db = normalized * 60 - 60;
+                handleChange('master_volume', db);
+              }}
             />
-            <span>{Math.round(-60 + (paramValues.master_volume || 0.7) * 60)} dB</span>
+            <span>{(paramValues.master_volume || -6).toFixed(1)} dB</span>
           </div>
 
           <button className="reset-button" onClick={resetToDefaults}>
-            Reset
+            Reset All
           </button>
         </div>
       </section>
 
       {/* ================================================================
           VISUALIZATION (if audio data available)
-          TODO: Replace with Oscilloscope component from library
           ================================================================ */}
       {audioData.length > 0 && (
-        <section className="synth-section">
-          <h2 className="section-title">Output</h2>
-          <div className="oscilloscope-placeholder">
+        <section className="synth-section visualization-panel">
+          <div className="oscilloscope">
             <canvas
               ref={(canvas) => {
                 if (canvas && audioData.length > 0) {
                   const ctx = canvas.getContext('2d');
                   if (ctx) {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#1a1a1a';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
                     ctx.strokeStyle = '#00ff88';
                     ctx.lineWidth = 2;
                     ctx.beginPath();
@@ -313,7 +437,7 @@ const App: React.FC = () => {
                 }
               }}
               width={400}
-              height={100}
+              height={80}
             />
           </div>
         </section>

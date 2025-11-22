@@ -97,7 +97,7 @@ public:
      */
     void noteOn(int note, float velocity, int sampleOffset = 0)
     {
-        juce::ignoreUnused(sampleOffset); // TODO: Implement sample-accurate timing
+        (void)sampleOffset; // TODO: Implement sample-accurate timing
 
         if (velocity <= 0.0f)
         {
@@ -119,7 +119,7 @@ public:
      */
     void noteOff(int note, int sampleOffset = 0)
     {
-        juce::ignoreUnused(sampleOffset);
+        (void)sampleOffset;
 
         for (auto& voice : voices)
         {
@@ -173,24 +173,53 @@ public:
         {
             if (voice.isActive())
             {
-                // TODO: Update voice parameters before rendering
-                // voice.setFilterCutoff(filterCutoff);
-                // voice.setFilterResonance(filterResonance);
+                // Update voice parameters before rendering
+
+                // Oscillator 1
+                voice.setOsc1Waveform(static_cast<Oscillator::Waveform>(osc1Waveform));
+                voice.setOsc1Octave(osc1Octave);
+                voice.setOsc1Level(osc1Level);
+
+                // Oscillator 2
+                voice.setOsc2Waveform(static_cast<Oscillator::Waveform>(osc2Waveform));
+                voice.setOsc2Octave(osc2Octave);
+                voice.setOsc2Detune(osc2Detune);
+                voice.setOsc2Level(osc2Level);
+                voice.setOsc2Sync(osc2Sync);
+
+                // Oscillator 3
+                voice.setOsc3Waveform(static_cast<Oscillator::Waveform>(osc3Waveform));
+                voice.setOsc3Octave(osc3Octave);
+                voice.setOsc3Detune(osc3Detune);
+                voice.setOsc3Level(osc3Level);
+
+                // Noise
+                voice.setNoiseLevel(noiseLevel);
+
+                // Filter
+                voice.setFilterCutoff(filterCutoff);
+                voice.setFilterResonance(filterResonance);
+                voice.setFilterEnvAmount(filterEnvAmount);
+                voice.setFilterKeyboardTracking(filterKeyboardTracking);
+
+                // Amp Envelope
+                voice.setAmpAttack(ampAttack);
+                voice.setAmpDecay(ampDecay);
+                voice.setAmpSustain(ampSustain);
+                voice.setAmpRelease(ampRelease);
+
+                // Filter Envelope
+                voice.setFilterAttack(filterAttack);
+                voice.setFilterDecay(filterDecay);
+                voice.setFilterSustain(filterSustain);
+                voice.setFilterRelease(filterRelease);
+
+                // Master level per voice
+                voice.setMasterLevel(1.0f);
 
                 voice.render(mixBufferL.data(), mixBufferR.data(), numSamples);
             }
         }
-
-        // ====================================================================
-        // GLOBAL EFFECTS
-        // TODO: Add effects processing
-        // ====================================================================
-
-        // TODO: Apply effects
-        // Example:
-        // if (reverbEnabled) {
-        //     reverb.process(mixBufferL.data(), mixBufferR.data(), numSamples);
-        // }
 
         // Apply master volume
         float gain = masterGain;
@@ -205,18 +234,57 @@ public:
     // Parameter Setters
     //==========================================================================
 
-    // TODO: Add parameter setters for your synth
-    // These should store values that get passed to voices in renderBlock
-
+    // Master
     void setMasterVolume(float volumeDb)
     {
         // Convert dB to linear gain
         masterGain = std::pow(10.0f, volumeDb / 20.0f);
     }
 
-    // void setFilterCutoff(float cutoffHz) { filterCutoff = cutoffHz; }
-    // void setFilterResonance(float reso) { filterResonance = reso; }
-    // void setReverbMix(float mix) { reverbMix = mix; }
+    // Oscillator 1
+    void setOsc1Waveform(int wf) { osc1Waveform = wf; }
+    void setOsc1Octave(int oct) { osc1Octave = oct; }
+    void setOsc1Level(float l) { osc1Level = l; }
+
+    // Oscillator 2
+    void setOsc2Waveform(int wf) { osc2Waveform = wf; }
+    void setOsc2Octave(int oct) { osc2Octave = oct; }
+    void setOsc2Detune(float cents) { osc2Detune = cents; }
+    void setOsc2Level(float l) { osc2Level = l; }
+    void setOsc2Sync(bool sync) { osc2Sync = sync; }
+
+    // Oscillator 3
+    void setOsc3Waveform(int wf) { osc3Waveform = wf; }
+    void setOsc3Octave(int oct) { osc3Octave = oct; }
+    void setOsc3Detune(float cents) { osc3Detune = cents; }
+    void setOsc3Level(float l) { osc3Level = l; }
+
+    // Noise
+    void setNoiseLevel(float l) { noiseLevel = l; }
+
+    // Filter
+    void setFilterCutoff(float cutoffHz) { filterCutoff = cutoffHz; }
+    void setFilterResonance(float reso) { filterResonance = reso; }
+    void setFilterEnvAmount(float amt) { filterEnvAmount = amt; }
+    void setFilterKeyboardTracking(float amt) { filterKeyboardTracking = amt; }
+
+    // Amp Envelope
+    void setAmpEnvelope(float a, float d, float s, float r)
+    {
+        ampAttack = a;
+        ampDecay = d;
+        ampSustain = s;
+        ampRelease = r;
+    }
+
+    // Filter Envelope
+    void setFilterEnvelope(float a, float d, float s, float r)
+    {
+        filterAttack = a;
+        filterDecay = d;
+        filterSustain = s;
+        filterRelease = r;
+    }
 
     //==========================================================================
     // State Queries
@@ -318,13 +386,46 @@ private:
 
     //==========================================================================
     // Global Parameters
-    // TODO: Add parameters for your synth
     //==========================================================================
 
-    // float filterCutoff = 5000.0f;
-    // float filterResonance = 0.0f;
-    // float reverbMix = 0.0f;
-    // bool reverbEnabled = false;
+    // Oscillator 1
+    int osc1Waveform = 0;    // Saw
+    int osc1Octave = 0;
+    float osc1Level = 1.0f;
+
+    // Oscillator 2
+    int osc2Waveform = 0;    // Saw
+    int osc2Octave = 0;
+    float osc2Detune = 0.0f; // cents
+    float osc2Level = 1.0f;
+    bool osc2Sync = false;
+
+    // Oscillator 3
+    int osc3Waveform = 0;    // Saw
+    int osc3Octave = 0;
+    float osc3Detune = 0.0f; // cents
+    float osc3Level = 0.0f;  // Off by default
+
+    // Noise
+    float noiseLevel = 0.0f;
+
+    // Filter
+    float filterCutoff = 5000.0f;
+    float filterResonance = 0.0f;
+    float filterEnvAmount = 0.5f;
+    float filterKeyboardTracking = 0.0f;
+
+    // Amp Envelope
+    float ampAttack = 0.01f;
+    float ampDecay = 0.1f;
+    float ampSustain = 0.7f;
+    float ampRelease = 0.3f;
+
+    // Filter Envelope
+    float filterAttack = 0.01f;
+    float filterDecay = 0.2f;
+    float filterSustain = 0.5f;
+    float filterRelease = 0.3f;
 
     //==========================================================================
     // SST Effects

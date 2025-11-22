@@ -15,10 +15,49 @@ PluginProcessor::PluginProcessor()
                      .withOutput("Output", juce::AudioChannelSet::stereo(), true))
     , apvts(*this, nullptr, "Parameters", createParameterLayout())
 {
-    // TODO: Cache parameter pointers for lock-free audio thread access
-    // Example:
-    // filterCutoffParam = apvts.getRawParameterValue("filter_cutoff");
-    // filterResoParam = apvts.getRawParameterValue("filter_reso");
+    // Cache parameter pointers for lock-free audio thread access
+
+    // Oscillator 1
+    osc1WaveformParam = apvts.getRawParameterValue("osc1_waveform");
+    osc1OctaveParam = apvts.getRawParameterValue("osc1_octave");
+    osc1LevelParam = apvts.getRawParameterValue("osc1_level");
+
+    // Oscillator 2
+    osc2WaveformParam = apvts.getRawParameterValue("osc2_waveform");
+    osc2OctaveParam = apvts.getRawParameterValue("osc2_octave");
+    osc2DetuneParam = apvts.getRawParameterValue("osc2_detune");
+    osc2LevelParam = apvts.getRawParameterValue("osc2_level");
+    osc2SyncParam = apvts.getRawParameterValue("osc2_sync");
+
+    // Oscillator 3
+    osc3WaveformParam = apvts.getRawParameterValue("osc3_waveform");
+    osc3OctaveParam = apvts.getRawParameterValue("osc3_octave");
+    osc3DetuneParam = apvts.getRawParameterValue("osc3_detune");
+    osc3LevelParam = apvts.getRawParameterValue("osc3_level");
+
+    // Noise
+    noiseLevelParam = apvts.getRawParameterValue("noise_level");
+
+    // Filter
+    filterCutoffParam = apvts.getRawParameterValue("filter_cutoff");
+    filterResoParam = apvts.getRawParameterValue("filter_reso");
+    filterEnvAmountParam = apvts.getRawParameterValue("filter_env_amount");
+    filterKbdTrackParam = apvts.getRawParameterValue("filter_kbd_track");
+
+    // Amp Envelope
+    ampAttackParam = apvts.getRawParameterValue("amp_attack");
+    ampDecayParam = apvts.getRawParameterValue("amp_decay");
+    ampSustainParam = apvts.getRawParameterValue("amp_sustain");
+    ampReleaseParam = apvts.getRawParameterValue("amp_release");
+
+    // Filter Envelope
+    filterAttackParam = apvts.getRawParameterValue("filter_attack");
+    filterDecayParam = apvts.getRawParameterValue("filter_decay");
+    filterSustainParam = apvts.getRawParameterValue("filter_sustain");
+    filterReleaseParam = apvts.getRawParameterValue("filter_release");
+
+    // Master
+    masterVolumeParam = apvts.getRawParameterValue("master_volume");
 }
 
 PluginProcessor::~PluginProcessor()
@@ -34,35 +73,112 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParam
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
     // =========================================================================
-    // OSCILLATOR PARAMETERS
-    // TODO: Add oscillator parameters for your synth
+    // OSCILLATOR 1 PARAMETERS
     // =========================================================================
 
     params.push_back(std::make_unique<juce::AudioParameterChoice>(
         juce::ParameterID{"osc1_waveform", 1},
         "Osc 1 Waveform",
-        juce::StringArray{"Saw", "Square", "Triangle", "Sine"},
+        juce::StringArray{"Saw", "Triangle", "Pulse", "Sine"},
         0  // Default: Saw
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterInt>(
+        juce::ParameterID{"osc1_octave", 1},
+        "Osc 1 Octave",
+        -2, 2, 0  // -2 to +2 octaves
     ));
 
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{"osc1_level", 1},
         "Osc 1 Level",
         juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
-        0.8f
+        1.0f
+    ));
+
+    // =========================================================================
+    // OSCILLATOR 2 PARAMETERS
+    // =========================================================================
+
+    params.push_back(std::make_unique<juce::AudioParameterChoice>(
+        juce::ParameterID{"osc2_waveform", 1},
+        "Osc 2 Waveform",
+        juce::StringArray{"Saw", "Triangle", "Pulse", "Sine"},
+        0  // Default: Saw
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterInt>(
+        juce::ParameterID{"osc2_octave", 1},
+        "Osc 2 Octave",
+        -2, 2, 0
     ));
 
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
-        juce::ParameterID{"osc1_tune", 1},
-        "Osc 1 Tune",
-        juce::NormalisableRange<float>(-24.0f, 24.0f, 0.01f),
+        juce::ParameterID{"osc2_detune", 1},
+        "Osc 2 Detune",
+        juce::NormalisableRange<float>(-50.0f, 50.0f, 0.1f),
         0.0f,
-        juce::AudioParameterFloatAttributes().withLabel("st")
+        juce::AudioParameterFloatAttributes().withLabel("cents")
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"osc2_level", 1},
+        "Osc 2 Level",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        1.0f
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterBool>(
+        juce::ParameterID{"osc2_sync", 1},
+        "Osc 2 Sync",
+        false
+    ));
+
+    // =========================================================================
+    // OSCILLATOR 3 PARAMETERS
+    // =========================================================================
+
+    params.push_back(std::make_unique<juce::AudioParameterChoice>(
+        juce::ParameterID{"osc3_waveform", 1},
+        "Osc 3 Waveform",
+        juce::StringArray{"Saw", "Triangle", "Pulse", "Sine"},
+        0  // Default: Saw
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterInt>(
+        juce::ParameterID{"osc3_octave", 1},
+        "Osc 3 Octave",
+        -2, 2, 0
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"osc3_detune", 1},
+        "Osc 3 Detune",
+        juce::NormalisableRange<float>(-50.0f, 50.0f, 0.1f),
+        0.0f,
+        juce::AudioParameterFloatAttributes().withLabel("cents")
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"osc3_level", 1},
+        "Osc 3 Level",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f  // Off by default
+    ));
+
+    // =========================================================================
+    // NOISE
+    // =========================================================================
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"noise_level", 1},
+        "Noise Level",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f  // Off by default
     ));
 
     // =========================================================================
     // FILTER PARAMETERS
-    // TODO: Add filter parameters
     // =========================================================================
 
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
@@ -85,6 +201,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParam
         "Filter Env Amount",
         juce::NormalisableRange<float>(-1.0f, 1.0f, 0.01f),
         0.5f
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"filter_kbd_track", 1},
+        "Filter Keyboard Tracking",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f
     ));
 
     // =========================================================================
@@ -212,10 +335,48 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     auto* rightChannel = buffer.getWritePointer(1);
     const int numSamples = buffer.getNumSamples();
 
-    // TODO: Read parameters (lock-free via atomics)
-    // Example:
-    // float cutoff = filterCutoffParam->load();
-    // float reso = filterResoParam->load();
+    // Read parameters (lock-free via atomics)
+    // Oscillator 1
+    int osc1Waveform = static_cast<int>(osc1WaveformParam->load());
+    int osc1Octave = static_cast<int>(osc1OctaveParam->load());
+    float osc1Level = osc1LevelParam->load();
+
+    // Oscillator 2
+    int osc2Waveform = static_cast<int>(osc2WaveformParam->load());
+    int osc2Octave = static_cast<int>(osc2OctaveParam->load());
+    float osc2Detune = osc2DetuneParam->load();
+    float osc2Level = osc2LevelParam->load();
+    bool osc2Sync = osc2SyncParam->load() > 0.5f;
+
+    // Oscillator 3
+    int osc3Waveform = static_cast<int>(osc3WaveformParam->load());
+    int osc3Octave = static_cast<int>(osc3OctaveParam->load());
+    float osc3Detune = osc3DetuneParam->load();
+    float osc3Level = osc3LevelParam->load();
+
+    // Noise
+    float noiseLevel = noiseLevelParam->load();
+
+    // Filter
+    float filterCutoff = filterCutoffParam->load();
+    float filterReso = filterResoParam->load();
+    float filterEnvAmount = filterEnvAmountParam->load();
+    float filterKbdTrack = filterKbdTrackParam->load();
+
+    // Amp Envelope
+    float ampAttack = ampAttackParam->load();
+    float ampDecay = ampDecayParam->load();
+    float ampSustain = ampSustainParam->load();
+    float ampRelease = ampReleaseParam->load();
+
+    // Filter Envelope
+    float filterAttack = filterAttackParam->load();
+    float filterDecay = filterDecayParam->load();
+    float filterSustain = filterSustainParam->load();
+    float filterRelease = filterReleaseParam->load();
+
+    // Master
+    float masterVolume = masterVolumeParam->load();
 
     // Handle MIDI messages
     for (const auto metadata : midiMessages)
@@ -244,10 +405,42 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
         }
     }
 
-    // TODO: Update synth engine parameters
-    // Example:
-    // synthEngine.setFilterCutoff(cutoff);
-    // synthEngine.setFilterResonance(reso);
+    // Update synth engine parameters
+    // Oscillator 1
+    synthEngine.setOsc1Waveform(osc1Waveform);
+    synthEngine.setOsc1Octave(osc1Octave);
+    synthEngine.setOsc1Level(osc1Level);
+
+    // Oscillator 2
+    synthEngine.setOsc2Waveform(osc2Waveform);
+    synthEngine.setOsc2Octave(osc2Octave);
+    synthEngine.setOsc2Detune(osc2Detune);
+    synthEngine.setOsc2Level(osc2Level);
+    synthEngine.setOsc2Sync(osc2Sync);
+
+    // Oscillator 3
+    synthEngine.setOsc3Waveform(osc3Waveform);
+    synthEngine.setOsc3Octave(osc3Octave);
+    synthEngine.setOsc3Detune(osc3Detune);
+    synthEngine.setOsc3Level(osc3Level);
+
+    // Noise
+    synthEngine.setNoiseLevel(noiseLevel);
+
+    // Filter
+    synthEngine.setFilterCutoff(filterCutoff);
+    synthEngine.setFilterResonance(filterReso);
+    synthEngine.setFilterEnvAmount(filterEnvAmount);
+    synthEngine.setFilterKeyboardTracking(filterKbdTrack);
+
+    // Amp Envelope
+    synthEngine.setAmpEnvelope(ampAttack, ampDecay, ampSustain, ampRelease);
+
+    // Filter Envelope
+    synthEngine.setFilterEnvelope(filterAttack, filterDecay, filterSustain, filterRelease);
+
+    // Master
+    synthEngine.setMasterVolume(masterVolume);
 
     // Render audio
     synthEngine.renderBlock(leftChannel, rightChannel, numSamples);

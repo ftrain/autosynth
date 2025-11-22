@@ -81,10 +81,47 @@ private:
     // Cached Parameters (for lock-free audio thread access)
     //==========================================================================
 
-    // TODO: Add cached parameter pointers
-    // Example:
-    // std::atomic<float>* filterCutoffParam = nullptr;
-    // std::atomic<float>* filterResoParam = nullptr;
+    // Oscillator 1
+    std::atomic<float>* osc1WaveformParam = nullptr;
+    std::atomic<float>* osc1OctaveParam = nullptr;
+    std::atomic<float>* osc1LevelParam = nullptr;
+
+    // Oscillator 2
+    std::atomic<float>* osc2WaveformParam = nullptr;
+    std::atomic<float>* osc2OctaveParam = nullptr;
+    std::atomic<float>* osc2DetuneParam = nullptr;
+    std::atomic<float>* osc2LevelParam = nullptr;
+    std::atomic<float>* osc2SyncParam = nullptr;
+
+    // Oscillator 3
+    std::atomic<float>* osc3WaveformParam = nullptr;
+    std::atomic<float>* osc3OctaveParam = nullptr;
+    std::atomic<float>* osc3DetuneParam = nullptr;
+    std::atomic<float>* osc3LevelParam = nullptr;
+
+    // Noise
+    std::atomic<float>* noiseLevelParam = nullptr;
+
+    // Filter
+    std::atomic<float>* filterCutoffParam = nullptr;
+    std::atomic<float>* filterResoParam = nullptr;
+    std::atomic<float>* filterEnvAmountParam = nullptr;
+    std::atomic<float>* filterKbdTrackParam = nullptr;
+
+    // Amp Envelope
+    std::atomic<float>* ampAttackParam = nullptr;
+    std::atomic<float>* ampDecayParam = nullptr;
+    std::atomic<float>* ampSustainParam = nullptr;
+    std::atomic<float>* ampReleaseParam = nullptr;
+
+    // Filter Envelope
+    std::atomic<float>* filterAttackParam = nullptr;
+    std::atomic<float>* filterDecayParam = nullptr;
+    std::atomic<float>* filterSustainParam = nullptr;
+    std::atomic<float>* filterReleaseParam = nullptr;
+
+    // Master
+    std::atomic<float>* masterVolumeParam = nullptr;
 
     //==========================================================================
     // State

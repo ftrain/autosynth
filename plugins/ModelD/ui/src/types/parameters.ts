@@ -1,11 +1,10 @@
 /**
  * @file parameters.ts
- * @brief Parameter definitions for the synthesizer
+ * @brief Parameter definitions for the Model D synthesizer
  *
  * This file defines all parameters exposed by the plugin.
  * Parameters are normalized to 0-1 range for UI communication.
  *
- * TODO: Update these definitions to match your plugin's parameters
  * These MUST match the parameters defined in PluginProcessor.cpp
  */
 
@@ -15,11 +14,13 @@ import { ParameterMap, ParameterDefinition } from '../hooks/useParameters';
  * Parameter categories for UI organization
  */
 export enum ParameterCategory {
-  OSCILLATOR = 'oscillator',
+  OSCILLATOR_1 = 'oscillator1',
+  OSCILLATOR_2 = 'oscillator2',
+  OSCILLATOR_3 = 'oscillator3',
+  MIXER = 'mixer',
   FILTER = 'filter',
-  ENVELOPE = 'envelope',
-  MODULATION = 'modulation',
-  EFFECTS = 'effects',
+  AMP_ENVELOPE = 'amp_envelope',
+  FILTER_ENVELOPE = 'filter_envelope',
   MASTER = 'master',
 }
 
@@ -30,7 +31,7 @@ export enum ParameterCategory {
  */
 export const PARAMETER_DEFINITIONS: ParameterMap = {
   // =========================================================================
-  // OSCILLATOR PARAMETERS
+  // OSCILLATOR 1 PARAMETERS
   // =========================================================================
 
   osc1_waveform: {
@@ -42,21 +43,120 @@ export const PARAMETER_DEFINITIONS: ParameterMap = {
     step: 1,
   },
 
+  osc1_octave: {
+    id: 'osc1_octave',
+    name: 'Osc 1 Octave',
+    min: -2,
+    max: 2,
+    default: 0,
+    step: 1,
+  },
+
   osc1_level: {
     id: 'osc1_level',
     name: 'Osc 1 Level',
     min: 0,
     max: 1,
-    default: 0.8,
+    default: 1.0,
   },
 
-  osc1_tune: {
-    id: 'osc1_tune',
-    name: 'Osc 1 Tune',
-    min: -24,
-    max: 24,
+  // =========================================================================
+  // OSCILLATOR 2 PARAMETERS
+  // =========================================================================
+
+  osc2_waveform: {
+    id: 'osc2_waveform',
+    name: 'Osc 2 Waveform',
+    min: 0,
+    max: 3,
     default: 0,
-    unit: 'st',
+    step: 1,
+  },
+
+  osc2_octave: {
+    id: 'osc2_octave',
+    name: 'Osc 2 Octave',
+    min: -2,
+    max: 2,
+    default: 0,
+    step: 1,
+  },
+
+  osc2_detune: {
+    id: 'osc2_detune',
+    name: 'Osc 2 Detune',
+    min: -50,
+    max: 50,
+    default: 0,
+    unit: 'cents',
+  },
+
+  osc2_level: {
+    id: 'osc2_level',
+    name: 'Osc 2 Level',
+    min: 0,
+    max: 1,
+    default: 1.0,
+  },
+
+  osc2_sync: {
+    id: 'osc2_sync',
+    name: 'Osc 2 Sync',
+    min: 0,
+    max: 1,
+    default: 0,
+    step: 1,
+  },
+
+  // =========================================================================
+  // OSCILLATOR 3 PARAMETERS
+  // =========================================================================
+
+  osc3_waveform: {
+    id: 'osc3_waveform',
+    name: 'Osc 3 Waveform',
+    min: 0,
+    max: 3,
+    default: 0,
+    step: 1,
+  },
+
+  osc3_octave: {
+    id: 'osc3_octave',
+    name: 'Osc 3 Octave',
+    min: -2,
+    max: 2,
+    default: 0,
+    step: 1,
+  },
+
+  osc3_detune: {
+    id: 'osc3_detune',
+    name: 'Osc 3 Detune',
+    min: -50,
+    max: 50,
+    default: 0,
+    unit: 'cents',
+  },
+
+  osc3_level: {
+    id: 'osc3_level',
+    name: 'Osc 3 Level',
+    min: 0,
+    max: 1,
+    default: 0.0,  // Off by default
+  },
+
+  // =========================================================================
+  // NOISE
+  // =========================================================================
+
+  noise_level: {
+    id: 'noise_level',
+    name: 'Noise Level',
+    min: 0,
+    max: 1,
+    default: 0.0,
   },
 
   // =========================================================================
@@ -86,6 +186,14 @@ export const PARAMETER_DEFINITIONS: ParameterMap = {
     min: -1,
     max: 1,
     default: 0.5,
+  },
+
+  filter_kbd_track: {
+    id: 'filter_kbd_track',
+    name: 'Filter Keyboard Tracking',
+    min: 0,
+    max: 1,
+    default: 0,
   },
 
   // =========================================================================
@@ -181,18 +289,38 @@ export const PARAMETER_DEFINITIONS: ParameterMap = {
 };
 
 /**
+ * Waveform labels for UI display
+ */
+export const WAVEFORM_OPTIONS = [
+  { value: 0, label: 'Saw' },
+  { value: 1, label: 'Triangle' },
+  { value: 2, label: 'Pulse' },
+  { value: 3, label: 'Sine' },
+];
+
+/**
+ * Octave labels for UI display
+ */
+export const OCTAVE_OPTIONS = [
+  { value: -2, label: "16'" },
+  { value: -1, label: "8'" },
+  { value: 0, label: "4'" },
+  { value: 1, label: "2'" },
+  { value: 2, label: "1'" },
+];
+
+/**
  * Get parameters by category
  */
 export function getParametersByCategory(category: ParameterCategory): ParameterDefinition[] {
   const categoryMap: Record<ParameterCategory, string[]> = {
-    [ParameterCategory.OSCILLATOR]: ['osc1_waveform', 'osc1_level', 'osc1_tune'],
-    [ParameterCategory.FILTER]: ['filter_cutoff', 'filter_reso', 'filter_env_amount'],
-    [ParameterCategory.ENVELOPE]: [
-      'amp_attack', 'amp_decay', 'amp_sustain', 'amp_release',
-      'filter_attack', 'filter_decay', 'filter_sustain', 'filter_release',
-    ],
-    [ParameterCategory.MODULATION]: [],
-    [ParameterCategory.EFFECTS]: [],
+    [ParameterCategory.OSCILLATOR_1]: ['osc1_waveform', 'osc1_octave', 'osc1_level'],
+    [ParameterCategory.OSCILLATOR_2]: ['osc2_waveform', 'osc2_octave', 'osc2_detune', 'osc2_level', 'osc2_sync'],
+    [ParameterCategory.OSCILLATOR_3]: ['osc3_waveform', 'osc3_octave', 'osc3_detune', 'osc3_level'],
+    [ParameterCategory.MIXER]: ['osc1_level', 'osc2_level', 'osc3_level', 'noise_level'],
+    [ParameterCategory.FILTER]: ['filter_cutoff', 'filter_reso', 'filter_env_amount', 'filter_kbd_track'],
+    [ParameterCategory.AMP_ENVELOPE]: ['amp_attack', 'amp_decay', 'amp_sustain', 'amp_release'],
+    [ParameterCategory.FILTER_ENVELOPE]: ['filter_attack', 'filter_decay', 'filter_sustain', 'filter_release'],
     [ParameterCategory.MASTER]: ['master_volume'],
   };
 
@@ -237,8 +365,8 @@ export function formatParameterValue(paramId: string, normalizedValue: number): 
     return `${value.toFixed(1)} dB`;
   }
 
-  if (param.unit === 'st') {
-    return `${value >= 0 ? '+' : ''}${Math.round(value)} st`;
+  if (param.unit === 'cents') {
+    return `${value >= 0 ? '+' : ''}${Math.round(value)} cents`;
   }
 
   // Percentage
