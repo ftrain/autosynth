@@ -1,0 +1,239 @@
+/**
+ * Global styles for plugin UI
+ *
+ * TODO: These are placeholder styles. When integrating with the
+ * component library, import the shared theme instead.
+ */
+
+:root {
+  /* Theme colors - match the component library */
+  --synth-bg-primary: #1a1a1a;
+  --synth-bg-secondary: #242424;
+  --synth-bg-tertiary: #2a2a2a;
+  --synth-text-primary: #ffffff;
+  --synth-text-secondary: #a0a0a0;
+  --synth-accent-primary: #00ff88;
+  --synth-accent-secondary: #0088ff;
+  --synth-border: #333333;
+
+  /* Spacing */
+  --synth-spacing-xs: 4px;
+  --synth-spacing-sm: 8px;
+  --synth-spacing-md: 16px;
+  --synth-spacing-lg: 24px;
+  --synth-spacing-xl: 32px;
+
+  /* Font sizes */
+  --synth-font-xs: 10px;
+  --synth-font-sm: 12px;
+  --synth-font-md: 14px;
+  --synth-font-lg: 18px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background-color: var(--synth-bg-primary);
+  color: var(--synth-text-primary);
+  overflow: hidden;
+  user-select: none;
+}
+
+.synth-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: var(--synth-spacing-md);
+  gap: var(--synth-spacing-md);
+}
+
+/* Header */
+.synth-header {
+  display: flex;
+  align-items: center;
+  gap: var(--synth-spacing-md);
+  padding-bottom: var(--synth-spacing-md);
+  border-bottom: 1px solid var(--synth-border);
+}
+
+.synth-title {
+  font-size: var(--synth-font-lg);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.synth-version {
+  font-size: var(--synth-font-xs);
+  color: var(--synth-text-secondary);
+}
+
+.connection-status {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--synth-spacing-xs);
+  font-size: var(--synth-font-sm);
+  color: var(--synth-text-secondary);
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #ff4444;
+}
+
+.status-indicator.connected {
+  background-color: var(--synth-accent-primary);
+  box-shadow: 0 0 8px var(--synth-accent-primary);
+}
+
+/* Sections */
+.synth-section {
+  background-color: var(--synth-bg-secondary);
+  border-radius: 8px;
+  padding: var(--synth-spacing-md);
+  border: 1px solid var(--synth-border);
+}
+
+.section-title {
+  font-size: var(--synth-font-sm);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--synth-text-secondary);
+  margin-bottom: var(--synth-spacing-md);
+}
+
+/* Control row */
+.control-row {
+  display: flex;
+  gap: var(--synth-spacing-lg);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Placeholder knob styling (replace with component library) */
+.knob-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--synth-spacing-xs);
+}
+
+.knob-placeholder label {
+  font-size: var(--synth-font-xs);
+  text-transform: uppercase;
+  color: var(--synth-text-secondary);
+}
+
+.knob-placeholder input[type="range"] {
+  width: 80px;
+  accent-color: var(--synth-accent-primary);
+}
+
+.knob-placeholder span {
+  font-size: var(--synth-font-xs);
+  color: var(--synth-accent-primary);
+  font-family: monospace;
+}
+
+.knob-placeholder select {
+  background-color: var(--synth-bg-tertiary);
+  border: 1px solid var(--synth-border);
+  color: var(--synth-text-primary);
+  padding: var(--synth-spacing-xs) var(--synth-spacing-sm);
+  border-radius: 4px;
+  font-size: var(--synth-font-sm);
+}
+
+/* Envelope controls */
+.envelope-row {
+  display: flex;
+  gap: var(--synth-spacing-xl);
+}
+
+.envelope-group {
+  flex: 1;
+}
+
+.envelope-group h3 {
+  font-size: var(--synth-font-sm);
+  margin-bottom: var(--synth-spacing-sm);
+  color: var(--synth-text-secondary);
+}
+
+.adsr-controls {
+  display: flex;
+  gap: var(--synth-spacing-md);
+}
+
+.adsr-slider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--synth-spacing-xs);
+}
+
+.adsr-slider label {
+  font-size: var(--synth-font-xs);
+  color: var(--synth-text-secondary);
+}
+
+.adsr-slider input[type="range"] {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 20px;
+  height: 80px;
+  accent-color: var(--synth-accent-primary);
+}
+
+/* Master section */
+.master-section {
+  margin-top: auto;
+}
+
+.reset-button {
+  background-color: var(--synth-bg-tertiary);
+  border: 1px solid var(--synth-border);
+  color: var(--synth-text-primary);
+  padding: var(--synth-spacing-sm) var(--synth-spacing-md);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: var(--synth-font-sm);
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+
+.reset-button:hover {
+  background-color: var(--synth-border);
+  border-color: var(--synth-accent-primary);
+}
+
+/* Oscilloscope placeholder */
+.oscilloscope-placeholder {
+  background-color: var(--synth-bg-primary);
+  border-radius: 4px;
+  padding: var(--synth-spacing-sm);
+}
+
+.oscilloscope-placeholder canvas {
+  display: block;
+  width: 100%;
+  height: 100px;
+  background-color: #111111;
+  border-radius: 4px;
+}
+
+/* Debug info */
+.debug-info {
+  text-align: center;
+  padding: var(--synth-spacing-sm);
+  color: var(--synth-text-secondary);
+  border-top: 1px solid var(--synth-border);
+}

@@ -1,0 +1,15 @@
+[submodule "plugins/ModelD/JUCE"]
+	path = plugins/ModelD/JUCE
+	url = https://github.com/juce-framework/JUCE.git
+[submodule "plugins/ModelD/libs/sst/sst-basic-blocks"]
+	path = plugins/ModelD/libs/sst/sst-basic-blocks
+	url = https://github.com/surge-synthesizer/sst-basic-blocks.git
+[submodule "plugins/ModelD/libs/sst/sst-filters"]
+	path = plugins/ModelD/libs/sst/sst-filters
+	url = https://github.com/surge-synthesizer/sst-filters.git
+[submodule "plugins/ModelD/libs/sst/sst-effects"]
+	path = plugins/ModelD/libs/sst/sst-effects
+	url = https://github.com/surge-synthesizer/sst-effects.git
+[submodule "plugins/ModelD/libs/sst/sst-waveshapers"]
+	path = plugins/ModelD/libs/sst/sst-waveshapers
+	url = https://github.com/surge-synthesizer/sst-waveshapers.git
