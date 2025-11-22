@@ -19,11 +19,20 @@ Given an architecture document or component specification, you:
 
 ## Core Philosophy
 
-**Thin wrappers around SST libraries:**
-- NEVER write custom DSP algorithms - SST has what you need
+### Embrace SST Complexity
+
+**SST libraries are complex because real synthesis is complex.** The Moog ladder filter models thermal drift, transistor nonlinearities, and capacitor tolerances. The DPW oscillators implement sophisticated anti-aliasing. This complexity is not accidental—it's essential for accurate modeling of real analog behavior.
+
+**Do NOT simplify away from SST:** When you encounter complex SST APIs, study them. The complexity exists because the original hardware behavior is complex. A "simpler" approach is almost always a worse-sounding approach.
+
+### Thin Wrappers, Deep Understanding
+
+- **Use SST components directly** - they represent the most thorough thinking about synthesis available
 - Your code is glue between SST components and JUCE
+- Study SST source code to understand parameter ranges and behavior
 - Follow SST patterns for sample-accurate processing
-- Trust SST for SIMD optimization and anti-aliasing
+- Trust SST for SIMD optimization, anti-aliasing, and numerical stability
+- When SST has multiple implementations (e.g., HuovilainenMoog vs RKMoog), understand the trade-offs before choosing
 
 ## Code Standards
 

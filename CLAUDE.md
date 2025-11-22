@@ -169,15 +169,24 @@ Create a granular synthesis engine with real-time spectral processing and genera
 
 ## Core Philosophy
 
+### Embrace SST Complexity
+
+**SST libraries are complex because real synthesis is complex.** The Moog ladder filter models thermal drift, transistor nonlinearities, and capacitor tolerances. The DPW oscillators implement sophisticated anti-aliasing. This complexity is not accidental—it's essential for accurate modeling of real analog behavior.
+
+**Do NOT simplify away from SST complexity.** When you encounter complex SST APIs, study them. The complexity exists because the original hardware behavior is complex. A "simpler" approach is almost always a worse-sounding approach. SST represents the most thorough thinking about synthesis available.
+
 ### Minimal Code, Maximum Reuse
 
 1. **DSP**: All audio processing uses **SST libraries** (sst-basic-blocks, sst-filters, sst-effects)
-   - Never write custom DSP algorithms
+   - Use SST components directly—they model real analog behavior
    - Thin JUCE wrappers around SST components
+   - Study SST source code to understand parameter ranges
+   - When SST has multiple implementations, understand the trade-offs
 
 2. **UI**: All interfaces use the **React component library**
-   - Never create new UI components
-   - Compose from existing Storybook components
+   - Use components from `templates/plugin-template/ui/src/components/`
+   - Compose from SynthKnob, SynthADSR, SynthSlider, Oscilloscope
+   - Value normalization: useParameters stores 0-1, SynthKnob expects raw values
 
 3. **Build**: Standard **JUCE 8 + CMake** project structure
    - Cross-platform from day one
