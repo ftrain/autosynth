@@ -144,6 +144,9 @@ find "$TARGET_DIR" -type f \( \
     replace_in_file "$file" "My Synth" "$PLUGIN_NAME"
     replace_in_file "$file" "MySynth" "$PLUGIN_CLASS"
 
+    # Replace template placeholder
+    replace_in_file "$file" "{{SYNTH_NAME}}" "$PLUGIN_NAME"
+
     # Replace plugin code
     replace_in_file "$file" "MyPl" "$PLUGIN_CODE"
     replace_in_file "$file" "MySy" "$PLUGIN_CODE"
