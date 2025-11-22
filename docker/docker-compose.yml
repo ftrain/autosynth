@@ -1,0 +1,74 @@
+# Studio Synth Development Environment
+#
+# Quick start:
+#   docker compose -f docker/docker-compose.yml up -d
+#   docker compose -f docker/docker-compose.yml exec studio bash
+#
+# Or use the helper script:
+#   ./scripts/dev.sh
+#
+version: '3.8'
+
+services:
+  studio:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    image: studio-dev:latest
+    container_name: studio-dev
+
+    # Keep running for interactive use
+    stdin_open: true
+    tty: true
+
+    # Mount the project
+    volumes:
+      # Main workspace
+      - ..:/workspace
+
+      # Persist npm cache
+      - npm-cache:/home/ubuntu/.npm
+
+      # Persist Claude Code config
+      - claude-config:/home/ubuntu/.claude
+
+      # X11 socket for GUI apps (Linux)
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+
+      # PulseAudio socket for audio (Linux)
+      - ${XDG_RUNTIME_DIR:-/run/user/1000}/pulse:/run/user/1000/pulse:rw
+      - ~/.config/pulse/cookie:/home/ubuntu/.config/pulse/cookie:ro
+
+    environment:
+      # Display for GUI apps
+      - DISPLAY=${DISPLAY:-:0}
+
+      # Audio
+      - PULSE_SERVER=unix:/run/user/1000/pulse/native
+      - XDG_RUNTIME_DIR=/run/user/1000
+
+      # JUCE paths (pre-installed in image)
+      - JUCE_PATH=/opt/JUCE
+      - SST_PATH=/opt/sst
+
+      # Use clang for faster builds
+      - CC=clang
+      - CXX=clang++
+
+    # For ALSA audio
+    devices:
+      - /dev/snd:/dev/snd
+
+    # Required for audio
+    privileged: false
+
+    working_dir: /workspace
+
+    # Network for any web UI development
+    ports:
+      - "5173:5173"  # Vite dev server
+      - "6006:6006"  # Storybook
+
+volumes:
+  npm-cache:
+  claude-config:

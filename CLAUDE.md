@@ -10,54 +10,54 @@ Studio is a framework for building professional synthesizers using AI agent coll
 
 ## Quick Start
 
-### Creating a New Plugin
+### Recommended: Docker Development Environment
 
-Use the helper script to scaffold a new plugin from the template:
+The fastest way to start building synths. JUCE and all dependencies are pre-installed:
+
+```bash
+# First time: build the image (~5-10 minutes, only once)
+./scripts/dev.sh build
+
+# Start development shell
+./scripts/dev.sh
+
+# Inside container: create a new synth (instant!)
+./scripts/new-plugin.sh "Warm Bass" "WarmBass" "WmBs"
+
+# Build immediately - no setup needed
+cd plugins/WarmBass
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+**What's pre-cached in Docker:**
+- JUCE 8.0.0 with juceaide pre-compiled (saves ~50 seconds per build)
+- All SST libraries (sst-basic-blocks, sst-filters, sst-effects, sst-waveshapers)
+- GTK3, WebKit, ALSA, PulseAudio, and all Linux dependencies
+- Node.js 20 for React UI development
+- Clang compiler for faster builds
+
+**Helper commands:**
+```bash
+./scripts/dev.sh                    # Interactive shell
+./scripts/dev.sh new "My Synth"     # Create plugin from host
+./scripts/dev.sh build-plugin dir   # Build a plugin
+./scripts/dev.sh claude             # Start Claude Code in container
+./scripts/dev.sh stop               # Stop container
+```
+
+### Alternative: Manual Setup (without Docker)
 
 ```bash
 ./scripts/new-plugin.sh "My Synth Name" "MySynthName" "MySn"
 ```
 
-This creates a complete plugin structure with:
-- JUCE 8 + SST CMake build system
-- Voice and SynthEngine templates
-- React WebView UI scaffold
-- Test infrastructure
-- CI/CD workflow
+This creates a plugin structure but requires manual setup:
+- Git submodules for JUCE and SST libraries
+- System package installation (GTK3, WebKit, ALSA, etc.)
+- npm install for UI dependencies
 
-### Docker Development Environment
-
-For isolated development with X11 display and audio testing capabilities:
-
-```bash
-# Build the Docker image
-./scripts/docker-run.sh build
-
-# Start interactive shell in container
-./scripts/docker-run.sh run
-
-# Start Claude Code directly in container (with full permissions)
-./scripts/docker-run.sh claude
-
-# Test X11 display
-./scripts/docker-run.sh test-x11
-
-# Test audio output (Linux only)
-./scripts/docker-run.sh test-audio
-```
-
-**Requirements:**
-- Docker installed
-- Claude Pro/Max subscription (OAuth login) or API key
-- Linux: X11 and PulseAudio (native support)
-- macOS: XQuartz installed (`brew install --cask xquartz`)
-
-**Features:**
-- Full JUCE build environment (CMake, clang, JUCE dependencies)
-- X11 forwarding for GUI testing
-- PulseAudio/ALSA for audio testing
-- Claude Code with permissive settings (can execute any command)
-- Node.js 20 for React UI development
+See the script output for full instructions.
 
 ### Starting a New Synth Project
 
@@ -165,6 +165,40 @@ Create a granular synthesis engine with real-time spectral processing and genera
 │  - Factory presets                                                   │
 │  - Documentation                                                     │
 └─────────────────────────────────────────────────────────────────────┘
+```
+
+## Git Workflow
+
+### Branch-per-Plugin Strategy
+
+The `main` branch is the **meta-template** - it contains the framework, templates, and shared infrastructure. Each plugin lives on its own branch:
+
+```
+main                          <- Framework, templates, shared code
+├── plugin/model-d            <- Minimoog Model D clone
+├── plugin/warm-bass          <- Bass synth
+├── plugin/tape-delay         <- Delay effect
+└── plugin/granular-pad       <- Granular synth
+```
+
+**Why this approach:**
+1. **Clean separation**: Each plugin is isolated, no conflicts
+2. **Shared improvements**: Template fixes on `main` benefit all plugins
+3. **Easy experimentation**: Create branches, discard if needed
+4. **Parallel development**: Multiple synths can be developed simultaneously
+
+**Creating a new plugin automatically creates its branch:**
+```bash
+./scripts/new-plugin.sh "Model D" "ModelD" "ModD"
+# Creates branch: plugin/model-d
+```
+
+**Merging improvements back to main:**
+When you discover fixes or improvements that apply to all plugins (template bugs, new test utilities, documentation), commit them to `main`:
+```bash
+git checkout main
+# Make changes to templates/
+git commit -m "fix: Template improvement"
 ```
 
 ## Core Philosophy

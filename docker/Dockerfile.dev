@@ -1,0 +1,173 @@
+# Studio Synth Development Container
+# Pre-built JUCE + SST libraries for instant plugin development
+#
+# Build: docker build -f docker/Dockerfile.dev -t studio-dev .
+# Run:   docker run -it --rm -v $(pwd):/workspace studio-dev
+#
+FROM ubuntu:24.04 AS base
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=UTC
+
+# =============================================================================
+# SYSTEM DEPENDENCIES
+# All packages needed for JUCE plugin development on Linux
+# =============================================================================
+RUN apt-get update && apt-get install -y \
+    # Build essentials
+    build-essential \
+    cmake \
+    ninja-build \
+    git \
+    curl \
+    wget \
+    pkg-config \
+    clang \
+    lld \
+    # X11 and GUI
+    libx11-dev \
+    libxrandr-dev \
+    libxinerama-dev \
+    libxcursor-dev \
+    libxi-dev \
+    libxcomposite-dev \
+    libxext-dev \
+    libxrender-dev \
+    libxfixes-dev \
+    libxdamage-dev \
+    libgl1-mesa-dev \
+    libglu1-mesa-dev \
+    mesa-utils \
+    x11-apps \
+    xauth \
+    # Audio - ALSA
+    libasound2-dev \
+    alsa-utils \
+    # Audio - PulseAudio
+    pulseaudio \
+    libpulse-dev \
+    pulseaudio-utils \
+    # Audio - JACK
+    libjack-jackd2-dev \
+    # JUCE dependencies
+    libfreetype6-dev \
+    libcurl4-openssl-dev \
+    libwebkit2gtk-4.1-dev \
+    libgtk-3-dev \
+    # Fonts
+    fonts-liberation \
+    fonts-dejavu-core \
+    && rm -rf /var/lib/apt/lists/*
+
+# Node.js 20 for React UI development
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# =============================================================================
+# JUCE + SST LIBRARIES (cached in /opt for reuse)
+# =============================================================================
+FROM base AS libraries
+
+# Clone JUCE (specific version for stability)
+RUN git clone --depth 1 --branch 8.0.0 \
+    https://github.com/juce-framework/JUCE.git /opt/JUCE
+
+# Clone SST libraries
+RUN mkdir -p /opt/sst && \
+    git clone --depth 1 https://github.com/surge-synthesizer/sst-basic-blocks.git /opt/sst/sst-basic-blocks && \
+    git clone --depth 1 https://github.com/surge-synthesizer/sst-filters.git /opt/sst/sst-filters && \
+    git clone --depth 1 https://github.com/surge-synthesizer/sst-effects.git /opt/sst/sst-effects && \
+    git clone --depth 1 https://github.com/surge-synthesizer/sst-waveshapers.git /opt/sst/sst-waveshapers
+
+# =============================================================================
+# PRE-BUILD JUCE (the slow step - ~50 seconds saved per new project!)
+# =============================================================================
+FROM libraries AS juce-builder
+
+# Create a minimal project just to trigger juceaide build
+WORKDIR /tmp/juce-prebuild
+
+# Minimal CMakeLists.txt to build juceaide
+RUN echo 'cmake_minimum_required(VERSION 3.22)\n\
+project(JucePrebuild LANGUAGES C CXX)\n\
+add_subdirectory(/opt/JUCE JUCE)\n\
+juce_add_plugin(DummyPlugin FORMATS Standalone PRODUCT_NAME "Dummy")\n\
+target_sources(DummyPlugin PRIVATE dummy.cpp)\n\
+target_link_libraries(DummyPlugin PRIVATE juce::juce_audio_utils)' > CMakeLists.txt
+
+# Minimal source file
+RUN echo '#include <juce_audio_processors/juce_audio_processors.h>\n\
+class P : public juce::AudioProcessor {\n\
+public:\n\
+    P() : AudioProcessor(BusesProperties().withOutput("Out", juce::AudioChannelSet::stereo())) {}\n\
+    const juce::String getName() const override { return "D"; }\n\
+    void prepareToPlay(double, int) override {}\n\
+    void releaseResources() override {}\n\
+    void processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&) override {}\n\
+    juce::AudioProcessorEditor* createEditor() override { return nullptr; }\n\
+    bool hasEditor() const override { return false; }\n\
+    bool acceptsMidi() const override { return false; }\n\
+    bool producesMidi() const override { return false; }\n\
+    double getTailLengthSeconds() const override { return 0; }\n\
+    int getNumPrograms() override { return 1; }\n\
+    int getCurrentProgram() override { return 0; }\n\
+    void setCurrentProgram(int) override {}\n\
+    const juce::String getProgramName(int) override { return {}; }\n\
+    void changeProgramName(int, const juce::String&) override {}\n\
+    void getStateInformation(juce::MemoryBlock&) override {}\n\
+    void setStateInformation(const void*, int) override {}\n\
+};\n\
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() { return new P(); }' > dummy.cpp
+
+# Build to trigger juceaide compilation (this is cached!)
+RUN cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release && \
+    cmake --build build --target juceaide 2>/dev/null || true
+
+# Copy the built juceaide back to JUCE
+RUN cp -r build/JUCE/tools/juceaide /opt/JUCE/tools/ 2>/dev/null || true
+
+# =============================================================================
+# FINAL IMAGE
+# =============================================================================
+FROM base AS final
+
+# Copy pre-built JUCE with juceaide
+COPY --from=juce-builder /opt/JUCE /opt/JUCE
+
+# Copy SST libraries
+COPY --from=libraries /opt/sst /opt/sst
+
+# Setup non-root user
+RUN apt-get update && apt-get install -y sudo \
+    && echo "ubuntu ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/ubuntu \
+    && chmod 0440 /etc/sudoers.d/ubuntu \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Claude Code CLI
+RUN npm install -g @anthropic-ai/claude-code
+
+# PulseAudio config
+RUN mkdir -p /etc/pulse && \
+    echo "load-module module-native-protocol-unix auth-anonymous=1" >> /etc/pulse/default.pa && \
+    echo "load-module module-native-protocol-tcp auth-anonymous=1" >> /etc/pulse/default.pa
+
+# Environment variables for easy library access
+ENV JUCE_PATH=/opt/JUCE
+ENV SST_PATH=/opt/sst
+ENV CC=clang
+ENV CXX=clang++
+
+# Set permissions on cached libraries
+RUN chmod -R 755 /opt/JUCE /opt/sst
+
+WORKDIR /workspace
+USER ubuntu
+
+# Create config directories
+RUN mkdir -p /home/ubuntu/.claude /home/ubuntu/.npm-global \
+    && npm config set prefix '/home/ubuntu/.npm-global'
+
+ENV PATH="/home/ubuntu/.npm-global/bin:${PATH}"
+
+CMD ["/bin/bash"]

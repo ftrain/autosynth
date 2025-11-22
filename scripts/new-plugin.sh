@@ -162,33 +162,73 @@ fi
 # Rename class files if needed
 # (Template uses PluginProcessor which is generic, so no renaming needed)
 
-log_info "Plugin created successfully!"
-log_info "Branch: $BRANCH_NAME"
-echo ""
-echo "Next steps:"
-echo ""
-echo "  1. Add git submodules:"
-echo "     cd $TARGET_DIR"
-echo "     git submodule add https://github.com/juce-framework/JUCE.git JUCE"
-echo "     git submodule add https://github.com/surge-synthesizer/sst-basic-blocks.git libs/sst/sst-basic-blocks"
-echo "     git submodule add https://github.com/surge-synthesizer/sst-filters.git libs/sst/sst-filters"
-echo "     git submodule add https://github.com/surge-synthesizer/sst-effects.git libs/sst/sst-effects"
-echo "     git submodule add https://github.com/surge-synthesizer/sst-waveshapers.git libs/sst/sst-waveshapers"
-echo ""
-echo "  2. Build the UI:"
-echo "     cd $TARGET_DIR/ui"
-echo "     npm install"
-echo "     npm run build"
-echo ""
-echo "  3. Build the plugin:"
-echo "     cd $TARGET_DIR"
-echo "     cmake -B build -DCMAKE_BUILD_TYPE=Release"
-echo "     cmake --build build --config Release"
-echo ""
-echo "  4. Start developing!"
-echo "     - Edit source/dsp/Voice.h for DSP"
-echo "     - Edit ui/src/App.tsx for UI"
-echo "     - See README.md for more info"
-echo ""
-echo "  5. When ready, commit and merge to main"
+# ============================================================================
+# LINK CACHED LIBRARIES (Docker environment)
+# If running in Docker with pre-cached JUCE/SST, symlink them for instant setup
+# ============================================================================
+if [ -d "/opt/JUCE" ] && [ -d "/opt/sst" ]; then
+    log_info "Docker environment detected - linking cached libraries..."
+
+    # Link JUCE
+    ln -sf /opt/JUCE "$TARGET_DIR/JUCE"
+
+    # Link SST libraries
+    mkdir -p "$TARGET_DIR/libs/sst"
+    ln -sf /opt/sst/sst-basic-blocks "$TARGET_DIR/libs/sst/sst-basic-blocks"
+    ln -sf /opt/sst/sst-filters "$TARGET_DIR/libs/sst/sst-filters"
+    ln -sf /opt/sst/sst-effects "$TARGET_DIR/libs/sst/sst-effects"
+    ln -sf /opt/sst/sst-waveshapers "$TARGET_DIR/libs/sst/sst-waveshapers"
+
+    log_info "Libraries linked (no git submodule setup needed)"
+
+    # Build UI
+    log_info "Installing UI dependencies..."
+    cd "$TARGET_DIR/ui"
+    npm install --silent
+    npm run build --silent
+    cd "$REPO_ROOT"
+
+    log_info "Plugin created and ready to build!"
+    log_info "Branch: $BRANCH_NAME"
+    echo ""
+    echo "Build immediately:"
+    echo "  cd $TARGET_DIR"
+    echo "  cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release"
+    echo "  cmake --build build"
+    echo ""
+    echo "Or use: ./scripts/dev.sh build-plugin $TARGET_DIR"
+    echo ""
+else
+    # Standard setup (outside Docker)
+    log_info "Plugin created successfully!"
+    log_info "Branch: $BRANCH_NAME"
+    echo ""
+    echo "Next steps:"
+    echo ""
+    echo "  1. Add git submodules:"
+    echo "     cd $TARGET_DIR"
+    echo "     git submodule add https://github.com/juce-framework/JUCE.git JUCE"
+    echo "     git submodule add https://github.com/surge-synthesizer/sst-basic-blocks.git libs/sst/sst-basic-blocks"
+    echo "     git submodule add https://github.com/surge-synthesizer/sst-filters.git libs/sst/sst-filters"
+    echo "     git submodule add https://github.com/surge-synthesizer/sst-effects.git libs/sst/sst-effects"
+    echo "     git submodule add https://github.com/surge-synthesizer/sst-waveshapers.git libs/sst/sst-waveshapers"
+    echo ""
+    echo "  2. Build the UI:"
+    echo "     cd $TARGET_DIR/ui"
+    echo "     npm install"
+    echo "     npm run build"
+    echo ""
+    echo "  3. Build the plugin:"
+    echo "     cd $TARGET_DIR"
+    echo "     cmake -B build -DCMAKE_BUILD_TYPE=Release"
+    echo "     cmake --build build --config Release"
+    echo ""
+    echo "  TIP: Use Docker for faster setup: ./scripts/dev.sh"
+    echo ""
+fi
+
+echo "  Start developing:"
+echo "    - Edit source/dsp/Voice.h for DSP"
+echo "    - Edit ui/src/App.tsx for UI"
+echo "    - See README.md for more info"
 echo ""
