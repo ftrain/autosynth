@@ -38,6 +38,14 @@ endif()
 add_subdirectory(JUCE)
 
 # ============================================================================
+# SIMDE (SIMD Everywhere - for cross-platform SIMD support)
+# ============================================================================
+add_library(simde INTERFACE)
+target_include_directories(simde INTERFACE
+    ${CMAKE_SOURCE_DIR}/libs/simde
+)
+
+# ============================================================================
 # SST LIBRARIES (header-only)
 # ============================================================================
 add_library(sst-libraries INTERFACE)
@@ -47,6 +55,7 @@ target_include_directories(sst-libraries INTERFACE
     ${CMAKE_SOURCE_DIR}/libs/sst/sst-effects/include
     ${CMAKE_SOURCE_DIR}/libs/sst/sst-waveshapers/include
 )
+target_link_libraries(sst-libraries INTERFACE simde)
 
 # ============================================================================
 # PLUGIN TARGET

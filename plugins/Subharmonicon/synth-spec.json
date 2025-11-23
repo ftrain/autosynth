@@ -1,0 +1,537 @@
+{
+  "$schema": "../../templates/synth-spec.schema.json",
+  "meta": {
+    "name": "Subharmonicon",
+    "id": "Subharmonicon",
+    "code": "SbHm",
+    "type": "subtractive",
+    "voices": 1,
+    "description": "Moog Subharmonicon clone - polyrhythmic analog synthesizer with subharmonic oscillators",
+    "inspiration": ["Moog Subharmonicon", "Moog DFAM", "Trautonium"]
+  },
+  "voice": {
+    "oscillators": [
+      {
+        "id": "osc1",
+        "sst": "SinOscillator",
+        "features": ["level"],
+        "description": "VCO 1 - Main oscillator with 2 subharmonic generators"
+      },
+      {
+        "id": "osc2",
+        "sst": "SinOscillator",
+        "features": ["level"],
+        "description": "VCO 2 - Second oscillator with 2 subharmonic generators"
+      },
+      {
+        "id": "sub1a",
+        "sst": "SinOscillator",
+        "features": ["level"],
+        "description": "VCO1 Subharmonic 1 - Frequency divider (1-16)"
+      },
+      {
+        "id": "sub1b",
+        "sst": "SinOscillator",
+        "features": ["level"],
+        "description": "VCO1 Subharmonic 2 - Frequency divider (1-16)"
+      },
+      {
+        "id": "sub2a",
+        "sst": "SinOscillator",
+        "features": ["level"],
+        "description": "VCO2 Subharmonic 1 - Frequency divider (1-16)"
+      },
+      {
+        "id": "sub2b",
+        "sst": "SinOscillator",
+        "features": ["level"],
+        "description": "VCO2 Subharmonic 2 - Frequency divider (1-16)"
+      }
+    ],
+    "filters": [
+      {
+        "id": "filter1",
+        "sst": "VintageLadder",
+        "modes": ["LP24"],
+        "keyTracking": true,
+        "envAmount": true,
+        "description": "Classic Moog 4-pole transistor ladder filter (24dB/oct)"
+      }
+    ],
+    "envelopes": [
+      {
+        "id": "env1",
+        "type": "AD",
+        "target": "amp",
+        "description": "VCA envelope - Attack/Decay only (like original)"
+      },
+      {
+        "id": "env2",
+        "type": "AD",
+        "target": "filter",
+        "description": "VCF envelope - Attack/Decay for filter modulation"
+      }
+    ],
+    "lfos": [],
+    "modMatrix": {
+      "slots": 0,
+      "sources": ["env1", "env2", "seq1", "seq2", "rhythm1", "rhythm2", "rhythm3", "rhythm4"],
+      "destinations": ["osc1_freq", "osc2_freq", "filter_cutoff", "vca"]
+    },
+    "sequencers": [
+      {
+        "id": "seq1",
+        "steps": 4,
+        "target": "osc1_freq",
+        "description": "4-step pitch sequencer for VCO1"
+      },
+      {
+        "id": "seq2",
+        "steps": 4,
+        "target": "osc2_freq",
+        "description": "4-step pitch sequencer for VCO2"
+      }
+    ],
+    "rhythmGenerators": [
+      {
+        "id": "rhythm1",
+        "divisions": [1, 2, 3, 4, 5, 6, 7, 8],
+        "description": "Polyrhythm generator 1 - triggers SEQ1"
+      },
+      {
+        "id": "rhythm2",
+        "divisions": [1, 2, 3, 4, 5, 6, 7, 8],
+        "description": "Polyrhythm generator 2 - triggers SEQ1"
+      },
+      {
+        "id": "rhythm3",
+        "divisions": [1, 2, 3, 4, 5, 6, 7, 8],
+        "description": "Polyrhythm generator 3 - triggers SEQ2"
+      },
+      {
+        "id": "rhythm4",
+        "divisions": [1, 2, 3, 4, 5, 6, 7, 8],
+        "description": "Polyrhythm generator 4 - triggers SEQ2"
+      }
+    ]
+  },
+  "effects": [],
+  "parameters": [
+    {
+      "id": "osc1_freq",
+      "name": "VCO1 Freq",
+      "min": 20,
+      "max": 2000,
+      "default": 220,
+      "unit": "Hz",
+      "scale": "log",
+      "category": "vco1",
+      "control": "knob",
+      "description": "VCO1 base frequency"
+    },
+    {
+      "id": "osc1_level",
+      "name": "VCO1 Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.8,
+      "category": "vco1",
+      "control": "knob"
+    },
+    {
+      "id": "sub1a_div",
+      "name": "Sub1A Div",
+      "min": 1,
+      "max": 16,
+      "default": 2,
+      "scale": "discrete",
+      "category": "vco1",
+      "control": "knob",
+      "description": "VCO1 Subharmonic 1 division ratio"
+    },
+    {
+      "id": "sub1a_level",
+      "name": "Sub1A Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.5,
+      "category": "vco1",
+      "control": "knob"
+    },
+    {
+      "id": "sub1b_div",
+      "name": "Sub1B Div",
+      "min": 1,
+      "max": 16,
+      "default": 3,
+      "scale": "discrete",
+      "category": "vco1",
+      "control": "knob",
+      "description": "VCO1 Subharmonic 2 division ratio"
+    },
+    {
+      "id": "sub1b_level",
+      "name": "Sub1B Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.5,
+      "category": "vco1",
+      "control": "knob"
+    },
+    {
+      "id": "osc2_freq",
+      "name": "VCO2 Freq",
+      "min": 20,
+      "max": 2000,
+      "default": 220,
+      "unit": "Hz",
+      "scale": "log",
+      "category": "vco2",
+      "control": "knob",
+      "description": "VCO2 base frequency"
+    },
+    {
+      "id": "osc2_level",
+      "name": "VCO2 Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.8,
+      "category": "vco2",
+      "control": "knob"
+    },
+    {
+      "id": "sub2a_div",
+      "name": "Sub2A Div",
+      "min": 1,
+      "max": 16,
+      "default": 4,
+      "scale": "discrete",
+      "category": "vco2",
+      "control": "knob",
+      "description": "VCO2 Subharmonic 1 division ratio"
+    },
+    {
+      "id": "sub2a_level",
+      "name": "Sub2A Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.5,
+      "category": "vco2",
+      "control": "knob"
+    },
+    {
+      "id": "sub2b_div",
+      "name": "Sub2B Div",
+      "min": 1,
+      "max": 16,
+      "default": 5,
+      "scale": "discrete",
+      "category": "vco2",
+      "control": "knob",
+      "description": "VCO2 Subharmonic 2 division ratio"
+    },
+    {
+      "id": "sub2b_level",
+      "name": "Sub2B Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.5,
+      "category": "vco2",
+      "control": "knob"
+    },
+    {
+      "id": "filter_cutoff",
+      "name": "Cutoff",
+      "min": 20,
+      "max": 20000,
+      "default": 2000,
+      "unit": "Hz",
+      "scale": "log",
+      "category": "filter",
+      "control": "knob",
+      "cc": 74
+    },
+    {
+      "id": "filter_reso",
+      "name": "Resonance",
+      "min": 0,
+      "max": 1,
+      "default": 0.3,
+      "category": "filter",
+      "control": "knob",
+      "cc": 71
+    },
+    {
+      "id": "filter_env_amt",
+      "name": "VCF EG Amt",
+      "min": -1,
+      "max": 1,
+      "default": 0.5,
+      "category": "filter",
+      "control": "knob"
+    },
+    {
+      "id": "vcf_attack",
+      "name": "VCF Attack",
+      "min": 0.001,
+      "max": 5,
+      "default": 0.01,
+      "unit": "s",
+      "scale": "log",
+      "category": "vcf_env",
+      "control": "knob"
+    },
+    {
+      "id": "vcf_decay",
+      "name": "VCF Decay",
+      "min": 0.001,
+      "max": 5,
+      "default": 0.5,
+      "unit": "s",
+      "scale": "log",
+      "category": "vcf_env",
+      "control": "knob"
+    },
+    {
+      "id": "vca_attack",
+      "name": "VCA Attack",
+      "min": 0.001,
+      "max": 5,
+      "default": 0.01,
+      "unit": "s",
+      "scale": "log",
+      "category": "vca_env",
+      "control": "knob"
+    },
+    {
+      "id": "vca_decay",
+      "name": "VCA Decay",
+      "min": 0.001,
+      "max": 5,
+      "default": 0.5,
+      "unit": "s",
+      "scale": "log",
+      "category": "vca_env",
+      "control": "knob"
+    },
+    {
+      "id": "tempo",
+      "name": "Tempo",
+      "min": 20,
+      "max": 300,
+      "default": 120,
+      "unit": "Hz",
+      "category": "clock",
+      "control": "knob",
+      "description": "Master clock tempo in BPM"
+    },
+    {
+      "id": "rhythm1_div",
+      "name": "Rhythm 1",
+      "min": 1,
+      "max": 8,
+      "default": 1,
+      "scale": "discrete",
+      "category": "rhythm",
+      "control": "knob",
+      "description": "Rhythm generator 1 clock division"
+    },
+    {
+      "id": "rhythm2_div",
+      "name": "Rhythm 2",
+      "min": 1,
+      "max": 8,
+      "default": 2,
+      "scale": "discrete",
+      "category": "rhythm",
+      "control": "knob",
+      "description": "Rhythm generator 2 clock division"
+    },
+    {
+      "id": "rhythm3_div",
+      "name": "Rhythm 3",
+      "min": 1,
+      "max": 8,
+      "default": 3,
+      "scale": "discrete",
+      "category": "rhythm",
+      "control": "knob",
+      "description": "Rhythm generator 3 clock division"
+    },
+    {
+      "id": "rhythm4_div",
+      "name": "Rhythm 4",
+      "min": 1,
+      "max": 8,
+      "default": 4,
+      "scale": "discrete",
+      "category": "rhythm",
+      "control": "knob",
+      "description": "Rhythm generator 4 clock division"
+    },
+    {
+      "id": "seq1_step1",
+      "name": "Seq1 Step 1",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "unit": "st",
+      "scale": "discrete",
+      "category": "seq1",
+      "control": "knob",
+      "description": "Sequencer 1 step 1 pitch offset in semitones"
+    },
+    {
+      "id": "seq1_step2",
+      "name": "Seq1 Step 2",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "unit": "st",
+      "scale": "discrete",
+      "category": "seq1",
+      "control": "knob"
+    },
+    {
+      "id": "seq1_step3",
+      "name": "Seq1 Step 3",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "unit": "st",
+      "scale": "discrete",
+      "category": "seq1",
+      "control": "knob"
+    },
+    {
+      "id": "seq1_step4",
+      "name": "Seq1 Step 4",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "unit": "st",
+      "scale": "discrete",
+      "category": "seq1",
+      "control": "knob"
+    },
+    {
+      "id": "seq2_step1",
+      "name": "Seq2 Step 1",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "unit": "st",
+      "scale": "discrete",
+      "category": "seq2",
+      "control": "knob",
+      "description": "Sequencer 2 step 1 pitch offset in semitones"
+    },
+    {
+      "id": "seq2_step2",
+      "name": "Seq2 Step 2",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "unit": "st",
+      "scale": "discrete",
+      "category": "seq2",
+      "control": "knob"
+    },
+    {
+      "id": "seq2_step3",
+      "name": "Seq2 Step 3",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "unit": "st",
+      "scale": "discrete",
+      "category": "seq2",
+      "control": "knob"
+    },
+    {
+      "id": "seq2_step4",
+      "name": "Seq2 Step 4",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "unit": "st",
+      "scale": "discrete",
+      "category": "seq2",
+      "control": "knob"
+    },
+    {
+      "id": "seq_run",
+      "name": "Run",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "category": "transport",
+      "control": "toggle",
+      "description": "Start/stop sequencer"
+    },
+    {
+      "id": "master_volume",
+      "name": "Volume",
+      "min": 0,
+      "max": 1,
+      "default": 0.7,
+      "category": "master",
+      "control": "knob"
+    }
+  ],
+  "ui": {
+    "layout": [
+      {
+        "section": "vco1",
+        "label": "VCO 1",
+        "params": ["osc1_freq", "osc1_level", "sub1a_div", "sub1a_level", "sub1b_div", "sub1b_level"]
+      },
+      {
+        "section": "vco2",
+        "label": "VCO 2",
+        "params": ["osc2_freq", "osc2_level", "sub2a_div", "sub2a_level", "sub2b_div", "sub2b_level"]
+      },
+      {
+        "section": "filter",
+        "label": "VCF",
+        "params": ["filter_cutoff", "filter_reso", "filter_env_amt"]
+      },
+      {
+        "section": "vcf_env",
+        "label": "VCF EG",
+        "params": ["vcf_attack", "vcf_decay"]
+      },
+      {
+        "section": "vca_env",
+        "label": "VCA EG",
+        "params": ["vca_attack", "vca_decay"]
+      },
+      {
+        "section": "seq1",
+        "label": "Sequencer 1",
+        "params": ["seq1_step1", "seq1_step2", "seq1_step3", "seq1_step4"]
+      },
+      {
+        "section": "seq2",
+        "label": "Sequencer 2",
+        "params": ["seq2_step1", "seq2_step2", "seq2_step3", "seq2_step4"]
+      },
+      {
+        "section": "rhythm",
+        "label": "Polyrhythm",
+        "params": ["tempo", "rhythm1_div", "rhythm2_div", "rhythm3_div", "rhythm4_div"]
+      },
+      {
+        "section": "transport",
+        "label": "Transport",
+        "params": ["seq_run"]
+      },
+      {
+        "section": "master",
+        "label": "Master",
+        "params": ["master_volume"]
+      }
+    ],
+    "theme": "dark"
+  }
+}

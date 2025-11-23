@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.22)
 # PROJECT CONFIGURATION
 # TODO: Update these values for your plugin
 # ============================================================================
-project(MyPlugin VERSION 1.0.0 LANGUAGES C CXX)
+project(ModelD VERSION 1.0.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -12,8 +12,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Plugin identification
 # TODO: Update these for your plugin
-set(PLUGIN_NAME "MyPlugin")
-set(PLUGIN_CODE "MyPl")  # 4-character unique code
+set(PLUGIN_NAME "ModelD")
+set(PLUGIN_CODE "ModD")  # 4-character unique code
 set(COMPANY_NAME "Studio")
 set(COMPANY_CODE "Stud")
 
@@ -121,41 +121,19 @@ target_compile_definitions(${PROJECT_NAME}
 
 # ============================================================================
 # EMBED UI RESOURCES
-# The UI is automatically built when running cmake --build
+# Build the UI first: cd ui && npm run build
 # ============================================================================
-
-# Custom target to build the React UI
-add_custom_target(${PROJECT_NAME}_BuildUI
-    COMMAND npm run build
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/ui
-    COMMENT "Building React UI..."
-    BYPRODUCTS ${CMAKE_SOURCE_DIR}/ui/dist/index.html
-)
-
-# Only add UI resources if package.json exists (UI is set up)
-if(EXISTS "${CMAKE_SOURCE_DIR}/ui/package.json")
-    # Create a dummy file to bootstrap the binary data target
-    # The actual HTML will be built by the BuildUI target
-    if(NOT EXISTS "${CMAKE_SOURCE_DIR}/ui/dist/index.html")
-        file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/ui/dist")
-        file(WRITE "${CMAKE_SOURCE_DIR}/ui/dist/index.html" "<!-- placeholder -->")
-    endif()
-
+if(EXISTS "${CMAKE_SOURCE_DIR}/ui/dist/index.html")
     juce_add_binary_data(${PROJECT_NAME}_UIData
         HEADER_NAME UIResources.h
         NAMESPACE UIResources
         SOURCES
             ui/dist/index.html
     )
-
-    # CRITICAL: Make binary data depend on UI build
-    # This ensures UI is rebuilt before binary data is regenerated
-    add_dependencies(${PROJECT_NAME}_UIData ${PROJECT_NAME}_BuildUI)
-
     target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_UIData)
     target_compile_definitions(${PROJECT_NAME} PRIVATE HAS_UI_RESOURCES=1)
 else()
-    message(WARNING "UI not found. Run 'cd ui && npm install' first.")
+    message(WARNING "UI not built. Run 'cd ui && npm install && npm run build' first.")
 endif()
 
 # ============================================================================

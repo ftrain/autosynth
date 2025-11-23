@@ -2,18 +2,16 @@ cmake_minimum_required(VERSION 3.22)
 
 # ============================================================================
 # PROJECT CONFIGURATION
-# TODO: Update these values for your plugin
 # ============================================================================
-project(MyPlugin VERSION 1.0.0 LANGUAGES C CXX)
+project(Subharmonicon VERSION 1.0.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Plugin identification
-# TODO: Update these for your plugin
-set(PLUGIN_NAME "MyPlugin")
-set(PLUGIN_CODE "MyPl")  # 4-character unique code
+set(PLUGIN_NAME "Subharmonicon")
+set(PLUGIN_CODE "SubH")  # 4-character unique code
 set(COMPANY_NAME "Studio")
 set(COMPANY_CODE "Stud")
 
@@ -73,8 +71,6 @@ juce_add_plugin(${PROJECT_NAME}
 target_sources(${PROJECT_NAME} PRIVATE
     source/PluginProcessor.cpp
     source/PluginEditor.cpp
-    # TODO: Add your DSP files here
-    # source/dsp/Voice.cpp
 )
 
 # ============================================================================
@@ -163,7 +159,8 @@ endif()
 # ============================================================================
 if(BUILD_TESTS)
     enable_testing()
-    add_subdirectory(tests)
+    # Tests directory will be added when tests are written
+    # add_subdirectory(tests)
 endif()
 
 # ============================================================================

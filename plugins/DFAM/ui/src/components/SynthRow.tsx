@@ -1,50 +1,9 @@
 /**
- * @file SynthRow.jsx
+ * @file SynthRow.tsx
  * @brief Layout component for organizing synth controls in horizontal rows
  *
- * @description
- * SynthRow is a flexible horizontal layout component designed for arranging
- * synthesizer controls in organized rows. It supports optional labels, dividers,
- * theming, and RESPONSIVE behavior - controls automatically wrap on smaller screens.
- *
- * ## Key Feature: Responsive by Default
- * SynthRow uses CSS flexbox with wrap enabled. When the window is compressed,
- * controls automatically flow to new lines. Use `minChildWidth` to control
- * when wrapping occurs.
- *
- * ## Use Cases
- * - **Oscillator Section**: Group oscillator controls (waveform, tune, level) horizontally
- * - **Filter Bank**: Arrange filter knobs (cutoff, resonance, env amount) in a row
- * - **Envelope Controls**: Place ADSR knobs or envelope display with related controls
- * - **Mixer Channel**: Combine fader, pan, mute, solo controls in a channel strip
- * - **Effect Parameters**: Group delay time, feedback, mix knobs together
- * - **Modulation Section**: Arrange LFO with destination controls
- * - **Master Section**: Combine volume, pan, and output meters
- *
- * ## Theming
- * Each module should have a distinct visual theme. Use the `theme` prop to apply
- * predefined color schemes, or pass custom styles via `themeStyles`.
- *
- * @example
- * ```jsx
- * // Basic responsive oscillator row
- * <SynthRow label="OSCILLATOR 1" theme="amber">
- *   <SynthKnob label="WAVE" options={['SIN', 'SAW', 'SQR']} />
- *   <SynthKnob label="TUNE" min={-24} max={24} />
- *   <SynthKnob label="FINE" min={-100} max={100} />
- *   <SynthKnob label="LEVEL" min={0} max={100} />
- * </SynthRow>
- *
- * // Filter section with custom theme
- * <SynthRow
- *   label="FILTER"
- *   theme="blue"
- *   icon="〰"
- * >
- *   <SynthKnob label="CUTOFF" />
- *   <SynthKnob label="RESO" />
- * </SynthRow>
- * ```
+ * RESPONSIVE by default - controls wrap when window is compressed.
+ * Use themes to create visually distinct modules.
  */
 
 import React from 'react';
@@ -53,7 +12,7 @@ import React from 'react';
 // PREDEFINED THEMES - Each module type gets a distinct visual identity
 // =============================================================================
 
-const THEMES = {
+const THEMES: Record<string, React.CSSProperties & { titleColor?: string; titleGlow?: string }> = {
   // Default/neutral
   default: {
     background: 'transparent',
@@ -134,36 +93,39 @@ const THEMES = {
   },
 };
 
-export const SynthRow = ({
-  /** Child components to arrange horizontally */
+interface SynthRowProps {
+  children: React.ReactNode;
+  label?: string;
+  icon?: string;
+  gap?: string;
+  align?: 'flex-start' | 'center' | 'flex-end';
+  justify?: 'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around';
+  padding?: string;
+  wrap?: boolean;
+  showPanel?: boolean;
+  showDivider?: boolean;
+  theme?: 'default' | 'amber' | 'blue' | 'green' | 'magenta' | 'cyan' | 'pink' | 'orange';
+  themeStyles?: React.CSSProperties;
+  style?: React.CSSProperties;
+}
+
+export const SynthRow: React.FC<SynthRowProps> = ({
   children,
-  /** Optional label displayed above the row */
   label,
-  /** Icon/symbol to display before label */
   icon,
-  /** Gap between child elements */
-  gap = 'var(--synth-space-xl, 24px)',
-  /** Vertical alignment of children */
+  gap = '24px',
   align = 'flex-start',
-  /** Horizontal distribution of children */
   justify = 'flex-start',
-  /** Padding inside the row container */
-  padding = 'var(--synth-space-md, 12px)',
-  /** Whether children should wrap to new lines (DEFAULT: true for responsiveness) */
-  wrap = true,
-  /** Show a subtle background panel */
+  padding = '12px',
+  wrap = true, // RESPONSIVE by default
   showPanel = false,
-  /** Show divider line below the row */
   showDivider = false,
-  /** Theme name: 'amber', 'blue', 'green', 'magenta', 'cyan', 'pink', 'orange' */
   theme = 'default',
-  /** Custom theme styles (overrides theme preset) */
   themeStyles = {},
-  /** Additional inline styles */
   style = {},
 }) => {
   // Get theme or use default
-  const activeTheme = { ...THEMES[theme] || THEMES.default, ...themeStyles };
+  const activeTheme = { ...(THEMES[theme] || THEMES.default), ...themeStyles };
   const hasTheme = theme !== 'default' || Object.keys(themeStyles).length > 0;
 
   return (
@@ -171,7 +133,7 @@ export const SynthRow = ({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: label ? 'var(--synth-space-sm, 8px)' : 0,
+        gap: label ? '8px' : 0,
         // Apply theme container styles
         ...(hasTheme && {
           background: activeTheme.background,
@@ -182,16 +144,17 @@ export const SynthRow = ({
           padding: padding,
           margin: '8px',
         }),
+        ...style,
       }}
     >
       {/* Section label */}
       {label && (
         <div
           style={{
-            color: activeTheme.titleColor || 'var(--synth-text-secondary, #888)',
-            fontSize: 'var(--synth-font-size-sm, 14px)',
-            fontWeight: 'var(--synth-font-weight-bold, bold)',
-            letterSpacing: 'var(--synth-letter-spacing-wide, 3px)',
+            color: activeTheme.titleColor || '#888',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            letterSpacing: '3px',
             textShadow: activeTheme.titleGlow || 'none',
             paddingLeft: hasTheme ? '0' : padding,
             marginBottom: '8px',
@@ -214,11 +177,10 @@ export const SynthRow = ({
           padding: hasTheme ? '0' : padding,
           flexWrap: wrap ? 'wrap' : 'nowrap',
           ...(showPanel && !hasTheme && {
-            background: 'var(--synth-gradient-panel, rgba(40, 40, 40, 0.6))',
-            borderRadius: 'var(--synth-radius-md, 8px)',
-            boxShadow: 'var(--synth-shadow-sm, inset 0 1px 3px rgba(0,0,0,0.3))',
+            background: 'rgba(40, 40, 40, 0.6)',
+            borderRadius: '8px',
+            boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.3)',
           }),
-          ...style,
         }}
       >
         {children}
@@ -230,7 +192,7 @@ export const SynthRow = ({
           style={{
             height: '1px',
             background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
-            margin: `var(--synth-space-sm, 8px) ${hasTheme ? '0' : padding}`,
+            margin: `8px ${hasTheme ? '0' : padding}`,
           }}
         />
       )}

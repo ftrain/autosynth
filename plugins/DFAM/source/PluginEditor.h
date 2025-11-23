@@ -8,9 +8,6 @@
  * Communication between JUCE and React happens via the WebView bridge:
  * - JUCE -> React: Parameter updates, audio data
  * - React -> JUCE: Parameter changes, MIDI events
- *
- * IMPORTANT: This file requires <optional> for std::optional used in getResource().
- * Do NOT add #if JUCE_WEB_BROWSER guards - the WebView is always needed for UI.
  */
 
 #pragma once
@@ -64,7 +61,7 @@ private:
     /** Handle MIDI note from WebView keyboard */
     void handleNoteFromWebView(int note, float velocity, bool isNoteOn);
 
-    /** Resource provider for serving embedded HTML to WebView */
+    /** Get embedded resource for WebView */
     std::optional<juce::WebBrowserComponent::Resource> getResource(const juce::String& url);
 
     //==========================================================================
