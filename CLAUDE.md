@@ -481,6 +481,68 @@ window.onStateUpdate = (state: Record<string, number>) => { ... };
 window.onAudioData = (samples: number[]) => { ... };
 ```
 
+### WebView Black Screen Issues
+
+**CRITICAL: If you see a black screen with no UI components, check these issues:**
+
+1. **Wrong URL scheme** - Use `getResourceProviderRoot()` NOT `"resource://index.html"`
+   ```cpp
+   // WRONG - causes black screen
+   webView->goToURL("resource://index.html");
+
+   // CORRECT - works on all platforms
+   webView->goToURL(juce::WebBrowserComponent::getResourceProviderRoot());
+   ```
+
+2. **Missing `<optional>` include** - Required for `std::optional<Resource>` return type
+   ```cpp
+   // In PluginEditor.h - MUST include this
+   #include <optional>
+   ```
+
+3. **Using `#if JUCE_WEB_BROWSER` guards** - These cause problems, remove them
+   ```cpp
+   // WRONG - causes issues
+   #if JUCE_WEB_BROWSER
+   std::unique_ptr<juce::WebBrowserComponent> webView;
+   #endif
+
+   // CORRECT - no guards needed
+   std::unique_ptr<juce::WebBrowserComponent> webView;
+   ```
+
+4. **Missing `getResource()` method** - Required to serve embedded HTML
+   ```cpp
+   // In PluginEditor.h - declare this method
+   std::optional<juce::WebBrowserComponent::Resource> getResource(const juce::String& url);
+
+   // In PluginEditor.cpp - use withResourceProvider with lambda
+   auto options = juce::WebBrowserComponent::Options{}
+       .withNativeIntegrationEnabled()
+       .withResourceProvider(
+           [this](const juce::String& url) -> std::optional<juce::WebBrowserComponent::Resource>
+           {
+               return getResource(url);
+           }
+       )
+       // ... other options
+   ```
+
+5. **GTK resize workaround** - Add this at end of constructor for Linux compatibility
+   ```cpp
+   juce::Timer::callAfterDelay(100, [this]() {
+       if (webView)
+       {
+           auto bounds = getLocalBounds();
+           webView->setBounds(0, 0, 0, 0);
+           webView->setBounds(bounds);
+           repaint();
+       }
+   });
+   ```
+
+**Reference**: See `plugins/Subharmonicon/source/PluginEditor.cpp` for a working example.
+
 ## DSP Implementation Notes
 
 ### Negative Filter Envelope Amount

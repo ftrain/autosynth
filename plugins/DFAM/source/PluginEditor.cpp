@@ -1,14 +1,6 @@
 /**
  * @file PluginEditor.cpp
- * @brief WebView-based editor implementation
- *
- * JUCE 8 WebView Integration Notes:
- * =================================
- * 1. Use getResourceProviderRoot() NOT "resource://index.html"
- * 2. Use withResourceProvider() with a lambda that calls getResource()
- * 3. Do NOT use #if JUCE_WEB_BROWSER guards - they cause black screens
- * 4. Include <optional> in the header for std::optional return type
- * 5. Add Timer::callAfterDelay resize hack for GTK compatibility
+ * @brief WebView-based editor implementation for DFAM
  */
 
 #include "PluginEditor.h"
@@ -42,7 +34,6 @@ PluginEditor::PluginEditor(PluginProcessor& p)
     setResizable(true, true);
     setResizeLimits(400, 300, 1600, 1200);
 
-    // Create WebView with resource provider and native functions
     auto options = juce::WebBrowserComponent::Options{}
         .withNativeIntegrationEnabled()
         .withResourceProvider(
@@ -59,27 +50,6 @@ PluginEditor::PluginEditor(PluginProcessor& p)
                     juce::String paramId = args[0].toString();
                     float value = static_cast<float>(args[1]);
                     handleParameterFromWebView(paramId, value);
-                }
-                completion({});
-            })
-        .withNativeFunction("noteOn",
-            [this](const juce::Array<juce::var>& args, juce::WebBrowserComponent::NativeFunctionCompletion completion)
-            {
-                if (args.size() >= 2)
-                {
-                    int note = static_cast<int>(args[0]);
-                    float velocity = static_cast<float>(args[1]);
-                    handleNoteFromWebView(note, velocity, true);
-                }
-                completion({});
-            })
-        .withNativeFunction("noteOff",
-            [this](const juce::Array<juce::var>& args, juce::WebBrowserComponent::NativeFunctionCompletion completion)
-            {
-                if (args.size() >= 1)
-                {
-                    int note = static_cast<int>(args[0]);
-                    handleNoteFromWebView(note, 0.0f, false);
                 }
                 completion({});
             })
@@ -102,16 +72,12 @@ PluginEditor::PluginEditor(PluginProcessor& p)
     webView = std::make_unique<juce::WebBrowserComponent>(options);
     addAndMakeVisible(*webView);
 
-    // Load UI using JUCE 8's resource provider URL scheme
-    // IMPORTANT: Use getResourceProviderRoot() - NOT "resource://index.html"
 #ifdef HAS_UI_RESOURCES
     webView->goToURL(juce::WebBrowserComponent::getResourceProviderRoot());
 #else
-    // Development mode - load from local Vite dev server
     webView->goToURL("http://localhost:5173");
 #endif
 
-    // Setup parameter listener for automation
     paramListener = std::make_unique<ParameterListener>(*this);
     for (auto* param : processorRef.apvts.processor.getParameters())
     {
@@ -121,10 +87,9 @@ PluginEditor::PluginEditor(PluginProcessor& p)
         }
     }
 
-    // Start timer for audio visualization updates (30fps)
     startTimerHz(30);
 
-    // Force a resize after a short delay to fix GTK WebView sizing issues
+    // Force a resize after a short delay to fix GTK WebView sizing
     juce::Timer::callAfterDelay(100, [this]() {
         if (webView)
         {
@@ -155,12 +120,10 @@ std::optional<juce::WebBrowserComponent::Resource> PluginEditor::getResource(con
 #ifdef HAS_UI_RESOURCES
     juce::String path = url;
 
-    // Remove the JUCE resource provider root if present
     auto root = juce::WebBrowserComponent::getResourceProviderRoot();
     if (path.startsWith(root))
         path = path.substring(root.length());
 
-    // Handle root path - serve index.html
     if (path.isEmpty() || path == "/" || path == "index.html")
     {
         juce::WebBrowserComponent::Resource resource;
@@ -263,6 +226,5 @@ void PluginEditor::handleParameterFromWebView(const juce::String& paramId, float
 
 void PluginEditor::handleNoteFromWebView(int note, float velocity, bool isNoteOn)
 {
-    // TODO: Implement MIDI injection if needed for on-screen keyboard
     juce::ignoreUnused(note, velocity, isNoteOn);
 }
