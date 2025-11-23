@@ -23,6 +23,9 @@ export default defineConfig({
     cssCodeSplit: false,
     rollupOptions: {
       output: {
+        // IMPORTANT: Use IIFE format, not ES modules
+        // ES modules use import() which doesn't work with inline scripts
+        format: 'iife',
         inlineDynamicImports: true,
       },
     },

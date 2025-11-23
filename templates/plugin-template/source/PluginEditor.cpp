@@ -22,10 +22,22 @@ PluginEditor::PluginEditor(PluginProcessor& p)
     setResizeLimits(400, 300, 1600, 1200);
 
 #if JUCE_WEB_BROWSER
-    // Create WebView with native functions registered in Options
+    // Build WebView options with resource provider
+    // IMPORTANT: Use withResourceProvider() callback pattern - this is the ONLY approach
+    // that works reliably across all platforms (Linux WebKit, macOS WebKit, Windows WebView2)
+    //
+    // URL schemes by platform:
+    //   Linux:   juce://juce.backend/
+    //   Windows: https://juce.backend/
+    //   macOS:   juce://juce.backend/
     auto options = juce::WebBrowserComponent::Options{}
-        .withBackend(juce::WebBrowserComponent::Options::Backend::webview2)
         .withNativeIntegrationEnabled()
+        .withResourceProvider(
+            [this](const juce::String& url) -> std::optional<juce::WebBrowserComponent::Resource>
+            {
+                return getResource(url);
+            }
+        )
         .withNativeFunction("setParameter",
             [this](const juce::Array<juce::var>& args, juce::WebBrowserComponent::NativeFunctionCompletion completion)
             {
@@ -64,37 +76,39 @@ PluginEditor::PluginEditor(PluginProcessor& p)
                 sendAllParametersToWebView();
                 completion({});
             })
-        .withResourceProvider([](const juce::String& url)
-            -> std::optional<juce::WebBrowserComponent::Resource>
-        {
-            // Serve embedded UI resources
-            #ifdef HAS_UI_RESOURCES
-            if (url.contains("index.html") || url == "/" || url.isEmpty())
+        .withNativeFunction("consoleLog",
+            [](const juce::Array<juce::var>& args, juce::WebBrowserComponent::NativeFunctionCompletion completion)
             {
-                auto data = UIResources::index_html;
-                auto size = UIResources::index_htmlSize;
-                return juce::WebBrowserComponent::Resource{
-                    std::vector<std::byte>(
-                        reinterpret_cast<const std::byte*>(data),
-                        reinterpret_cast<const std::byte*>(data) + size
-                    ),
-                    "text/html"
-                };
-            }
-            #endif
-            return std::nullopt;
-        });
+                juce::String message;
+                for (const auto& arg : args)
+                    message += arg.toString() + " ";
+                DBG("WebView console: " + message);
+                completion({});
+            });
 
     webView = std::make_unique<juce::WebBrowserComponent>(options);
     addAndMakeVisible(*webView);
 
-    // Load UI
-    #ifdef HAS_UI_RESOURCES
-    webView->goToURL("resource://index.html");
-    #else
-    // Development mode - load from local dev server
+    // Navigate to the resource provider root
+    // IMPORTANT: Do NOT use custom URLs like "resource://", "file://", or "data:text/html"
+    // Only getResourceProviderRoot() works reliably on all platforms
+#ifdef HAS_UI_RESOURCES
+    webView->goToURL(juce::WebBrowserComponent::getResourceProviderRoot());
+#else
+    // Development mode - load from Vite dev server
     webView->goToURL("http://localhost:5173");
-    #endif
+#endif
+
+    // Force a resize after a short delay to fix GTK WebView sizing on Linux
+    juce::Timer::callAfterDelay(100, [this]() {
+        if (webView)
+        {
+            auto bounds = getLocalBounds();
+            webView->setBounds(0, 0, 0, 0);  // Reset
+            webView->setBounds(bounds);       // Set correct size
+            repaint();
+        }
+    });
 #endif
 
     // Setup parameter listener
@@ -239,4 +253,40 @@ void PluginEditor::handleNoteFromWebView(int note, float velocity, bool isNoteOn
 {
     // TODO: Implement MIDI injection if needed for on-screen keyboard
     juce::ignoreUnused(note, velocity, isNoteOn);
+}
+
+std::optional<juce::WebBrowserComponent::Resource> PluginEditor::getResource(const juce::String& url)
+{
+    DBG("Resource request: " + url);
+
+#ifdef HAS_UI_RESOURCES
+    // Parse the URL path
+    juce::String path = url;
+
+    // Remove the JUCE resource provider root if present
+    // On Linux: juce://juce.backend/
+    // On Windows: https://juce.backend/
+    auto root = juce::WebBrowserComponent::getResourceProviderRoot();
+    if (path.startsWith(root))
+        path = path.substring(root.length());
+
+    // Handle root path - serve index.html
+    if (path.isEmpty() || path == "/" || path == "index.html")
+    {
+        juce::WebBrowserComponent::Resource resource;
+        resource.data = std::vector<std::byte>(
+            reinterpret_cast<const std::byte*>(UIResources::index_html),
+            reinterpret_cast<const std::byte*>(UIResources::index_html) + UIResources::index_htmlSize
+        );
+        resource.mimeType = "text/html";
+        DBG("Serving index.html, size: " + juce::String(UIResources::index_htmlSize));
+        return resource;
+    }
+
+    DBG("Resource not found: " + path);
+#else
+    juce::ignoreUnused(url);
+#endif
+
+    return std::nullopt;
 }

@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <optional>
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_gui_extra/juce_gui_extra.h>
 #include "PluginProcessor.h"
@@ -59,6 +60,9 @@ private:
 
     /** Handle MIDI note from WebView keyboard */
     void handleNoteFromWebView(int note, float velocity, bool isNoteOn);
+
+    /** Resource provider for serving embedded HTML to WebView */
+    std::optional<juce::WebBrowserComponent::Resource> getResource(const juce::String& url);
 
     //==========================================================================
     // Members

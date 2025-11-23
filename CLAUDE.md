@@ -481,6 +481,126 @@ window.onStateUpdate = (state: Record<string, number>) => { ... };
 window.onAudioData = (samples: number[]) => { ... };
 ```
 
+### CRITICAL: Resource Provider Pattern for Embedded HTML
+
+**The ONLY reliable way to load embedded HTML in WebView is using `withResourceProvider()` callback with `getResourceProviderRoot()`.**
+
+Other approaches that **DO NOT WORK** reliably:
+- `data:text/html;base64,...` URLs (white screen on Linux WebKit)
+- `resource://index.html` custom URL scheme (white screen)
+- `file://` URLs (security restrictions)
+- Custom origins like `http://plugin.local` (fails on Linux)
+
+**The working pattern in PluginEditor.cpp:**
+
+```cpp
+// Build WebView options with resource provider
+// URL schemes by platform:
+//   Linux:   juce://juce.backend/
+//   Windows: https://juce.backend/
+//   macOS:   juce://juce.backend/
+auto options = juce::WebBrowserComponent::Options{}
+    .withNativeIntegrationEnabled()
+    .withResourceProvider(
+        [this](const juce::String& url) -> std::optional<juce::WebBrowserComponent::Resource>
+        {
+            return getResource(url);
+        }
+    )
+    // ... native functions ...
+
+webView = std::make_unique<juce::WebBrowserComponent>(options);
+addAndMakeVisible(*webView);
+
+// CRITICAL: Use getResourceProviderRoot(), NOT a custom URL
+#ifdef HAS_UI_RESOURCES
+    webView->goToURL(juce::WebBrowserComponent::getResourceProviderRoot());
+#else
+    webView->goToURL("http://localhost:5173");  // Dev server
+#endif
+```
+
+**The getResource() implementation:**
+
+```cpp
+std::optional<juce::WebBrowserComponent::Resource> PluginEditor::getResource(const juce::String& url)
+{
+    DBG("Resource request: " + url);
+
+#ifdef HAS_UI_RESOURCES
+    juce::String path = url;
+    auto root = juce::WebBrowserComponent::getResourceProviderRoot();
+    if (path.startsWith(root))
+        path = path.substring(root.length());
+
+    if (path.isEmpty() || path == "/" || path == "index.html")
+    {
+        juce::WebBrowserComponent::Resource resource;
+        resource.data = std::vector<std::byte>(
+            reinterpret_cast<const std::byte*>(UIResources::index_html),
+            reinterpret_cast<const std::byte*>(UIResources::index_html) + UIResources::index_htmlSize
+        );
+        resource.mimeType = "text/html";
+        return resource;
+    }
+#else
+    juce::ignoreUnused(url);
+#endif
+    return std::nullopt;
+}
+```
+
+### CRITICAL: DOMContentLoaded in main.tsx
+
+When using `vite-plugin-singlefile` with IIFE format, the inline script executes in `<head>` **before** the `<body>` is parsed. This means `document.getElementById('root')` returns `null` and React cannot mount.
+
+**The fix - ALWAYS wrap React mounting in DOMContentLoaded handler:**
+
+```tsx
+// ui/src/main.tsx
+const mount = () => {
+  const root = document.getElementById('root');
+  if (root) {
+    ReactDOM.createRoot(root).render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>,
+    );
+  } else {
+    console.error('Could not find #root element');
+  }
+};
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', mount);
+} else {
+  mount();
+}
+```
+
+### CRITICAL: Vite IIFE Format
+
+The Vite config **MUST** use IIFE format, not ES modules:
+
+```typescript
+// ui/vite.config.ts
+rollupOptions: {
+  output: {
+    format: 'iife',  // NOT 'es' - ES modules don't work inline
+    inlineDynamicImports: true,
+  },
+},
+```
+
+### Troubleshooting WebView Issues
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| White screen | Wrong URL scheme or resource provider | Use `getResourceProviderRoot()` |
+| Black screen | CSS loads, JS doesn't execute | Add DOMContentLoaded wrapper |
+| React not mounting | Script runs before `#root` exists | Add DOMContentLoaded wrapper |
+| Nothing loads | `HAS_UI_RESOURCES` not defined | Check CMakeLists.txt |
+
 ## DSP Implementation Notes
 
 ### Negative Filter Envelope Amount
