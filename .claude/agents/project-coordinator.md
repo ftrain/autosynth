@@ -62,6 +62,7 @@ You coordinate these specialist agents:
 Run these in parallel (both read from same spec):
 - `dsp-engineer`: Add custom DSP logic to generated Voice.h
 - `ui-developer`: Build UI using generated parameter types
+  - **CRITICAL**: UI developer MUST first review all components in `templates/plugin-template/ui/src/components/` before writing any layout code
 
 ### Phase 4: Validation Gates
 Before proceeding, verify:

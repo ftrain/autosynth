@@ -82,7 +82,7 @@ body {
   background-color: var(--synth-bg-primary);
   color: var(--synth-text-primary);
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: auto;  /* Allow vertical scrolling if needed */
   user-select: none;
 }
 
@@ -92,7 +92,6 @@ body {
   min-height: 100vh;
   padding: var(--synth-spacing-md);
   gap: var(--synth-spacing-md);
-  padding-bottom: var(--synth-spacing-xl);
 }
 
 /* Header */

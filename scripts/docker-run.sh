@@ -182,9 +182,10 @@ run_synth() {
     '
 
     if [ "$PLATFORM" = "linux" ]; then
-        docker-compose run --rm autosynth claude $unsafe --output-format stream-json -p "$full_prompt" | jq -rj "$jq_filter"
+        docker-compose run --rm -T autosynth claude $unsafe --verbose --output-format stream-json -p "$full_prompt" | jq -rj "$jq_filter"
     else
-        docker run -it --rm \
+        # Use -i without -t since we're piping output (not interactive TTY)
+        docker run -i --rm \
             --name autosynth-dev \
             -v "$PROJECT_DIR:/workspace" \
             -v "$PROJECT_DIR/.docker-state/claude:/home/ubuntu/.claude" \
@@ -192,7 +193,7 @@ run_synth() {
             --security-opt seccomp=unconfined \
             -w /workspace \
             autosynth-dev:latest \
-            claude $unsafe --output-format stream-json -p "$full_prompt" | jq -rj "$jq_filter"
+            claude $unsafe --verbose --output-format stream-json -p "$full_prompt" | jq -rj "$jq_filter"
     fi
     echo  # Final newline
 }

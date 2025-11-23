@@ -121,19 +121,41 @@ target_compile_definitions(${PROJECT_NAME}
 
 # ============================================================================
 # EMBED UI RESOURCES
-# Build the UI first: cd ui && npm run build
+# The UI is automatically built when running cmake --build
 # ============================================================================
-if(EXISTS "${CMAKE_SOURCE_DIR}/ui/dist/index.html")
+
+# Custom target to build the React UI
+add_custom_target(${PROJECT_NAME}_BuildUI
+    COMMAND npm run build
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/ui
+    COMMENT "Building React UI..."
+    BYPRODUCTS ${CMAKE_SOURCE_DIR}/ui/dist/index.html
+)
+
+# Only add UI resources if package.json exists (UI is set up)
+if(EXISTS "${CMAKE_SOURCE_DIR}/ui/package.json")
+    # Create a dummy file to bootstrap the binary data target
+    # The actual HTML will be built by the BuildUI target
+    if(NOT EXISTS "${CMAKE_SOURCE_DIR}/ui/dist/index.html")
+        file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/ui/dist")
+        file(WRITE "${CMAKE_SOURCE_DIR}/ui/dist/index.html" "<!-- placeholder -->")
+    endif()
+
     juce_add_binary_data(${PROJECT_NAME}_UIData
         HEADER_NAME UIResources.h
         NAMESPACE UIResources
         SOURCES
             ui/dist/index.html
     )
+
+    # CRITICAL: Make binary data depend on UI build
+    # This ensures UI is rebuilt before binary data is regenerated
+    add_dependencies(${PROJECT_NAME}_UIData ${PROJECT_NAME}_BuildUI)
+
     target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_UIData)
     target_compile_definitions(${PROJECT_NAME} PRIVATE HAS_UI_RESOURCES=1)
 else()
-    message(WARNING "UI not built. Run 'cd ui && npm install && npm run build' first.")
+    message(WARNING "UI not found. Run 'cd ui && npm install' first.")
 endif()
 
 # ============================================================================
