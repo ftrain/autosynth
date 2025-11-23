@@ -122,26 +122,78 @@ run_claude() {
     fi
 }
 
+run_synth() {
+    local unsafe=""
+    local prompt=""
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --unsafe)
+                unsafe="--dangerously-skip-permissions"
+                shift
+                ;;
+            *)
+                prompt="$1"
+                shift
+                ;;
+        esac
+    done
+
+    if [ -z "$prompt" ]; then
+        error "Usage: $0 synth [--unsafe] \"Your synth description\""
+        error "Example: $0 synth --unsafe \"A clone of a Subharmonicon from Moog\""
+        exit 1
+    fi
+
+    info "Creating synth: $prompt"
+    cd "$PROJECT_DIR"
+
+    # Create persistent directory for Claude auth
+    mkdir -p "$PROJECT_DIR/.docker-state/claude"
+
+    # Build the full prompt for the project-coordinator
+    local full_prompt="@project-coordinator Build me a synthesizer: $prompt"
+
+    if [ "$PLATFORM" = "linux" ]; then
+        docker-compose run --rm autosynth claude $unsafe -p "$full_prompt"
+    else
+        docker run -it --rm \
+            --name autosynth-dev \
+            -v "$PROJECT_DIR:/workspace" \
+            -v "$PROJECT_DIR/docker/claude-settings.json:/home/ubuntu/.claude/settings.json:ro" \
+            -v "$PROJECT_DIR/.docker-state/claude:/home/ubuntu/.claude-code" \
+            -e DISPLAY=host.docker.internal:0 \
+            --security-opt seccomp=unconfined \
+            -w /workspace \
+            autosynth-dev:latest \
+            claude $unsafe -p "$full_prompt"
+    fi
+}
+
 show_help() {
     echo "AutoSynth Docker Development Environment"
     echo ""
     echo "Usage: $0 [command]"
     echo ""
     echo "Commands:"
-    echo "  build      Build the Docker image"
-    echo "  run        Start a bash shell in the container"
-    echo "  claude     Start the container and run Claude Code"
-    echo "  test-x11   Test X11 display"
-    echo "  test-audio Test audio output"
-    echo "  help       Show this help message"
+    echo "  build                Build the Docker image"
+    echo "  run                  Start a bash shell in the container"
+    echo "  claude               Start the container and run Claude Code"
+    echo "  synth [--unsafe] \"prompt\"  Create a synth from a description"
+    echo "  test-x11             Test X11 display"
+    echo "  test-audio           Test audio output"
+    echo "  help                 Show this help message"
     echo ""
     echo "Claude Code will prompt for OAuth login on first run (Pro/Max)."
     echo "Login persists in .docker-state/claude/"
     echo ""
     echo "Examples:"
-    echo "  $0 build           # Build the image first"
-    echo "  $0 run             # Start interactive shell"
-    echo "  $0 claude          # Start Claude Code directly"
+    echo "  $0 build                                    # Build the image first"
+    echo "  $0 run                                      # Start interactive shell"
+    echo "  $0 claude                                   # Start Claude Code directly"
+    echo "  $0 synth \"A Minimoog Model D clone\"        # Create a synth"
+    echo "  $0 synth --unsafe \"A Moog Subharmonicon\"   # Create without prompts"
 }
 
 test_x11() {
@@ -184,6 +236,12 @@ case "${1:-help}" in
         [ "$PLATFORM" = "linux" ] && setup_linux
         [ "$PLATFORM" = "macos" ] && setup_macos
         run_claude
+        ;;
+    synth)
+        [ "$PLATFORM" = "linux" ] && setup_linux
+        [ "$PLATFORM" = "macos" ] && setup_macos
+        shift  # Remove 'synth' from args
+        run_synth "$@"
         ;;
     test-x11)
         [ "$PLATFORM" = "linux" ] && setup_linux
