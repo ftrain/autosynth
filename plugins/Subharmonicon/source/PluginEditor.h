@@ -1,0 +1,61 @@
+/**
+ * @file PluginEditor.h
+ * @brief WebView-based editor for Subharmonicon UI
+ */
+
+#pragma once
+
+#include <optional>
+#include <juce_audio_processors/juce_audio_processors.h>
+#include <juce_gui_extra/juce_gui_extra.h>
+#include "PluginProcessor.h"
+
+/**
+ * @brief WebView-based plugin editor
+ */
+class PluginEditor : public juce::AudioProcessorEditor,
+                     private juce::Timer
+{
+public:
+    explicit PluginEditor(PluginProcessor& processor);
+    ~PluginEditor() override;
+
+    void paint(juce::Graphics& g) override;
+    void resized() override;
+
+private:
+    void timerCallback() override;
+
+    void sendParameterToWebView(const juce::String& paramId, float value);
+    void sendAllParametersToWebView();
+    void sendAudioDataToWebView();
+    void sendSequencerStateToWebView();
+    void handleParameterFromWebView(const juce::String& paramId, float value);
+
+    // Resource provider for serving embedded HTML
+    std::optional<juce::WebBrowserComponent::Resource> getResource(const juce::String& url);
+
+    PluginProcessor& processorRef;
+
+    std::unique_ptr<juce::WebBrowserComponent> webView;
+
+    struct ParameterListener : public juce::AudioProcessorValueTreeState::Listener
+    {
+        PluginEditor& editor;
+        explicit ParameterListener(PluginEditor& e) : editor(e) {}
+        void parameterChanged(const juce::String& paramId, float newValue) override
+        {
+            editor.sendParameterToWebView(paramId, newValue);
+        }
+    };
+    std::unique_ptr<ParameterListener> paramListener;
+
+    bool ignoreParameterCallbacks = false;
+
+    juce::File uiDistFolder;
+
+    static constexpr int DEFAULT_WIDTH = 1000;
+    static constexpr int DEFAULT_HEIGHT = 700;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginEditor)
+};
