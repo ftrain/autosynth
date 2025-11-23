@@ -122,26 +122,92 @@ run_claude() {
     fi
 }
 
+run_synth() {
+    local unsafe_flag=""
+    local synth_description=""
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --unsafe)
+                unsafe_flag="--dangerously-skip-permissions"
+                shift
+                ;;
+            *)
+                synth_description="$1"
+                shift
+                ;;
+        esac
+    done
+
+    if [ -z "$synth_description" ]; then
+        error "Please provide a synth description"
+        echo "Usage: $0 synth [--unsafe] \"Description of the synth you want to build\""
+        echo ""
+        echo "Examples:"
+        echo "  $0 synth \"A clone of the Moog Mother 32\""
+        echo "  $0 synth --unsafe \"A TB-303 acid bass synth with built-in distortion\""
+        exit 1
+    fi
+
+    info "Starting synth build: $synth_description"
+    if [ -n "$unsafe_flag" ]; then
+        warn "Running with --dangerously-skip-permissions (no permission prompts)"
+    fi
+
+    cd "$PROJECT_DIR"
+
+    # Create persistent directory for Claude auth
+    mkdir -p "$PROJECT_DIR/.docker-state/claude"
+
+    # Build the prompt for Claude
+    local prompt="@project-coordinator Build me a synthesizer: $synth_description"
+
+    if [ "$PLATFORM" = "linux" ]; then
+        docker-compose run --rm autosynth claude $unsafe_flag --print "$prompt"
+    else
+        docker run -it --rm \
+            --name autosynth-dev \
+            -v "$PROJECT_DIR:/workspace" \
+            -v "$PROJECT_DIR/docker/claude-settings.json:/home/ubuntu/.claude/settings.json:ro" \
+            -v "$PROJECT_DIR/.docker-state/claude:/home/ubuntu/.claude-code" \
+            -e DISPLAY=host.docker.internal:0 \
+            --security-opt seccomp=unconfined \
+            -w /workspace \
+            autosynth-dev:latest \
+            claude $unsafe_flag --print "$prompt"
+    fi
+}
+
 show_help() {
     echo "AutoSynth Docker Development Environment"
     echo ""
     echo "Usage: $0 [command]"
     echo ""
     echo "Commands:"
-    echo "  build      Build the Docker image"
-    echo "  run        Start a bash shell in the container"
-    echo "  claude     Start the container and run Claude Code"
-    echo "  test-x11   Test X11 display"
-    echo "  test-audio Test audio output"
-    echo "  help       Show this help message"
+    echo "  build                        Build the Docker image"
+    echo "  run                          Start a bash shell in the container"
+    echo "  claude                       Start the container and run Claude Code"
+    echo "  synth [--unsafe] \"desc\"      Build a synth with Claude Code"
+    echo "  test-x11                     Test X11 display"
+    echo "  test-audio                   Test audio output"
+    echo "  help                         Show this help message"
+    echo ""
+    echo "Synth Command:"
+    echo "  The 'synth' command invokes Claude Code with the project-coordinator agent"
+    echo "  to build a synthesizer based on your description."
+    echo ""
+    echo "  --unsafe    Skip permission prompts (--dangerously-skip-permissions)"
     echo ""
     echo "Claude Code will prompt for OAuth login on first run (Pro/Max)."
     echo "Login persists in .docker-state/claude/"
     echo ""
     echo "Examples:"
-    echo "  $0 build           # Build the image first"
-    echo "  $0 run             # Start interactive shell"
-    echo "  $0 claude          # Start Claude Code directly"
+    echo "  $0 build                                    # Build the image first"
+    echo "  $0 run                                      # Start interactive shell"
+    echo "  $0 claude                                   # Start Claude Code directly"
+    echo "  $0 synth \"A Moog Mother 32 clone\"           # Build a synth (with prompts)"
+    echo "  $0 synth --unsafe \"A TB-303 acid synth\"     # Build without permission prompts"
 }
 
 test_x11() {
@@ -184,6 +250,12 @@ case "${1:-help}" in
         [ "$PLATFORM" = "linux" ] && setup_linux
         [ "$PLATFORM" = "macos" ] && setup_macos
         run_claude
+        ;;
+    synth)
+        [ "$PLATFORM" = "linux" ] && setup_linux
+        [ "$PLATFORM" = "macos" ] && setup_macos
+        shift  # Remove 'synth' from args
+        run_synth "$@"
         ;;
     test-x11)
         [ "$PLATFORM" = "linux" ] && setup_linux
