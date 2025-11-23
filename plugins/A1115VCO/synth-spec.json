@@ -1,0 +1,61 @@
+{
+  "$schema": "../../templates/synth-spec.schema.json",
+  "meta": {
+    "name": "A111-5 VCO",
+    "id": "A1115VCO",
+    "code": "A115",
+    "type": "subtractive",
+    "voices": 4,
+    "description": "Doepfer A-111-5 High-End VCO clone with multiple waveforms, sub-oscillator, hard sync, linear FM, and PWM",
+    "inspiration": ["Doepfer A-111-5"]
+  },
+  "voice": {
+    "oscillators": [
+      {
+        "id": "osc1",
+        "sst": "DPWSawOscillator",
+        "features": ["waveform", "tune", "fine", "pwm"]
+      },
+      {
+        "id": "sub",
+        "sst": "SinOscillator",
+        "features": ["level"]
+      }
+    ],
+    "filters": [],
+    "envelopes": [
+      { "id": "amp_env", "type": "ADSR", "target": "amp" }
+    ],
+    "lfos": [],
+    "modMatrix": {
+      "slots": 0,
+      "sources": [],
+      "destinations": []
+    }
+  },
+  "effects": [],
+  "parameters": [
+    { "id": "osc_waveform", "name": "Waveform", "min": 0, "max": 3, "default": 0, "step": 1, "category": "oscillator", "control": "knob" },
+    { "id": "osc_tune", "name": "Tune", "min": -24, "max": 24, "default": 0, "step": 1, "unit": "st", "category": "oscillator", "control": "knob" },
+    { "id": "osc_fine", "name": "Fine", "min": -100, "max": 100, "default": 0, "unit": "cents", "category": "oscillator", "control": "knob" },
+    { "id": "pulse_width", "name": "Pulse Width", "min": 0, "max": 1, "default": 0.5, "category": "oscillator", "control": "knob" },
+    { "id": "sub_level", "name": "Sub Level", "min": 0, "max": 1, "default": 0, "category": "sub", "control": "knob" },
+    { "id": "sync_enable", "name": "Sync", "min": 0, "max": 1, "default": 0, "step": 1, "category": "modulation", "control": "toggle" },
+    { "id": "fm_amount", "name": "FM Amount", "min": 0, "max": 1, "default": 0, "category": "modulation", "control": "knob" },
+    { "id": "fm_ratio", "name": "FM Ratio", "min": 0.5, "max": 8, "default": 1, "category": "modulation", "control": "knob" },
+    { "id": "amp_attack", "name": "Attack", "min": 0.001, "max": 5, "default": 0.01, "unit": "s", "category": "amp", "control": "knob" },
+    { "id": "amp_decay", "name": "Decay", "min": 0.001, "max": 5, "default": 0.1, "unit": "s", "category": "amp", "control": "knob" },
+    { "id": "amp_sustain", "name": "Sustain", "min": 0, "max": 1, "default": 0.7, "category": "amp", "control": "knob" },
+    { "id": "amp_release", "name": "Release", "min": 0.001, "max": 5, "default": 0.3, "unit": "s", "category": "amp", "control": "knob" },
+    { "id": "master_level", "name": "Level", "min": 0, "max": 1, "default": 0.8, "category": "master", "control": "knob" }
+  ],
+  "ui": {
+    "layout": [
+      { "section": "oscillator", "label": "Oscillator", "params": ["osc_waveform", "osc_tune", "osc_fine", "pulse_width"] },
+      { "section": "sub", "label": "Sub", "params": ["sub_level"] },
+      { "section": "modulation", "label": "Modulation", "params": ["sync_enable", "fm_amount", "fm_ratio"] },
+      { "section": "amp", "label": "Amp", "params": ["amp_attack", "amp_decay", "amp_sustain", "amp_release", "master_level"] }
+    ],
+    "theme": "dark"
+  }
+}

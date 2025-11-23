@@ -176,6 +176,73 @@ For every project, ensure:
 4. **BUILD.md**: Build and deployment instructions
 5. **CHANGELOG.md**: Version history
 
+## UI Layout Guidelines (CRITICAL)
+
+**Use the component library for ALL layout. No custom CSS layouts.**
+
+### Layout Rules
+
+1. **Use `SynthRow` component** for grouping related controls
+   - Each module/section of the synth goes in its own `SynthRow`
+   - SynthRow handles horizontal layout automatically
+
+2. **Simple left-to-right flow**
+   - Components flow left to right within each row
+   - Don't attempt complex grid layouts
+   - Don't use CSS Grid or Flexbox directly - the components handle it
+
+3. **Don't overload rows**
+   - Keep 3-6 controls per row maximum
+   - If a section has many controls, split into multiple rows
+   - Scrolling is fine - we can always scroll
+
+4. **Bundle by function**
+   - OSCILLATOR section = one or more SynthRows
+   - FILTER section = one or more SynthRows
+   - ENVELOPE section = one or more SynthRows
+   - etc.
+
+### Example Structure
+
+```tsx
+<div className="synth-panel">
+  {/* Oscillator Section */}
+  <SynthRow label="OSCILLATOR">
+    <SynthKnob param="osc_waveform" />
+    <SynthKnob param="osc_tune" />
+    <SynthKnob param="osc_fine" />
+  </SynthRow>
+
+  {/* Filter Section */}
+  <SynthRow label="FILTER">
+    <SynthKnob param="filter_cutoff" />
+    <SynthKnob param="filter_resonance" />
+  </SynthRow>
+
+  {/* Amp Envelope */}
+  <SynthRow label="AMP">
+    <SynthADSR prefix="amp" />
+    <SynthKnob param="master_level" />
+  </SynthRow>
+</div>
+```
+
+### What NOT to Do
+
+- ❌ Don't create custom layout components
+- ❌ Don't use CSS Grid or complex Flexbox
+- ❌ Don't try to create multi-column layouts
+- ❌ Don't pack too many controls in one row
+- ❌ Don't fight the component library's default styling
+
+### What TO Do
+
+- ✅ Use SynthRow for every group of controls
+- ✅ Keep it simple - left to right
+- ✅ Use default component styling
+- ✅ Let the page scroll if needed
+- ✅ Label each SynthRow clearly
+
 ## Communication Style
 
 - Be concise but thorough

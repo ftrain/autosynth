@@ -1,0 +1,69 @@
+{
+  "$schema": "../../templates/synth-spec.schema.json",
+  "meta": {
+    "name": "FM Drone",
+    "id": "FMDrone",
+    "code": "FmDr",
+    "type": "fm",
+    "voices": 4,
+    "description": "Minimalist 2-operator FM synth for drones and ambient textures",
+    "inspiration": ["Yamaha DX7", "Ambient/Drone music"]
+  },
+  "voice": {
+    "oscillators": [
+      {
+        "id": "osc1",
+        "sst": "SinOscillator",
+        "features": ["fm"]
+      },
+      {
+        "id": "osc2",
+        "sst": "SinOscillator",
+        "features": ["fm"]
+      }
+    ],
+    "filters": [],
+    "envelopes": [
+      { "id": "env1", "type": "ADSR", "target": "amp" },
+      { "id": "env2", "type": "ADSR", "target": "mod" }
+    ],
+    "lfos": [
+      {
+        "id": "lfo1",
+        "shapes": ["sine"],
+        "sync": false,
+        "bipolar": true,
+        "defaultTarget": "drift"
+      }
+    ]
+  },
+  "parameters": [
+    { "id": "carrier_ratio", "name": "Carrier Ratio", "min": 0.5, "max": 8, "default": 1, "category": "carrier", "control": "knob" },
+    { "id": "carrier_level", "name": "Carrier Level", "min": 0, "max": 1, "default": 0.8, "category": "carrier", "control": "knob" },
+    { "id": "mod_ratio", "name": "Mod Ratio", "min": 0.5, "max": 16, "default": 2, "category": "modulator", "control": "knob" },
+    { "id": "mod_depth", "name": "Mod Depth", "min": 0, "max": 1, "default": 0.3, "category": "modulator", "control": "knob" },
+    { "id": "mod_feedback", "name": "Feedback", "min": 0, "max": 1, "default": 0, "category": "modulator", "control": "knob" },
+    { "id": "mod_attack", "name": "Attack", "min": 0.001, "max": 30, "default": 5, "unit": "s", "category": "mod_env", "control": "adsr" },
+    { "id": "mod_decay", "name": "Decay", "min": 0.001, "max": 30, "default": 10, "unit": "s", "category": "mod_env", "control": "adsr" },
+    { "id": "mod_sustain", "name": "Sustain", "min": 0, "max": 1, "default": 0.7, "category": "mod_env", "control": "adsr" },
+    { "id": "mod_release", "name": "Release", "min": 0.001, "max": 30, "default": 8, "unit": "s", "category": "mod_env", "control": "adsr" },
+    { "id": "amp_attack", "name": "Attack", "min": 0.001, "max": 30, "default": 3, "unit": "s", "category": "amp_env", "control": "adsr" },
+    { "id": "amp_decay", "name": "Decay", "min": 0.001, "max": 30, "default": 5, "unit": "s", "category": "amp_env", "control": "adsr" },
+    { "id": "amp_sustain", "name": "Sustain", "min": 0, "max": 1, "default": 0.9, "category": "amp_env", "control": "adsr" },
+    { "id": "amp_release", "name": "Release", "min": 0.001, "max": 30, "default": 10, "unit": "s", "category": "amp_env", "control": "adsr" },
+    { "id": "drift_rate", "name": "Drift Rate", "min": 0.01, "max": 2, "default": 0.1, "unit": "Hz", "category": "drift", "control": "knob" },
+    { "id": "drift_amount", "name": "Drift Amount", "min": 0, "max": 1, "default": 0.2, "category": "drift", "control": "knob" },
+    { "id": "master_level", "name": "Master Level", "min": 0, "max": 1, "default": 0.7, "category": "output", "control": "knob" }
+  ],
+  "ui": {
+    "layout": [
+      { "section": "carrier", "label": "Carrier", "params": ["carrier_ratio", "carrier_level"] },
+      { "section": "modulator", "label": "Modulator", "params": ["mod_ratio", "mod_depth", "mod_feedback"] },
+      { "section": "mod_env", "label": "FM Envelope", "params": ["mod_attack", "mod_decay", "mod_sustain", "mod_release"] },
+      { "section": "amp_env", "label": "Amp Envelope", "params": ["amp_attack", "amp_decay", "amp_sustain", "amp_release"] },
+      { "section": "drift", "label": "Drift", "params": ["drift_rate", "drift_amount"] },
+      { "section": "output", "label": "Output", "params": ["master_level"] }
+    ],
+    "theme": "dark"
+  }
+}
