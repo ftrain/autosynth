@@ -354,7 +354,67 @@ export function useSynthParameters() {
 
 ## Layout Patterns
 
-**Use CSS Grid or Flexbox for responsive layouts:**
+**Use SynthRow with themes for responsive, visually distinct layouts:**
+
+### MANDATORY: Use Themed SynthRow for Every Module
+
+Each synth module MUST have a distinct visual theme that communicates its function.
+Use the `theme` prop on SynthRow to apply predefined color schemes:
+
+| Theme | Use For | Visual Style |
+|-------|---------|--------------|
+| `amber` | Oscillators, tone generation | Warm gold/bronze, analog feel |
+| `blue` | Filters, frequency shaping | Liquid purple/blue, flowing |
+| `green` | Envelopes, timing | Sharp green, precise |
+| `magenta` | Pitch sequencer/modulation | Neon pink, energetic |
+| `cyan` | Velocity/dynamics | Digital cyan, precise |
+| `pink` | Effects (delay, reverb, etc) | Deep space, atmospheric |
+| `orange` | Header/transport | Industrial, control room |
+
+```tsx
+// CORRECT: Each module has a distinct theme
+<SynthRow label="OSCILLATORS" theme="amber" icon="≋">
+  <SynthKnob label="FREQ" />
+  <SynthKnob label="WAVE" />
+</SynthRow>
+
+<SynthRow label="FILTER" theme="blue" icon="〰">
+  <SynthKnob label="CUTOFF" />
+  <SynthKnob label="RESO" />
+</SynthRow>
+
+<SynthRow label="ENVELOPES" theme="green" icon="▲">
+  <SynthKnob label="ATK" />
+  <SynthKnob label="DCY" />
+</SynthRow>
+
+// WRONG: No theme - modules look identical
+<SynthRow label="OSCILLATORS">...</SynthRow>
+<SynthRow label="FILTER">...</SynthRow>
+```
+
+### Responsive by Default
+
+SynthRow uses `wrap={true}` by default. When the window is compressed,
+controls automatically flow to new lines. DO NOT disable wrapping.
+
+### Combining Modules in Rows
+
+Use nested divs with `display: flex` to place multiple themed modules side-by-side:
+
+```tsx
+// Two sequencers on one row
+<div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+  <SynthRow label="PITCH" theme="magenta" style={{ flex: 1, minWidth: '300px' }}>
+    <DFAMSequencer ... />
+  </SynthRow>
+  <SynthRow label="VELOCITY" theme="cyan" style={{ flex: 1, minWidth: '300px' }}>
+    <DFAMSequencer ... />
+  </SynthRow>
+</div>
+```
+
+### CSS Variables (from global.css)
 
 ```css
 /* Import global styles from template */
@@ -377,9 +437,9 @@ export function useSynthParameters() {
 ```
 
 **Key Principles:**
-1. Copy `styles/global.css` from template for base styles
-2. Use CSS Grid for section layout
-3. Use Flexbox with `flex-wrap` for controls
+1. EVERY module gets a theme - no unstyled sections
+2. SynthRow is responsive by default (wrap=true)
+3. Use icons (◆, ≋, 〰, ▲, ✦) to reinforce module identity
 4. Allow vertical scrolling if content needs it
 
 ## Accessibility
