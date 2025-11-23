@@ -1,0 +1,239 @@
+{
+  "meta": {
+    "name": "Phoneme",
+    "id": "Phoneme",
+    "code": "Phon",
+    "version": "1.0.0",
+    "type": "formant",
+    "voices": 4,
+    "description": "Formant synthesizer for vocal-like sounds with vowel morphing"
+  },
+  "voice": {
+    "oscillators": [
+      {
+        "id": "osc1",
+        "type": "dual",
+        "waveforms": ["saw", "pulse"],
+        "description": "Harmonically rich source for formant filtering"
+      }
+    ],
+    "filters": [
+      {
+        "id": "formant1",
+        "type": "bandpass",
+        "sst": "CytomicSVF",
+        "mode": "BP",
+        "description": "First formant (F1)"
+      },
+      {
+        "id": "formant2",
+        "type": "bandpass",
+        "sst": "CytomicSVF",
+        "mode": "BP",
+        "description": "Second formant (F2)"
+      },
+      {
+        "id": "formant3",
+        "type": "bandpass",
+        "sst": "CytomicSVF",
+        "mode": "BP",
+        "description": "Third formant (F3)"
+      }
+    ],
+    "envelopes": [
+      {
+        "id": "amp_env",
+        "type": "ADSR",
+        "target": "amp"
+      }
+    ],
+    "lfos": [
+      {
+        "id": "vibrato_lfo",
+        "type": "sine",
+        "target": "pitch"
+      },
+      {
+        "id": "vowel_lfo",
+        "type": "sine",
+        "target": "vowel"
+      }
+    ]
+  },
+  "formantTable": {
+    "description": "Formant frequencies for vowels in Hz",
+    "vowels": {
+      "A": { "F1": 800, "F2": 1200, "F3": 2500 },
+      "E": { "F1": 400, "F2": 2000, "F3": 2600 },
+      "I": { "F1": 300, "F2": 2300, "F3": 3000 },
+      "O": { "F1": 500, "F2": 800, "F3": 2300 },
+      "U": { "F1": 350, "F2": 700, "F3": 2500 }
+    }
+  },
+  "parameters": [
+    {
+      "id": "osc_waveform",
+      "name": "Waveform",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "step": 1,
+      "options": ["SAW", "PLS"],
+      "description": "Oscillator waveform (0=saw, 1=pulse)"
+    },
+    {
+      "id": "osc_tune",
+      "name": "Tune",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "step": 1,
+      "unit": "st",
+      "description": "Coarse tuning in semitones"
+    },
+    {
+      "id": "osc_pw",
+      "name": "Pulse Width",
+      "min": 0.05,
+      "max": 0.95,
+      "default": 0.5,
+      "description": "Pulse width for pulse waveform"
+    },
+    {
+      "id": "vowel",
+      "name": "Vowel",
+      "min": 0,
+      "max": 4,
+      "default": 0,
+      "step": 1,
+      "options": ["A", "E", "I", "O", "U"],
+      "description": "Vowel selection (0=A, 1=E, 2=I, 3=O, 4=U)"
+    },
+    {
+      "id": "formant_shift",
+      "name": "Formant Shift",
+      "min": -12,
+      "max": 12,
+      "default": 0,
+      "step": 1,
+      "unit": "st",
+      "description": "Shift all formants up/down in semitones"
+    },
+    {
+      "id": "formant_spread",
+      "name": "Spread",
+      "min": 0.5,
+      "max": 2.0,
+      "default": 1.0,
+      "description": "Spacing between formants"
+    },
+    {
+      "id": "vibrato_rate",
+      "name": "Vibrato Rate",
+      "min": 0.1,
+      "max": 10,
+      "default": 5.0,
+      "unit": "Hz",
+      "description": "Vibrato LFO speed"
+    },
+    {
+      "id": "vibrato_depth",
+      "name": "Vibrato Depth",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "description": "Vibrato amount"
+    },
+    {
+      "id": "vowel_lfo_rate",
+      "name": "Vowel LFO Rate",
+      "min": 0.01,
+      "max": 5,
+      "default": 0.5,
+      "unit": "Hz",
+      "description": "Speed of vowel morphing"
+    },
+    {
+      "id": "vowel_lfo_depth",
+      "name": "Vowel LFO Depth",
+      "min": 0,
+      "max": 1,
+      "default": 0,
+      "description": "Amount of automatic vowel morphing"
+    },
+    {
+      "id": "amp_attack",
+      "name": "Attack",
+      "min": 0.001,
+      "max": 5,
+      "default": 0.01,
+      "unit": "s",
+      "description": "Amplitude envelope attack time"
+    },
+    {
+      "id": "amp_decay",
+      "name": "Decay",
+      "min": 0.001,
+      "max": 5,
+      "default": 0.1,
+      "unit": "s",
+      "description": "Amplitude envelope decay time"
+    },
+    {
+      "id": "amp_sustain",
+      "name": "Sustain",
+      "min": 0,
+      "max": 1,
+      "default": 0.7,
+      "description": "Amplitude envelope sustain level"
+    },
+    {
+      "id": "amp_release",
+      "name": "Release",
+      "min": 0.001,
+      "max": 5,
+      "default": 0.3,
+      "unit": "s",
+      "description": "Amplitude envelope release time"
+    },
+    {
+      "id": "master_level",
+      "name": "Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.8,
+      "description": "Master output level"
+    }
+  ],
+  "ui": {
+    "width": 800,
+    "height": 600,
+    "layout": [
+      {
+        "type": "SynthRow",
+        "label": "SOURCE",
+        "controls": ["osc_waveform", "osc_tune", "osc_pw"]
+      },
+      {
+        "type": "SynthRow",
+        "label": "FORMANT",
+        "controls": ["vowel", "formant_shift", "formant_spread"]
+      },
+      {
+        "type": "SynthRow",
+        "label": "VIBRATO",
+        "controls": ["vibrato_rate", "vibrato_depth"]
+      },
+      {
+        "type": "SynthRow",
+        "label": "VOWEL LFO",
+        "controls": ["vowel_lfo_rate", "vowel_lfo_depth"]
+      },
+      {
+        "type": "SynthRow",
+        "label": "AMP",
+        "controls": ["amp_attack", "amp_decay", "amp_sustain", "amp_release", "master_level"]
+      }
+    ]
+  }
+}

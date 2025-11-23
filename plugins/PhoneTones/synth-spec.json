@@ -1,0 +1,79 @@
+{
+  "$schema": "../../templates/synth-spec.schema.json",
+  "meta": {
+    "name": "Phone Tones",
+    "id": "PhoneTones",
+    "code": "PhTn",
+    "type": "hybrid",
+    "voices": 1,
+    "description": "Vintage telephone sounds: dial tones, DTMF, busy signals, ring tones, and modem sounds",
+    "inspiration": ["DTMF tone generators", "Telephone exchange equipment", "Dial-up modems"]
+  },
+  "voice": {
+    "oscillators": [
+      {
+        "id": "osc1",
+        "sst": "SinOscillator",
+        "features": ["level"]
+      },
+      {
+        "id": "osc2",
+        "sst": "SinOscillator",
+        "features": ["level"]
+      },
+      {
+        "id": "noise",
+        "sst": "CorrelatedNoise",
+        "features": ["level"]
+      }
+    ],
+    "filters": [
+      {
+        "id": "filter1",
+        "sst": "CytomicSVF",
+        "modes": ["BP12"],
+        "keyTracking": false,
+        "envAmount": false
+      }
+    ],
+    "envelopes": [
+      { "id": "env1", "type": "ADSR", "target": "amp" }
+    ],
+    "lfos": [],
+    "modMatrix": {
+      "slots": 0,
+      "sources": [],
+      "destinations": []
+    }
+  },
+  "effects": [],
+  "parameters": [
+    { "id": "tone_mode", "name": "Tone Mode", "min": 0, "max": 5, "default": 0, "category": "tone", "control": "select" },
+    { "id": "tone1_freq", "name": "Tone 1 Freq", "min": 200, "max": 2000, "default": 440, "unit": "Hz", "scale": "log", "category": "tone", "control": "knob" },
+    { "id": "tone2_freq", "name": "Tone 2 Freq", "min": 200, "max": 2000, "default": 480, "unit": "Hz", "scale": "log", "category": "tone", "control": "knob" },
+    { "id": "tone_mix", "name": "Tone Mix", "min": 0, "max": 1, "default": 0.5, "category": "tone", "control": "knob" },
+    { "id": "filter_low", "name": "Filter Low", "min": 200, "max": 500, "default": 300, "unit": "Hz", "category": "filter", "control": "knob" },
+    { "id": "filter_high", "name": "Filter High", "min": 2500, "max": 4000, "default": 3400, "unit": "Hz", "category": "filter", "control": "knob" },
+    { "id": "filter_drive", "name": "Drive", "min": 0, "max": 1, "default": 0.2, "category": "filter", "control": "knob" },
+    { "id": "noise_level", "name": "Noise Level", "min": 0, "max": 1, "default": 0.1, "category": "noise", "control": "knob" },
+    { "id": "noise_crackle", "name": "Crackle", "min": 0, "max": 1, "default": 0.1, "category": "noise", "control": "knob" },
+    { "id": "pattern_rate", "name": "Pattern Rate", "min": 0.1, "max": 10, "default": 2, "unit": "Hz", "scale": "log", "category": "pattern", "control": "knob" },
+    { "id": "pattern_duty", "name": "Duty Cycle", "min": 0, "max": 1, "default": 0.5, "category": "pattern", "control": "knob" },
+    { "id": "amp_attack", "name": "Attack", "min": 0.001, "max": 2, "default": 0.005, "unit": "s", "scale": "log", "category": "amp", "control": "knob" },
+    { "id": "amp_decay", "name": "Decay", "min": 0.001, "max": 2, "default": 0.1, "unit": "s", "scale": "log", "category": "amp", "control": "knob" },
+    { "id": "amp_sustain", "name": "Sustain", "min": 0, "max": 1, "default": 1.0, "category": "amp", "control": "knob" },
+    { "id": "amp_release", "name": "Release", "min": 0.001, "max": 2, "default": 0.05, "unit": "s", "scale": "log", "category": "amp", "control": "knob" },
+    { "id": "master_level", "name": "Level", "min": 0, "max": 1, "default": 0.8, "category": "master", "control": "knob" }
+  ],
+  "ui": {
+    "layout": [
+      { "section": "tone", "label": "Tone Mode", "params": ["tone_mode"] },
+      { "section": "freq", "label": "Frequencies", "params": ["tone1_freq", "tone2_freq", "tone_mix"] },
+      { "section": "filter", "label": "Phone Filter", "params": ["filter_low", "filter_high", "filter_drive"] },
+      { "section": "noise", "label": "Noise", "params": ["noise_level", "noise_crackle"] },
+      { "section": "pattern", "label": "Pattern", "params": ["pattern_rate", "pattern_duty"] },
+      { "section": "amp", "label": "Amp", "params": ["amp_attack", "amp_decay", "amp_sustain", "amp_release", "master_level"] }
+    ],
+    "theme": "dark"
+  }
+}

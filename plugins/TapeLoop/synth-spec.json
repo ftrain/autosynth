@@ -1,0 +1,274 @@
+{
+  "meta": {
+    "name": "Tape Loop",
+    "id": "TapeLoop",
+    "code": "TpLp",
+    "type": "hybrid",
+    "voices": 1,
+    "description": "Tape-based drone synthesizer with recording, layering, and tape degradation",
+    "inspiration": ["William Basinski", "Disintegration Loops", "Tape Loop Artists"]
+  },
+  "voice": {
+    "oscillators": [
+      {
+        "id": "osc1",
+        "sst": "DPWSawOscillator",
+        "features": ["level"]
+      },
+      {
+        "id": "osc2",
+        "sst": "DPWSawOscillator",
+        "features": ["level", "detune"]
+      }
+    ],
+    "filters": [],
+    "envelopes": []
+  },
+  "effects": [
+    {
+      "id": "tape_loop",
+      "sst": "Delay",
+      "bypass": false
+    },
+    {
+      "id": "tape_saturation",
+      "sst": "Distortion",
+      "bypass": false
+    }
+  ],
+  "parameters": [
+    {
+      "id": "osc1_waveform",
+      "name": "Osc 1 Wave",
+      "min": 0,
+      "max": 2,
+      "default": 0,
+      "unit": "",
+      "scale": "discrete",
+      "category": "osc1",
+      "control": "knob"
+    },
+    {
+      "id": "osc1_tune",
+      "name": "Osc 1 Tune",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "unit": "st",
+      "scale": "linear",
+      "category": "osc1",
+      "control": "knob"
+    },
+    {
+      "id": "osc1_level",
+      "name": "Osc 1 Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.7,
+      "unit": "",
+      "scale": "linear",
+      "category": "osc1",
+      "control": "knob"
+    },
+    {
+      "id": "osc2_waveform",
+      "name": "Osc 2 Wave",
+      "min": 0,
+      "max": 2,
+      "default": 0,
+      "unit": "",
+      "scale": "discrete",
+      "category": "osc2",
+      "control": "knob"
+    },
+    {
+      "id": "osc2_tune",
+      "name": "Osc 2 Tune",
+      "min": -24,
+      "max": 24,
+      "default": 0,
+      "unit": "st",
+      "scale": "linear",
+      "category": "osc2",
+      "control": "knob"
+    },
+    {
+      "id": "osc2_detune",
+      "name": "Osc 2 Detune",
+      "min": -100,
+      "max": 100,
+      "default": 7,
+      "unit": "ct",
+      "scale": "linear",
+      "category": "osc2",
+      "control": "knob"
+    },
+    {
+      "id": "osc2_level",
+      "name": "Osc 2 Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.5,
+      "unit": "",
+      "scale": "linear",
+      "category": "osc2",
+      "control": "knob"
+    },
+    {
+      "id": "loop_length",
+      "name": "Loop Length",
+      "min": 0.5,
+      "max": 10,
+      "default": 4,
+      "unit": "s",
+      "scale": "linear",
+      "category": "tape_loop",
+      "control": "knob"
+    },
+    {
+      "id": "loop_feedback",
+      "name": "Loop Feedback",
+      "min": 0,
+      "max": 1,
+      "default": 0.85,
+      "unit": "",
+      "scale": "linear",
+      "category": "tape_loop",
+      "control": "knob"
+    },
+    {
+      "id": "record_level",
+      "name": "Record Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.5,
+      "unit": "",
+      "scale": "linear",
+      "category": "tape_loop",
+      "control": "knob"
+    },
+    {
+      "id": "tape_saturation",
+      "name": "Saturation",
+      "min": 0,
+      "max": 1,
+      "default": 0.3,
+      "unit": "",
+      "scale": "linear",
+      "category": "tape_character",
+      "control": "knob"
+    },
+    {
+      "id": "tape_wobble_rate",
+      "name": "Wobble Rate",
+      "min": 0.1,
+      "max": 5,
+      "default": 0.5,
+      "unit": "Hz",
+      "scale": "linear",
+      "category": "tape_character",
+      "control": "knob"
+    },
+    {
+      "id": "tape_wobble_depth",
+      "name": "Wobble Depth",
+      "min": 0,
+      "max": 1,
+      "default": 0.2,
+      "unit": "",
+      "scale": "linear",
+      "category": "tape_character",
+      "control": "knob"
+    },
+    {
+      "id": "tape_hiss",
+      "name": "Tape Hiss",
+      "min": 0,
+      "max": 1,
+      "default": 0.1,
+      "unit": "",
+      "scale": "linear",
+      "category": "tape_noise",
+      "control": "knob"
+    },
+    {
+      "id": "tape_age",
+      "name": "Tape Age",
+      "min": 0,
+      "max": 1,
+      "default": 0.3,
+      "unit": "",
+      "scale": "linear",
+      "category": "tape_noise",
+      "control": "knob"
+    },
+    {
+      "id": "dry_level",
+      "name": "Dry Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.3,
+      "unit": "",
+      "scale": "linear",
+      "category": "mix",
+      "control": "knob"
+    },
+    {
+      "id": "loop_level",
+      "name": "Loop Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.7,
+      "unit": "",
+      "scale": "linear",
+      "category": "mix",
+      "control": "knob"
+    },
+    {
+      "id": "master_level",
+      "name": "Master Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.8,
+      "unit": "",
+      "scale": "linear",
+      "category": "mix",
+      "control": "knob"
+    }
+  ],
+  "ui": {
+    "layout": [
+      {
+        "section": "osc1",
+        "label": "OSC 1",
+        "params": ["osc1_waveform", "osc1_tune", "osc1_level"]
+      },
+      {
+        "section": "osc2",
+        "label": "OSC 2",
+        "params": ["osc2_waveform", "osc2_tune", "osc2_detune", "osc2_level"]
+      },
+      {
+        "section": "tape_loop",
+        "label": "TAPE LOOP",
+        "params": ["loop_length", "loop_feedback", "record_level"]
+      },
+      {
+        "section": "tape_character",
+        "label": "TAPE CHARACTER",
+        "params": ["tape_saturation", "tape_wobble_rate", "tape_wobble_depth"]
+      },
+      {
+        "section": "tape_noise",
+        "label": "TAPE NOISE",
+        "params": ["tape_hiss", "tape_age"]
+      },
+      {
+        "section": "mix",
+        "label": "MIX",
+        "params": ["dry_level", "loop_level", "master_level"]
+      }
+    ],
+    "theme": "dark"
+  }
+}

@@ -1,0 +1,338 @@
+{
+  "$schema": "../../templates/synth-spec.schema.json",
+  "meta": {
+    "name": "FM Drums",
+    "id": "FMDrums",
+    "code": "FmDm",
+    "type": "fm",
+    "voices": 4,
+    "description": "Classic FM percussion - punchy kicks, snappy snares, metallic hats",
+    "inspiration": ["Yamaha RX", "LinnDrum", "TR-808"]
+  },
+  "voice": {
+    "oscillators": [
+      { "id": "osc1", "sst": "SinOscillator", "features": ["fm"] },
+      { "id": "osc2", "sst": "SinOscillator", "features": ["fm"] },
+      { "id": "osc3", "sst": "SinOscillator", "features": ["fm"] },
+      { "id": "osc4", "sst": "SinOscillator", "features": ["fm"] }
+    ],
+    "filters": [],
+    "envelopes": [
+      { "id": "env1", "type": "AD", "target": "amp" },
+      { "id": "env2", "type": "AD", "target": "pitch" }
+    ]
+  },
+  "parameters": [
+    {
+      "id": "kick_carrier_freq",
+      "name": "Kick Freq",
+      "min": 20,
+      "max": 200,
+      "default": 60,
+      "unit": "Hz",
+      "scale": "log",
+      "category": "kick",
+      "control": "knob"
+    },
+    {
+      "id": "kick_mod_ratio",
+      "name": "Kick Mod Ratio",
+      "min": 0.5,
+      "max": 16,
+      "default": 1,
+      "unit": "",
+      "scale": "log",
+      "category": "kick",
+      "control": "knob"
+    },
+    {
+      "id": "kick_mod_depth",
+      "name": "Kick FM Depth",
+      "min": 0,
+      "max": 1,
+      "default": 0.5,
+      "unit": "",
+      "scale": "linear",
+      "category": "kick",
+      "control": "knob"
+    },
+    {
+      "id": "kick_pitch_decay",
+      "name": "Kick Pitch Decay",
+      "min": 1,
+      "max": 500,
+      "default": 50,
+      "unit": "ms",
+      "scale": "log",
+      "category": "kick_env",
+      "control": "knob"
+    },
+    {
+      "id": "kick_pitch_amount",
+      "name": "Kick Pitch Amt",
+      "min": 0,
+      "max": 1,
+      "default": 0.8,
+      "unit": "",
+      "scale": "linear",
+      "category": "kick_env",
+      "control": "knob"
+    },
+    {
+      "id": "kick_amp_decay",
+      "name": "Kick Amp Decay",
+      "min": 1,
+      "max": 2000,
+      "default": 400,
+      "unit": "ms",
+      "scale": "log",
+      "category": "kick_env",
+      "control": "knob"
+    },
+    {
+      "id": "kick_level",
+      "name": "Kick Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.8,
+      "unit": "",
+      "scale": "linear",
+      "category": "kick_env",
+      "control": "knob"
+    },
+    {
+      "id": "snare_carrier_freq",
+      "name": "Snare Freq",
+      "min": 80,
+      "max": 500,
+      "default": 180,
+      "unit": "Hz",
+      "scale": "log",
+      "category": "snare",
+      "control": "knob"
+    },
+    {
+      "id": "snare_mod_ratio",
+      "name": "Snare Mod Ratio",
+      "min": 0.5,
+      "max": 16,
+      "default": 2.4,
+      "unit": "",
+      "scale": "log",
+      "category": "snare",
+      "control": "knob"
+    },
+    {
+      "id": "snare_mod_depth",
+      "name": "Snare FM Depth",
+      "min": 0,
+      "max": 1,
+      "default": 0.6,
+      "unit": "",
+      "scale": "linear",
+      "category": "snare",
+      "control": "knob"
+    },
+    {
+      "id": "snare_noise",
+      "name": "Snare Noise",
+      "min": 0,
+      "max": 1,
+      "default": 0.5,
+      "unit": "",
+      "scale": "linear",
+      "category": "snare",
+      "control": "knob"
+    },
+    {
+      "id": "snare_pitch_decay",
+      "name": "Snare Pitch Decay",
+      "min": 1,
+      "max": 200,
+      "default": 20,
+      "unit": "ms",
+      "scale": "log",
+      "category": "snare_env",
+      "control": "knob"
+    },
+    {
+      "id": "snare_amp_decay",
+      "name": "Snare Amp Decay",
+      "min": 1,
+      "max": 1000,
+      "default": 200,
+      "unit": "ms",
+      "scale": "log",
+      "category": "snare_env",
+      "control": "knob"
+    },
+    {
+      "id": "snare_level",
+      "name": "Snare Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.8,
+      "unit": "",
+      "scale": "linear",
+      "category": "snare_env",
+      "control": "knob"
+    },
+    {
+      "id": "hat_carrier_freq",
+      "name": "Hat Freq",
+      "min": 200,
+      "max": 2000,
+      "default": 800,
+      "unit": "Hz",
+      "scale": "log",
+      "category": "hat",
+      "control": "knob"
+    },
+    {
+      "id": "hat_mod_ratio",
+      "name": "Hat Mod Ratio",
+      "min": 0.5,
+      "max": 16,
+      "default": 7.1,
+      "unit": "",
+      "scale": "log",
+      "category": "hat",
+      "control": "knob"
+    },
+    {
+      "id": "hat_mod_depth",
+      "name": "Hat FM Depth",
+      "min": 0,
+      "max": 1,
+      "default": 0.8,
+      "unit": "",
+      "scale": "linear",
+      "category": "hat",
+      "control": "knob"
+    },
+    {
+      "id": "hat_noise",
+      "name": "Hat Noise",
+      "min": 0,
+      "max": 1,
+      "default": 0.7,
+      "unit": "",
+      "scale": "linear",
+      "category": "hat",
+      "control": "knob"
+    },
+    {
+      "id": "hat_amp_decay",
+      "name": "Hat Amp Decay",
+      "min": 1,
+      "max": 500,
+      "default": 80,
+      "unit": "ms",
+      "scale": "log",
+      "category": "hat_env",
+      "control": "knob"
+    },
+    {
+      "id": "hat_level",
+      "name": "Hat Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.7,
+      "unit": "",
+      "scale": "linear",
+      "category": "hat_env",
+      "control": "knob"
+    },
+    {
+      "id": "perc_carrier_freq",
+      "name": "Perc Freq",
+      "min": 100,
+      "max": 1000,
+      "default": 400,
+      "unit": "Hz",
+      "scale": "log",
+      "category": "perc",
+      "control": "knob"
+    },
+    {
+      "id": "perc_mod_ratio",
+      "name": "Perc Mod Ratio",
+      "min": 0.5,
+      "max": 16,
+      "default": 3.5,
+      "unit": "",
+      "scale": "log",
+      "category": "perc",
+      "control": "knob"
+    },
+    {
+      "id": "perc_mod_depth",
+      "name": "Perc FM Depth",
+      "min": 0,
+      "max": 1,
+      "default": 0.4,
+      "unit": "",
+      "scale": "linear",
+      "category": "perc",
+      "control": "knob"
+    },
+    {
+      "id": "perc_pitch_decay",
+      "name": "Perc Pitch Decay",
+      "min": 1,
+      "max": 300,
+      "default": 30,
+      "unit": "ms",
+      "scale": "log",
+      "category": "perc_env",
+      "control": "knob"
+    },
+    {
+      "id": "perc_amp_decay",
+      "name": "Perc Amp Decay",
+      "min": 1,
+      "max": 1000,
+      "default": 250,
+      "unit": "ms",
+      "scale": "log",
+      "category": "perc_env",
+      "control": "knob"
+    },
+    {
+      "id": "perc_level",
+      "name": "Perc Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.7,
+      "unit": "",
+      "scale": "linear",
+      "category": "perc_env",
+      "control": "knob"
+    },
+    {
+      "id": "master_level",
+      "name": "Master Level",
+      "min": 0,
+      "max": 1,
+      "default": 0.8,
+      "unit": "",
+      "scale": "linear",
+      "category": "output",
+      "control": "knob"
+    }
+  ],
+  "ui": {
+    "layout": [
+      { "section": "kick", "label": "KICK", "params": ["kick_carrier_freq", "kick_mod_ratio", "kick_mod_depth"] },
+      { "section": "kick_env", "label": "KICK ENV", "params": ["kick_pitch_decay", "kick_pitch_amount", "kick_amp_decay", "kick_level"] },
+      { "section": "snare", "label": "SNARE", "params": ["snare_carrier_freq", "snare_mod_ratio", "snare_mod_depth", "snare_noise"] },
+      { "section": "snare_env", "label": "SNARE ENV", "params": ["snare_pitch_decay", "snare_amp_decay", "snare_level"] },
+      { "section": "hat", "label": "HAT", "params": ["hat_carrier_freq", "hat_mod_ratio", "hat_mod_depth", "hat_noise"] },
+      { "section": "hat_env", "label": "HAT ENV", "params": ["hat_amp_decay", "hat_level"] },
+      { "section": "perc", "label": "PERC", "params": ["perc_carrier_freq", "perc_mod_ratio", "perc_mod_depth"] },
+      { "section": "perc_env", "label": "PERC ENV", "params": ["perc_pitch_decay", "perc_amp_decay", "perc_level"] },
+      { "section": "output", "label": "OUTPUT", "params": ["master_level"] }
+    ],
+    "theme": "dark"
+  }
+}
