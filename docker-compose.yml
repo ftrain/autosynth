@@ -24,14 +24,11 @@ services:
       - ${XDG_RUNTIME_DIR:-/run/user/1000}/pulse:/run/user/1000/pulse:rw
       - ${HOME}/.config/pulse:/home/ubuntu/.config/pulse:ro
 
-      # Claude Code config - mount permissive settings
-      - ./docker/claude-settings.json:/home/ubuntu/.claude/settings.json:ro
+      # Persist Claude Code auth and config (entire .claude directory)
+      - ./.docker-state/claude:/home/ubuntu/.claude
 
       # Persist npm cache
       - autosynth-npm-cache:/home/ubuntu/.npm
-
-      # Persist Claude Code state
-      - autosynth-claude-state:/home/ubuntu/.claude-code
 
     # Environment for X11 and audio
     environment:
@@ -64,4 +61,3 @@ services:
 
 volumes:
   autosynth-npm-cache:
-  autosynth-claude-state:

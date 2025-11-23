@@ -77,8 +77,13 @@ run_container() {
     info "Starting container..."
     cd "$PROJECT_DIR"
 
-    # Create persistent directory for Claude auth
+    # Create persistent directory for Claude auth (entire .claude dir)
     mkdir -p "$PROJECT_DIR/.docker-state/claude"
+
+    # Copy default settings if not present
+    if [ ! -f "$PROJECT_DIR/.docker-state/claude/settings.json" ]; then
+        cp "$PROJECT_DIR/docker/claude-settings.json" "$PROJECT_DIR/.docker-state/claude/settings.json" 2>/dev/null || true
+    fi
 
     if [ "$PLATFORM" = "linux" ]; then
         # Linux: Use docker-compose which has all the right settings
@@ -89,8 +94,7 @@ run_container() {
         docker run -it --rm \
             --name autosynth-dev \
             -v "$PROJECT_DIR:/workspace" \
-            -v "$PROJECT_DIR/docker/claude-settings.json:/home/ubuntu/.claude/settings.json:ro" \
-            -v "$PROJECT_DIR/.docker-state/claude:/home/ubuntu/.claude-code" \
+            -v "$PROJECT_DIR/.docker-state/claude:/home/ubuntu/.claude" \
             -e DISPLAY=host.docker.internal:0 \
             --security-opt seccomp=unconfined \
             -w /workspace \
@@ -103,8 +107,13 @@ run_claude() {
     info "Starting container with Claude Code..."
     cd "$PROJECT_DIR"
 
-    # Create persistent directory for Claude auth
+    # Create persistent directory for Claude auth (entire .claude dir)
     mkdir -p "$PROJECT_DIR/.docker-state/claude"
+
+    # Copy default settings if not present
+    if [ ! -f "$PROJECT_DIR/.docker-state/claude/settings.json" ]; then
+        cp "$PROJECT_DIR/docker/claude-settings.json" "$PROJECT_DIR/.docker-state/claude/settings.json" 2>/dev/null || true
+    fi
 
     if [ "$PLATFORM" = "linux" ]; then
         docker-compose run --rm autosynth claude
@@ -112,8 +121,7 @@ run_claude() {
         docker run -it --rm \
             --name autosynth-dev \
             -v "$PROJECT_DIR:/workspace" \
-            -v "$PROJECT_DIR/docker/claude-settings.json:/home/ubuntu/.claude/settings.json:ro" \
-            -v "$PROJECT_DIR/.docker-state/claude:/home/ubuntu/.claude-code" \
+            -v "$PROJECT_DIR/.docker-state/claude:/home/ubuntu/.claude" \
             -e DISPLAY=host.docker.internal:0 \
             --security-opt seccomp=unconfined \
             -w /workspace \
@@ -149,26 +157,44 @@ run_synth() {
     info "Creating synth: $prompt"
     cd "$PROJECT_DIR"
 
-    # Create persistent directory for Claude auth
+    # Create persistent directory for Claude auth (entire .claude dir)
     mkdir -p "$PROJECT_DIR/.docker-state/claude"
+
+    # Copy default settings if not present
+    if [ ! -f "$PROJECT_DIR/.docker-state/claude/settings.json" ]; then
+        cp "$PROJECT_DIR/docker/claude-settings.json" "$PROJECT_DIR/.docker-state/claude/settings.json" 2>/dev/null || true
+    fi
 
     # Build the full prompt for the project-coordinator
     local full_prompt="@project-coordinator Build me a synthesizer: $prompt"
 
+    # jq filter to format stream-json output nicely
+    local jq_filter='
+        if .type == "assistant" then
+            .message.content[]? |
+            if .type == "text" then "\(.text)"
+            elif .type == "tool_use" then "\n\u001b[36m▶ \(.name)\u001b[0m"
+            else empty end
+        elif .type == "result" then
+            if .result then "\n\u001b[32m✓ Done\u001b[0m"
+            else empty end
+        else empty end
+    '
+
     if [ "$PLATFORM" = "linux" ]; then
-        docker-compose run --rm autosynth claude $unsafe -p "$full_prompt"
+        docker-compose run --rm autosynth claude $unsafe --output-format stream-json -p "$full_prompt" | jq -rj "$jq_filter"
     else
         docker run -it --rm \
             --name autosynth-dev \
             -v "$PROJECT_DIR:/workspace" \
-            -v "$PROJECT_DIR/docker/claude-settings.json:/home/ubuntu/.claude/settings.json:ro" \
-            -v "$PROJECT_DIR/.docker-state/claude:/home/ubuntu/.claude-code" \
+            -v "$PROJECT_DIR/.docker-state/claude:/home/ubuntu/.claude" \
             -e DISPLAY=host.docker.internal:0 \
             --security-opt seccomp=unconfined \
             -w /workspace \
             autosynth-dev:latest \
-            claude $unsafe -p "$full_prompt"
+            claude $unsafe --output-format stream-json -p "$full_prompt" | jq -rj "$jq_filter"
     fi
+    echo  # Final newline
 }
 
 show_help() {
