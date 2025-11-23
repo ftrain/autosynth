@@ -107,7 +107,7 @@ const App: React.FC = () => {
       {/* =====================================================================
           OSCILLATORS - Warm Analog Amber (top section)
           ===================================================================== */}
-      <SynthRow label="OSCILLATORS" theme="amber" icon="≋" justify="center" gap="16px">
+      <SynthRow label="OSCILLATORS" theme="amber" icon="≋" justify="flex-start" gap="16px">
         {/* VCO 1 */}
         <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid #886600', borderRadius: '8px', padding: '12px' }}>
           <div style={{ color: '#ffcc66', fontSize: '12px', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '10px', textAlign: 'center' }}>VCO 1</div>
@@ -173,7 +173,7 @@ const App: React.FC = () => {
       {/* =====================================================================
           FILTER + ENVELOPES - Combined into one row (blue theme)
           ===================================================================== */}
-      <SynthRow label="FILTER & ENVELOPES" theme="blue" icon="〰" justify="center" gap="16px">
+      <SynthRow label="FILTER & ENVELOPES" theme="blue" icon="〰" justify="flex-start" gap="16px">
         {/* Filter Controls */}
         <div style={{ background: 'rgba(0,0,30,0.4)', border: '1px solid #5555cc', borderRadius: '8px', padding: '12px' }}>
           <div style={{ color: '#aaaaff', fontSize: '10px', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '8px', textAlign: 'center' }}>FILTER</div>
@@ -250,7 +250,7 @@ const App: React.FC = () => {
       {/* =====================================================================
           SEQUENCERS - Combined into one row (magenta theme)
           ===================================================================== */}
-      <SynthRow label="SEQUENCERS" theme="magenta" icon="◆" align="center" justify="center" gap="24px">
+      <SynthRow label="SEQUENCERS" theme="magenta" icon="◆" align="center" justify="flex-start" gap="24px">
         {/* PITCH SEQUENCER */}
         <div style={{ background: 'rgba(40,0,40,0.4)', border: '1px solid #cc00cc', borderRadius: '8px', padding: '12px' }}>
           <div style={{ color: '#ff66ff', fontSize: '10px', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '8px', textAlign: 'center' }}>PITCH</div>
@@ -312,7 +312,7 @@ const App: React.FC = () => {
       {/* =====================================================================
           EFFECTS - Deep Space Pink
           ===================================================================== */}
-      <SynthRow label="EFFECTS" theme="pink" icon="✦" justify="center" gap="12px">
+      <SynthRow label="EFFECTS" theme="pink" icon="✦" justify="flex-start" gap="12px">
         {/* Drive */}
         <div style={{ background: 'rgba(255,51,102,0.05)', border: '1px solid rgba(255,51,102,0.3)', borderRadius: '8px', padding: '10px' }}>
           <div style={{ color: '#ff6688', fontSize: '10px', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '8px', textAlign: 'center' }}>🔥 DRIVE</div>
