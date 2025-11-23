@@ -6,7 +6,7 @@
 import React from 'react';
 import { useJUCEBridge } from './hooks/useJUCEBridge';
 import { useParameters, normalizeValue, denormalizeValue } from './hooks/useParameters';
-import { PARAMETER_DEFINITIONS, WAVEFORM_OPTIONS, OCTAVE_OPTIONS } from './types/parameters';
+import { PARAMETER_DEFINITIONS, WAVEFORM_OPTIONS, OCTAVE_OPTIONS, LFO_WAVEFORM_OPTIONS } from './types/parameters';
 import { SynthKnob } from './components/SynthKnob';
 import { SynthADSR } from './components/SynthADSR';
 import Oscilloscope from './components/Oscilloscope';
@@ -106,12 +106,12 @@ const OscillatorSection: React.FC<OscillatorProps> = ({
  * Main synthesizer UI
  */
 const App: React.FC = () => {
-  const { isConnected, juceInfo, audioData } = useJUCEBridge({
+  const { isConnected, audioData } = useJUCEBridge({
     enableAudioData: true,
     audioChannel: 'master',
   });
 
-  const { paramValues, handleChange, resetToDefaults } = useParameters({
+  const { paramValues, handleChange } = useParameters({
     parameters: PARAMETER_DEFINITIONS,
     syncWithJUCE: true,
   });
@@ -142,7 +142,6 @@ const App: React.FC = () => {
             max={0}
             value={getDenormalized('master_volume', paramValues.master_volume ?? 0.9)}
             onChange={(v) => handleChange('master_volume', getNormalized('master_volume', v))}
-            size="medium"
           />
           <div className="connection-status">
             <span className={`status-indicator ${isConnected ? 'connected' : 'disconnected'}`} />
@@ -253,6 +252,43 @@ const App: React.FC = () => {
             onDecayChange={(ms: number) => handleChange('amp_decay', getNormalized('amp_decay', ms / 1000))}
             onSustainChange={(v: number) => handleChange('amp_sustain', v / 100)}
             onReleaseChange={(ms: number) => handleChange('amp_release', getNormalized('amp_release', ms / 1000))}
+          />
+        </div>
+      </section>
+
+      {/* LFO */}
+      <section className="synth-section lfo-panel">
+        <h2 className="section-title">LFO</h2>
+        <div className="lfo-controls">
+          <SynthKnob
+            label="RATE"
+            min={0.01}
+            max={50}
+            value={getDenormalized('lfo_rate', paramValues.lfo_rate ?? 0.04)}
+            onChange={(v) => handleChange('lfo_rate', getNormalized('lfo_rate', v))}
+          />
+          <SynthKnob
+            label="WAVE"
+            min={0}
+            max={4}
+            step={1}
+            value={getDenormalized('lfo_waveform', paramValues.lfo_waveform ?? 0)}
+            onChange={(v) => handleChange('lfo_waveform', getNormalized('lfo_waveform', v))}
+            options={LFO_WAVEFORM_OPTIONS.map(o => o.label)}
+          />
+          <SynthKnob
+            label="PITCH"
+            min={0}
+            max={1}
+            value={getDenormalized('lfo_pitch_amount', paramValues.lfo_pitch_amount ?? 0)}
+            onChange={(v) => handleChange('lfo_pitch_amount', getNormalized('lfo_pitch_amount', v))}
+          />
+          <SynthKnob
+            label="FILTER"
+            min={0}
+            max={1}
+            value={getDenormalized('lfo_filter_amount', paramValues.lfo_filter_amount ?? 0)}
+            onChange={(v) => handleChange('lfo_filter_amount', getNormalized('lfo_filter_amount', v))}
           />
         </div>
       </section>

@@ -58,6 +58,12 @@ PluginProcessor::PluginProcessor()
 
     // Master
     masterVolumeParam = apvts.getRawParameterValue("master_volume");
+
+    // LFO
+    lfoRateParam = apvts.getRawParameterValue("lfo_rate");
+    lfoWaveformParam = apvts.getRawParameterValue("lfo_waveform");
+    lfoPitchAmountParam = apvts.getRawParameterValue("lfo_pitch_amount");
+    lfoFilterAmountParam = apvts.getRawParameterValue("lfo_filter_amount");
 }
 
 PluginProcessor::~PluginProcessor()
@@ -295,6 +301,39 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParam
         juce::AudioParameterFloatAttributes().withLabel("dB")
     ));
 
+    // =========================================================================
+    // LFO PARAMETERS
+    // =========================================================================
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"lfo_rate", 1},
+        "LFO Rate",
+        juce::NormalisableRange<float>(0.01f, 50.0f, 0.01f, 0.4f),  // skew for better low-end control
+        2.0f,
+        juce::AudioParameterFloatAttributes().withLabel("Hz")
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterChoice>(
+        juce::ParameterID{"lfo_waveform", 1},
+        "LFO Waveform",
+        juce::StringArray{"Sine", "Triangle", "Saw", "Square", "S&H"},
+        0  // Default: Sine
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"lfo_pitch_amount", 1},
+        "LFO Pitch Amount",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"lfo_filter_amount", 1},
+        "LFO Filter Amount",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f
+    ));
+
     return { params.begin(), params.end() };
 }
 
@@ -379,6 +418,12 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     // Master
     float masterVolume = masterVolumeParam->load();
 
+    // LFO
+    float lfoRate = lfoRateParam->load();
+    int lfoWaveform = static_cast<int>(lfoWaveformParam->load());
+    float lfoPitchAmount = lfoPitchAmountParam->load();
+    float lfoFilterAmount = lfoFilterAmountParam->load();
+
     // Handle MIDI messages
     for (const auto metadata : midiMessages)
     {
@@ -439,6 +484,12 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
 
     // Filter Envelope
     synthEngine.setFilterEnvelope(filterAttack, filterDecay, filterSustain, filterRelease);
+
+    // LFO
+    synthEngine.setLFORate(lfoRate);
+    synthEngine.setLFOWaveform(lfoWaveform);
+    synthEngine.setLFOPitchAmount(lfoPitchAmount);
+    synthEngine.setLFOFilterAmount(lfoFilterAmount);
 
     // Master
     synthEngine.setMasterVolume(masterVolume);

@@ -215,6 +215,95 @@ private:
 };
 
 /**
+ * @brief LFO (Low Frequency Oscillator) for modulation
+ *
+ * Provides classic modulation waveforms for parameter modulation.
+ * Like the original Minimoog, can modulate pitch and filter.
+ */
+class LFO
+{
+public:
+    enum class Waveform { Sine, Triangle, Saw, Square, SampleHold };
+
+    void setSampleRate(float sr) { sampleRate = sr; }
+
+    void setRate(float hz)
+    {
+        rate = std::clamp(hz, 0.01f, 50.0f);
+        phaseIncrement = rate / sampleRate;
+    }
+
+    void setWaveform(Waveform wf) { waveform = wf; }
+
+    void reset()
+    {
+        phase = 0.0f;
+        sampleHoldValue = 0.0f;
+    }
+
+    /**
+     * @brief Process one sample of LFO output
+     * @return Bipolar output in range [-1, 1]
+     */
+    float process()
+    {
+        float output = 0.0f;
+
+        switch (waveform)
+        {
+        case Waveform::Sine:
+            output = std::sin(TWO_PI * phase);
+            break;
+
+        case Waveform::Triangle:
+            output = phase < 0.5f
+                ? 4.0f * phase - 1.0f
+                : 3.0f - 4.0f * phase;
+            break;
+
+        case Waveform::Saw:
+            output = 2.0f * phase - 1.0f;
+            break;
+
+        case Waveform::Square:
+            output = phase < 0.5f ? 1.0f : -1.0f;
+            break;
+
+        case Waveform::SampleHold:
+            // Update sample-hold value when phase wraps
+            if (phase + phaseIncrement >= 1.0f)
+            {
+                // Generate random value
+                shNoiseState = shNoiseState * 1664525u + 1013904223u;
+                sampleHoldValue = (static_cast<float>(shNoiseState) / 2147483648.0f) - 1.0f;
+            }
+            output = sampleHoldValue;
+            break;
+        }
+
+        // Advance phase
+        phase += phaseIncrement;
+        if (phase >= 1.0f)
+            phase -= 1.0f;
+
+        return output;
+    }
+
+    float getPhase() const { return phase; }
+
+private:
+    float sampleRate = 44100.0f;
+    float rate = 1.0f;
+    float phase = 0.0f;
+    float phaseIncrement = 0.0001f;
+    Waveform waveform = Waveform::Sine;
+
+    // Sample-and-hold state
+    float sampleHoldValue = 0.0f;
+    uint32_t shNoiseState = 54321;
+};
+
+/**
  * @brief Moog-style 4-pole ladder filter (24dB/octave)
  *
  * Based on the classic transistor ladder topology with
@@ -308,10 +397,15 @@ public:
         filter.setSampleRate(sampleRate);
         ampEnv.setSampleRate(sampleRate);
         filterEnv.setSampleRate(sampleRate);
+        lfo.setSampleRate(sampleRate);
 
         // Default envelope settings (Minimoog-like)
         ampEnv.setADSR(0.01f, 0.1f, 0.7f, 0.3f);
         filterEnv.setADSR(0.01f, 0.2f, 0.5f, 0.3f);
+
+        // Default LFO settings
+        lfo.setRate(2.0f);
+        lfo.setWaveform(LFO::Waveform::Sine);
     }
 
     void noteOn(int note, float vel)
@@ -367,8 +461,24 @@ public:
 
         ++age;
 
+        // Calculate base frequency from current note for pitch modulation
+        float baseFreq = 440.0f * std::pow(2.0f, (currentNote - 69) / 12.0f);
+
         for (int i = 0; i < numSamples; ++i)
         {
+            // Get LFO value (bipolar -1 to +1)
+            float lfoValue = lfo.process();
+
+            // Apply LFO pitch modulation (in semitones)
+            // Max pitch mod range: +/- 12 semitones (1 octave)
+            float pitchModSemitones = lfoValue * lfoPitchAmount * 12.0f;
+            float pitchModMultiplier = std::pow(2.0f, pitchModSemitones / 12.0f);
+
+            // Update oscillator frequencies with LFO pitch modulation
+            oscillators[0].setFrequency(baseFreq * osc1OctaveMultiplier * pitchModMultiplier);
+            oscillators[1].setFrequency(baseFreq * osc2OctaveMultiplier * osc2Detune * pitchModMultiplier);
+            oscillators[2].setFrequency(baseFreq * osc3OctaveMultiplier * osc3Detune * pitchModMultiplier);
+
             // Process oscillators
             float osc1Out = oscillators[0].process();
             float osc2Out = oscillators[1].process();
@@ -397,6 +507,12 @@ public:
                 // At env=1: cutoff = base (dark)
                 modCutoff = filterCutoff + std::abs(filterEnvAmount) * (1.0f - filterEnvOut) * 10000.0f;
             }
+
+            // LFO filter modulation
+            // Bipolar modulation: positive LFO increases cutoff, negative decreases
+            // Max filter mod range: +/- 8000 Hz
+            float lfoFilterMod = lfoValue * lfoFilterAmount * 8000.0f;
+            modCutoff += lfoFilterMod;
 
             // Keyboard tracking
             if (filterKeyboardTracking > 0.0f)
@@ -477,6 +593,12 @@ public:
     void setFilterSustain(float l) { filterSustainLevel = l; updateFilterEnv(); }
     void setFilterRelease(float t) { filterReleaseTime = t; updateFilterEnv(); }
 
+    // LFO
+    void setLFORate(float hz) { lfo.setRate(hz); }
+    void setLFOWaveform(LFO::Waveform wf) { lfo.setWaveform(wf); }
+    void setLFOPitchAmount(float amt) { lfoPitchAmount = amt; }
+    void setLFOFilterAmount(float amt) { lfoFilterAmount = amt; }
+
     // Master
     void setMasterLevel(float l) { masterLevel = l; }
 
@@ -537,6 +659,11 @@ private:
     // Envelopes
     ADSREnvelope ampEnv;
     ADSREnvelope filterEnv;
+
+    // LFO
+    LFO lfo;
+    float lfoPitchAmount = 0.0f;   // 0-1 range, 1.0 = 12 semitones
+    float lfoFilterAmount = 0.0f;  // 0-1 range, 1.0 = 8000 Hz
 
     // Envelope parameters
     float ampAttack = 0.01f;

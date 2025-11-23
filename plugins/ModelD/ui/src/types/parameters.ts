@@ -21,6 +21,7 @@ export enum ParameterCategory {
   FILTER = 'filter',
   AMP_ENVELOPE = 'amp_envelope',
   FILTER_ENVELOPE = 'filter_envelope',
+  LFO = 'lfo',
   MASTER = 'master',
 }
 
@@ -275,6 +276,44 @@ export const PARAMETER_DEFINITIONS: ParameterMap = {
   },
 
   // =========================================================================
+  // LFO
+  // =========================================================================
+
+  lfo_rate: {
+    id: 'lfo_rate',
+    name: 'LFO Rate',
+    min: 0.01,
+    max: 50,
+    default: 2,
+    unit: 'Hz',
+  },
+
+  lfo_waveform: {
+    id: 'lfo_waveform',
+    name: 'LFO Waveform',
+    min: 0,
+    max: 4,
+    default: 0,
+    step: 1,
+  },
+
+  lfo_pitch_amount: {
+    id: 'lfo_pitch_amount',
+    name: 'LFO Pitch Amount',
+    min: 0,
+    max: 1,
+    default: 0,
+  },
+
+  lfo_filter_amount: {
+    id: 'lfo_filter_amount',
+    name: 'LFO Filter Amount',
+    min: 0,
+    max: 1,
+    default: 0,
+  },
+
+  // =========================================================================
   // MASTER
   // =========================================================================
 
@@ -310,6 +349,17 @@ export const OCTAVE_OPTIONS = [
 ];
 
 /**
+ * LFO Waveform labels for UI display
+ */
+export const LFO_WAVEFORM_OPTIONS = [
+  { value: 0, label: 'Sine' },
+  { value: 1, label: 'Tri' },
+  { value: 2, label: 'Saw' },
+  { value: 3, label: 'Sq' },
+  { value: 4, label: 'S&H' },
+];
+
+/**
  * Get parameters by category
  */
 export function getParametersByCategory(category: ParameterCategory): ParameterDefinition[] {
@@ -321,6 +371,7 @@ export function getParametersByCategory(category: ParameterCategory): ParameterD
     [ParameterCategory.FILTER]: ['filter_cutoff', 'filter_reso', 'filter_env_amount', 'filter_kbd_track'],
     [ParameterCategory.AMP_ENVELOPE]: ['amp_attack', 'amp_decay', 'amp_sustain', 'amp_release'],
     [ParameterCategory.FILTER_ENVELOPE]: ['filter_attack', 'filter_decay', 'filter_sustain', 'filter_release'],
+    [ParameterCategory.LFO]: ['lfo_rate', 'lfo_waveform', 'lfo_pitch_amount', 'lfo_filter_amount'],
     [ParameterCategory.MASTER]: ['master_volume'],
   };
 

@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <optional>
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_gui_extra/juce_gui_extra.h>
 #include "PluginProcessor.h"
@@ -31,6 +32,9 @@ private:
     void handleParameterFromWebView(const juce::String& paramId, float value);
     void handleNoteFromWebView(int note, float velocity, bool isNoteOn);
 
+    // Resource provider for serving embedded HTML
+    std::optional<juce::WebBrowserComponent::Resource> getResource(const juce::String& url);
+
     PluginProcessor& processorRef;
 
     std::unique_ptr<juce::WebBrowserComponent> webView;
@@ -47,6 +51,8 @@ private:
     std::unique_ptr<ParameterListener> paramListener;
 
     bool ignoreParameterCallbacks = false;
+
+    juce::File uiDistFolder;  // Path to UI dist folder for resource provider
 
     static constexpr int DEFAULT_WIDTH = 900;
     static constexpr int DEFAULT_HEIGHT = 600;

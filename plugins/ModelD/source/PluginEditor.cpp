@@ -9,6 +9,24 @@
 #include "UIResources.h"
 #endif
 
+namespace
+{
+    // Get MIME type from file extension
+    juce::String getMimeType(const juce::String& path)
+    {
+        if (path.endsWith(".html")) return "text/html";
+        if (path.endsWith(".js"))   return "application/javascript";
+        if (path.endsWith(".css"))  return "text/css";
+        if (path.endsWith(".json")) return "application/json";
+        if (path.endsWith(".png"))  return "image/png";
+        if (path.endsWith(".jpg") || path.endsWith(".jpeg")) return "image/jpeg";
+        if (path.endsWith(".svg"))  return "image/svg+xml";
+        if (path.endsWith(".woff")) return "font/woff";
+        if (path.endsWith(".woff2")) return "font/woff2";
+        return "application/octet-stream";
+    }
+}
+
 PluginEditor::PluginEditor(PluginProcessor& p)
     : AudioProcessorEditor(&p)
     , processorRef(p)
@@ -17,9 +35,17 @@ PluginEditor::PluginEditor(PluginProcessor& p)
     setResizable(true, true);
     setResizeLimits(600, 400, 1400, 900);
 
-    // Build WebView options
+    // Build WebView options with resource provider
+    // On Linux: uses juce://juce.backend/ scheme
+    // On Windows: uses https://juce.backend/ scheme
     auto options = juce::WebBrowserComponent::Options{}
         .withNativeIntegrationEnabled()
+        .withResourceProvider(
+            [this](const juce::String& url) -> std::optional<juce::WebBrowserComponent::Resource>
+            {
+                return getResource(url);
+            }
+        )
         .withNativeFunction("setParameter",
             [this](const juce::Array<juce::var>& args, juce::WebBrowserComponent::NativeFunctionCompletion completion)
             {
@@ -57,39 +83,27 @@ PluginEditor::PluginEditor(PluginProcessor& p)
             {
                 sendAllParametersToWebView();
                 completion({});
-            });
-
-#ifdef HAS_UI_RESOURCES
-    // Production: serve embedded resources
-    options = options.withResourceProvider(
-        [](const juce::String& url) -> std::optional<juce::WebBrowserComponent::Resource>
-        {
-            // Handle root and index.html requests
-            if (url.isEmpty() || url == "/" || url.endsWith("index.html"))
+            })
+        .withNativeFunction("consoleLog",
+            [](const juce::Array<juce::var>& args, juce::WebBrowserComponent::NativeFunctionCompletion completion)
             {
-                return juce::WebBrowserComponent::Resource{
-                    std::vector<std::byte>(
-                        reinterpret_cast<const std::byte*>(UIResources::index_html),
-                        reinterpret_cast<const std::byte*>(UIResources::index_html) + UIResources::index_htmlSize
-                    ),
-                    "text/html"
-                };
-            }
-            return std::nullopt;
-        },
-        juce::URL("http://localhost/"));  // Base URL for resource provider
-#endif
+                juce::String message;
+                for (const auto& arg : args)
+                    message += arg.toString() + " ";
+                DBG("WebView console: " + message);
+                completion({});
+            });
 
     webView = std::make_unique<juce::WebBrowserComponent>(options);
     addAndMakeVisible(*webView);
 
-    // Load the UI
+    // Navigate to the resource provider root (which serves index.html for "/")
 #ifdef HAS_UI_RESOURCES
-    // Production: use resource provider
-    webView->goToURL("http://localhost/index.html");
+    // Use JUCE's built-in resource provider URL scheme
+    webView->goToURL(juce::WebBrowserComponent::getResourceProviderRoot());
 #else
-    // Development: use Vite dev server
-    webView->goToURL("http://localhost:5173");
+    // Development: use Vite dev server or HTTP server
+    webView->goToURL("http://localhost:8080");
 #endif
 
     // Setup parameter listener
@@ -126,6 +140,43 @@ PluginEditor::~PluginEditor()
             processorRef.apvts.removeParameterListener(paramWithID->getParameterID(), paramListener.get());
         }
     }
+
+}
+
+std::optional<juce::WebBrowserComponent::Resource> PluginEditor::getResource(const juce::String& url)
+{
+    DBG("Resource request: " + url);
+
+#ifdef HAS_UI_RESOURCES
+    // Parse the URL path
+    juce::String path = url;
+
+    // Remove the JUCE resource provider root if present
+    // On Linux: juce://juce.backend/
+    // On Windows: https://juce.backend/
+    auto root = juce::WebBrowserComponent::getResourceProviderRoot();
+    if (path.startsWith(root))
+        path = path.substring(root.length());
+
+    // Handle root path - serve index.html
+    if (path.isEmpty() || path == "/" || path == "index.html")
+    {
+        juce::WebBrowserComponent::Resource resource;
+        resource.data = std::vector<std::byte>(
+            reinterpret_cast<const std::byte*>(UIResources::index_html),
+            reinterpret_cast<const std::byte*>(UIResources::index_html) + UIResources::index_htmlSize
+        );
+        resource.mimeType = "text/html";
+        DBG("Serving index.html, size: " + juce::String(UIResources::index_htmlSize));
+        return resource;
+    }
+
+    DBG("Resource not found: " + path);
+#else
+    juce::ignoreUnused(url);
+#endif
+
+    return std::nullopt;
 }
 
 void PluginEditor::paint(juce::Graphics& g)
@@ -188,8 +239,8 @@ void PluginEditor::sendAudioDataToWebView()
 
     for (int i = 0; i < 128; ++i)
     {
-        int srcIndex = (i * audioData.size()) / 128;
-        samples.add(audioData[srcIndex]);
+        int srcIndex = (i * static_cast<int>(audioData.size())) / 128;
+        samples.add(audioData[static_cast<size_t>(srcIndex)]);
     }
 
     juce::var samplesVar(samples);

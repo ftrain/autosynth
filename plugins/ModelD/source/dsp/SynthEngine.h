@@ -214,6 +214,12 @@ public:
                 voice.setFilterSustain(filterSustain);
                 voice.setFilterRelease(filterRelease);
 
+                // LFO
+                voice.setLFORate(lfoRate);
+                voice.setLFOWaveform(static_cast<LFO::Waveform>(lfoWaveform));
+                voice.setLFOPitchAmount(lfoPitchAmount);
+                voice.setLFOFilterAmount(lfoFilterAmount);
+
                 // Master level per voice
                 voice.setMasterLevel(1.0f);
 
@@ -285,6 +291,12 @@ public:
         filterSustain = s;
         filterRelease = r;
     }
+
+    // LFO
+    void setLFORate(float hz) { lfoRate = hz; }
+    void setLFOWaveform(int wf) { lfoWaveform = wf; }
+    void setLFOPitchAmount(float amt) { lfoPitchAmount = amt; }
+    void setLFOFilterAmount(float amt) { lfoFilterAmount = amt; }
 
     //==========================================================================
     // State Queries
@@ -426,6 +438,12 @@ private:
     float filterDecay = 0.2f;
     float filterSustain = 0.5f;
     float filterRelease = 0.3f;
+
+    // LFO
+    float lfoRate = 2.0f;        // Hz
+    int lfoWaveform = 0;         // 0=Sine, 1=Triangle, 2=Saw, 3=Square, 4=S&H
+    float lfoPitchAmount = 0.0f; // 0-1 range
+    float lfoFilterAmount = 0.0f; // 0-1 range
 
     //==========================================================================
     // SST Effects

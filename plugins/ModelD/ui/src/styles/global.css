@@ -361,3 +361,16 @@ body {
   color: var(--synth-text-secondary);
   border-top: 1px solid var(--synth-border);
 }
+
+/* LFO panel */
+.lfo-panel {
+  background: linear-gradient(135deg, var(--synth-bg-secondary), var(--synth-bg-tertiary));
+}
+
+.lfo-controls {
+  display: flex;
+  gap: var(--synth-spacing-xl);
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+}

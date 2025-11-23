@@ -123,6 +123,12 @@ private:
     // Master
     std::atomic<float>* masterVolumeParam = nullptr;
 
+    // LFO
+    std::atomic<float>* lfoRateParam = nullptr;
+    std::atomic<float>* lfoWaveformParam = nullptr;
+    std::atomic<float>* lfoPitchAmountParam = nullptr;
+    std::atomic<float>* lfoFilterAmountParam = nullptr;
+
     //==========================================================================
     // State
     //==========================================================================

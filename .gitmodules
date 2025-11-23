@@ -13,3 +13,6 @@
 [submodule "plugins/ModelD/libs/sst/sst-waveshapers"]
 	path = plugins/ModelD/libs/sst/sst-waveshapers
 	url = https://github.com/surge-synthesizer/sst-waveshapers.git
+[submodule "plugins/ModelD/libs/choc"]
+	path = plugins/ModelD/libs/choc
+	url = https://github.com/Tracktion/choc.git

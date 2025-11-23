@@ -435,6 +435,117 @@ TEST_CASE("Voice parameter setters", "[voice][params]")
     }
 }
 
+TEST_CASE("Voice LFO behavior", "[voice][lfo]")
+{
+    Voice voice;
+    constexpr int bufferSize = 4800; // 100ms at 48kHz
+    constexpr double sampleRate = 48000.0;
+
+    std::array<float, bufferSize> leftBuffer{};
+    std::array<float, bufferSize> rightBuffer{};
+
+    voice.prepare(sampleRate);
+
+    SECTION("LFO setters do not crash")
+    {
+        voice.setLFORate(1.0f);
+        voice.setLFOWaveform(LFO::Waveform::Sine);
+        voice.setLFOPitchAmount(0.5f);
+        voice.setLFOFilterAmount(0.5f);
+
+        REQUIRE(true);  // No crash
+    }
+
+    SECTION("LFO pitch modulation produces valid output")
+    {
+        clearBuffer(leftBuffer.data(), bufferSize);
+        clearBuffer(rightBuffer.data(), bufferSize);
+
+        voice.setOsc1Level(1.0f);
+        voice.setOsc2Level(0.0f);
+        voice.setOsc3Level(0.0f);
+        voice.setLFORate(5.0f);  // 5 Hz
+        voice.setLFOWaveform(LFO::Waveform::Sine);
+        voice.setLFOPitchAmount(0.5f);  // 6 semitone modulation
+        voice.setLFOFilterAmount(0.0f);
+
+        voice.noteOn(60, 1.0f);
+        voice.render(leftBuffer.data(), rightBuffer.data(), bufferSize);
+
+        // Should produce valid audio (no NaN/Inf)
+        REQUIRE(isBufferValid(leftBuffer.data(), bufferSize));
+
+        // Should produce audio
+        float rms = calculateRMS(leftBuffer.data(), bufferSize);
+        REQUIRE(rms > 0.0f);
+    }
+
+    SECTION("LFO filter modulation produces valid output")
+    {
+        clearBuffer(leftBuffer.data(), bufferSize);
+        clearBuffer(rightBuffer.data(), bufferSize);
+
+        voice.setOsc1Level(1.0f);
+        voice.setOsc2Level(0.0f);
+        voice.setOsc3Level(0.0f);
+        voice.setFilterCutoff(1000.0f);
+        voice.setLFORate(5.0f);  // 5 Hz
+        voice.setLFOWaveform(LFO::Waveform::Triangle);
+        voice.setLFOPitchAmount(0.0f);
+        voice.setLFOFilterAmount(0.5f);  // 4000 Hz modulation
+
+        voice.noteOn(60, 1.0f);
+        voice.render(leftBuffer.data(), rightBuffer.data(), bufferSize);
+
+        // Should produce valid audio (no NaN/Inf)
+        REQUIRE(isBufferValid(leftBuffer.data(), bufferSize));
+
+        // Should produce audio
+        float rms = calculateRMS(leftBuffer.data(), bufferSize);
+        REQUIRE(rms > 0.0f);
+    }
+
+    SECTION("All LFO waveforms produce valid output")
+    {
+        voice.setOsc1Level(1.0f);
+        voice.setOsc2Level(0.0f);
+        voice.setOsc3Level(0.0f);
+        voice.setLFORate(2.0f);
+        voice.setLFOPitchAmount(0.25f);
+        voice.setLFOFilterAmount(0.25f);
+
+        // Test each waveform
+        std::array<LFO::Waveform, 5> waveforms = {
+            LFO::Waveform::Sine,
+            LFO::Waveform::Triangle,
+            LFO::Waveform::Saw,
+            LFO::Waveform::Square,
+            LFO::Waveform::SampleHold
+        };
+
+        for (auto wf : waveforms)
+        {
+            Voice testVoice;
+            testVoice.prepare(sampleRate);
+            testVoice.setOsc1Level(1.0f);
+            testVoice.setOsc2Level(0.0f);
+            testVoice.setOsc3Level(0.0f);
+            testVoice.setLFORate(2.0f);
+            testVoice.setLFOWaveform(wf);
+            testVoice.setLFOPitchAmount(0.25f);
+            testVoice.setLFOFilterAmount(0.25f);
+
+            clearBuffer(leftBuffer.data(), bufferSize);
+            clearBuffer(rightBuffer.data(), bufferSize);
+
+            testVoice.noteOn(60, 1.0f);
+            testVoice.render(leftBuffer.data(), rightBuffer.data(), bufferSize);
+
+            REQUIRE(isBufferValid(leftBuffer.data(), bufferSize));
+        }
+    }
+}
+
 TEST_CASE("Voice stress test", "[voice][stress]")
 {
     Voice voice;

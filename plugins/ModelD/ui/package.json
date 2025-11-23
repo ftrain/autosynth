@@ -6,7 +6,8 @@
   "description": "React UI for synthesizer plugin",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build && sed -i 's/<script type=\"module\" crossorigin>/<script>/g' dist/index.html",
+    "build:check": "tsc && vite build && sed -i 's/<script type=\"module\" crossorigin>/<script>/g' dist/index.html",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "test": "vitest run",

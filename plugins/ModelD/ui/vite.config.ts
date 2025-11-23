@@ -23,6 +23,10 @@ export default defineConfig({
     cssCodeSplit: false,
     rollupOptions: {
       output: {
+        // CRITICAL: Use IIFE format, not ES modules
+        // ES modules are blocked on file:// URLs due to CORS
+        // IIFE works everywhere including embedded WebViews
+        format: 'iife',
         inlineDynamicImports: true,
       },
     },
