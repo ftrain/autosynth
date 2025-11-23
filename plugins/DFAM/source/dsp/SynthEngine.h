@@ -1,8 +1,8 @@
 /**
  * @file SynthEngine.h
- * @brief DFAM Synth Engine with 8-Step Sequencer
+ * @brief Famdrum Synth Engine with 8-Step Sequencer
  *
- * The DFAM is a semi-modular analog percussion synthesizer.
+ * Famdrum is a percussion synthesizer inspired by semi-modular designs.
  * Key features:
  * - 8-step sequencer with pitch and velocity per step
  * - 2 VCOs with FM modulation
@@ -93,6 +93,15 @@ public:
         blockSize = samplesPerBlock;
 
         voice.prepare(sr);
+        pitchLfo.prepare(sr);
+        velocityLfo.prepare(sr);
+        filterLfo.prepare(sr);
+
+        // Effects
+        delay.prepare(sr);
+        reverb.prepare(sr);
+        compressor.prepare(sr);
+
         updateClockRate();
         sequencer.reset();
     }
@@ -109,6 +118,16 @@ public:
 
         for (int i = 0; i < numSamples; ++i)
         {
+            // Advance LFOs (free-running)
+            pitchLfo.process();
+            velocityLfo.process();
+            float filterLfoValue = filterLfo.process();
+
+            // Apply filter LFO modulation
+            float modulatedCutoff = filterCutoffBase + filterLfoValue * filterLfoAmount * 5000.0f;
+            modulatedCutoff = std::clamp(modulatedCutoff, 20.0f, 20000.0f);
+            voice.setFilterCutoff(modulatedCutoff);
+
             // Process clock if running
             if (running)
             {
@@ -125,6 +144,14 @@ public:
             float outL = 0.0f;
             float outR = 0.0f;
             voice.render(&outL, &outR, 1);
+
+            // Apply effects chain: Saturator -> Delay -> Reverb -> Compressor
+            outL = saturator.process(outL);
+            outR = saturator.process(outR);
+
+            delay.process(outL, outR);
+            reverb.process(outL, outR);
+            compressor.process(outL, outR);
 
             outputL[i] = outL * masterGain;
             outputR[i] = outR * masterGain;
@@ -186,18 +213,104 @@ public:
     void setFMAmount(float amount) { voice.setFMAmount(amount); }
 
     // =========================================================================
-    // Noise
+    // Noise & Modulation
     // =========================================================================
 
     void setNoiseLevel(float level) { voice.setNoiseLevel(level); }
+    void setPitchToNoiseAmount(float amount) { voice.setPitchToNoiseAmount(amount); }
+    void setPitchToDecayAmount(float amount) { voice.setPitchToDecayAmount(amount); }
+
+    // =========================================================================
+    // LFO Parameters
+    // =========================================================================
+
+    void setPitchLfoRate(float hz) { pitchLfo.setRate(hz); }
+    void setPitchLfoAmount(float semitones) { pitchLfoAmount = semitones; }
+    void setPitchLfoWaveform(int w) { pitchLfo.setWaveform(w); }
+
+    void setVelocityLfoRate(float hz) { velocityLfo.setRate(hz); }
+    void setVelocityLfoAmount(float amount) { velocityLfoAmount = std::clamp(amount, 0.0f, 1.0f); }
+    void setVelocityLfoWaveform(int w) { velocityLfo.setWaveform(w); }
+
+    void setStepPitchLfoEnabled(int step, bool enabled)
+    {
+        if (step >= 0 && step < 8)
+            pitchLfoEnabled[static_cast<size_t>(step)] = enabled;
+    }
+
+    void setStepVelocityLfoEnabled(int step, bool enabled)
+    {
+        if (step >= 0 && step < 8)
+            velocityLfoEnabled[static_cast<size_t>(step)] = enabled;
+    }
+
+    bool getStepPitchLfoEnabled(int step) const
+    {
+        if (step >= 0 && step < 8)
+            return pitchLfoEnabled[static_cast<size_t>(step)];
+        return false;
+    }
+
+    bool getStepVelocityLfoEnabled(int step) const
+    {
+        if (step >= 0 && step < 8)
+            return velocityLfoEnabled[static_cast<size_t>(step)];
+        return false;
+    }
 
     // =========================================================================
     // Filter Parameters
     // =========================================================================
 
-    void setFilterCutoff(float freq) { voice.setFilterCutoff(freq); }
+    void setFilterCutoff(float freq)
+    {
+        filterCutoffBase = freq;
+        voice.setFilterCutoff(freq);
+    }
     void setFilterResonance(float res) { voice.setFilterResonance(res); }
     void setFilterEnvAmount(float amount) { voice.setFilterEnvAmount(amount); }
+    void setFilterMode(int mode) { voice.setFilterMode(mode); }
+
+    // =========================================================================
+    // Filter LFO
+    // =========================================================================
+
+    void setFilterLfoRate(float hz) { filterLfo.setRate(hz); }
+    void setFilterLfoAmount(float amount) { filterLfoAmount = std::clamp(amount, 0.0f, 1.0f); }
+    void setFilterLfoWaveform(int w) { filterLfo.setWaveform(w); }
+
+    // =========================================================================
+    // Effects - Saturator/Drive
+    // =========================================================================
+
+    void setSaturatorDrive(float drive) { saturator.setDrive(drive); }
+    void setSaturatorMix(float mix) { saturator.setMix(mix); }
+
+    // =========================================================================
+    // Effects - Delay
+    // =========================================================================
+
+    void setDelayTime(float seconds) { delay.setTime(seconds); }
+    void setDelayFeedback(float fb) { delay.setFeedback(fb); }
+    void setDelayMix(float mix) { delay.setMix(mix); }
+
+    // =========================================================================
+    // Effects - Reverb
+    // =========================================================================
+
+    void setReverbDecay(float decay) { reverb.setDecay(decay); }
+    void setReverbDamping(float damping) { reverb.setDamping(damping); }
+    void setReverbMix(float mix) { reverb.setMix(mix); }
+
+    // =========================================================================
+    // Effects - Compressor
+    // =========================================================================
+
+    void setCompThreshold(float db) { compressor.setThreshold(db); }
+    void setCompRatio(float ratio) { compressor.setRatio(ratio); }
+    void setCompAttack(float ms) { compressor.setAttack(ms); }
+    void setCompRelease(float ms) { compressor.setRelease(ms); }
+    void setCompMakeup(float db) { compressor.setMakeupGain(db); }
 
     // =========================================================================
     // Pitch Envelope
@@ -290,8 +403,29 @@ private:
     void processSequencerStep()
     {
         auto [pitch, velocity] = sequencer.advance();
-        voice.setPitchOffset(pitch);
-        voice.trigger(velocity);
+        int step = sequencer.getCurrentStep();
+
+        // Apply pitch LFO modulation if enabled for this step
+        float modulatedPitch = pitch;
+        if (pitchLfoEnabled[static_cast<size_t>(step)])
+        {
+            float lfoValue = pitchLfo.getValue();  // -1 to 1
+            modulatedPitch += lfoValue * pitchLfoAmount;
+        }
+
+        // Apply velocity LFO modulation if enabled for this step
+        float modulatedVelocity = velocity;
+        if (velocityLfoEnabled[static_cast<size_t>(step)])
+        {
+            float lfoValue = velocityLfo.getValue();  // -1 to 1
+            // Map -1 to 1 -> 0 to 1 for velocity scaling, then scale by amount
+            float lfoScale = (lfoValue + 1.0f) * 0.5f;  // 0 to 1
+            modulatedVelocity = velocity * (1.0f - velocityLfoAmount + lfoScale * velocityLfoAmount);
+            modulatedVelocity = std::clamp(modulatedVelocity, 0.0f, 1.0f);
+        }
+
+        voice.setPitchOffset(modulatedPitch);
+        voice.trigger(modulatedVelocity);
     }
 
     // Audio settings
@@ -303,6 +437,23 @@ private:
 
     // Sequencer
     DFAMSequencer sequencer;
+
+    // LFOs
+    SimpleLFO pitchLfo;
+    SimpleLFO velocityLfo;
+    SimpleLFO filterLfo;
+    float pitchLfoAmount = 12.0f;      // Semitones
+    float velocityLfoAmount = 0.5f;    // 0-1 depth
+    float filterLfoAmount = 0.5f;      // 0-1 depth
+    float filterCutoffBase = 5000.0f;  // Base cutoff for LFO modulation
+    std::array<bool, 8> pitchLfoEnabled = {false, false, false, false, false, false, false, false};
+    std::array<bool, 8> velocityLfoEnabled = {false, false, false, false, false, false, false, false};
+
+    // Effects chain
+    Saturator saturator;
+    StereoDelay delay;
+    AmbisonicReverb reverb;
+    Compressor compressor;
 
     // Transport
     bool running = false;

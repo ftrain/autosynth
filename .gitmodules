@@ -16,3 +16,6 @@
 [submodule "plugins/ModelD/libs/choc"]
 	path = plugins/ModelD/libs/choc
 	url = https://github.com/Tracktion/choc.git
+[submodule "plugins/DFAM/libs/simde"]
+	path = plugins/DFAM/libs/simde
+	url = https://github.com/simd-everywhere/simde.git

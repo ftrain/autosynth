@@ -1,8 +1,8 @@
 /**
  * @file Voice.h
- * @brief DFAM Voice - Monophonic percussion synthesizer voice
+ * @brief Famdrum Voice - Monophonic percussion synthesizer voice
  *
- * Signal Flow (matching original DFAM):
+ * Signal Flow:
  *   VCO1 ----+
  *            |---> Mixer ---> VCF (Ladder) ---> VCA ---> Output
  *   VCO2 ----+                   ^               ^
@@ -27,6 +27,9 @@
 #include <random>
 #include <algorithm>
 
+// SST Libraries
+#include "sst/basic-blocks/dsp/Clippers.h"
+
 /**
  * @brief Simple noise generator
  */
@@ -41,6 +44,84 @@ public:
 private:
     std::mt19937 generator{std::random_device{}()};
     std::uniform_real_distribution<float> distribution{-1.0f, 1.0f};
+};
+
+/**
+ * @brief Simple LFO for modulation
+ */
+class SimpleLFO
+{
+public:
+    enum Waveform { SINE, TRIANGLE, SAW, SQUARE };
+
+    void prepare(double sr)
+    {
+        sampleRate = sr;
+        phase = 0.0;
+        updatePhaseIncrement();
+    }
+
+    void setRate(float hz)
+    {
+        rate = std::clamp(hz, 0.01f, 20.0f);
+        updatePhaseIncrement();
+    }
+
+    void setWaveform(Waveform w) { waveform = w; }
+    void setWaveform(int w) { waveform = static_cast<Waveform>(std::clamp(w, 0, 3)); }
+
+    /**
+     * @brief Get current LFO value without advancing phase
+     * @return Value in range [-1, 1]
+     */
+    float getValue() const
+    {
+        return computeValue(phase);
+    }
+
+    /**
+     * @brief Process and advance phase
+     * @return Value in range [-1, 1]
+     */
+    float process()
+    {
+        float output = computeValue(phase);
+        phase += phaseIncrement;
+        if (phase >= 1.0)
+            phase -= 1.0;
+        return output;
+    }
+
+    void reset() { phase = 0.0; }
+
+private:
+    void updatePhaseIncrement()
+    {
+        phaseIncrement = rate / sampleRate;
+    }
+
+    float computeValue(double p) const
+    {
+        switch (waveform)
+        {
+            case SINE:
+                return std::sin(2.0f * juce::MathConstants<float>::pi * static_cast<float>(p));
+            case TRIANGLE:
+                return 4.0f * std::abs(static_cast<float>(p) - 0.5f) - 1.0f;
+            case SAW:
+                return 2.0f * static_cast<float>(p) - 1.0f;
+            case SQUARE:
+                return p < 0.5 ? 1.0f : -1.0f;
+            default:
+                return 0.0f;
+        }
+    }
+
+    double sampleRate = 44100.0;
+    double phase = 0.0;
+    double phaseIncrement = 0.0;
+    float rate = 1.0f;
+    Waveform waveform = SINE;
 };
 
 /**
@@ -181,11 +262,13 @@ private:
 };
 
 /**
- * @brief Simple ladder filter (4-pole lowpass)
+ * @brief Ladder filter with LP/HP modes
  */
 class LadderFilter
 {
 public:
+    enum Mode { LOWPASS, HIGHPASS };
+
     void prepare(double sr)
     {
         sampleRate = sr;
@@ -196,6 +279,7 @@ public:
     {
         for (int i = 0; i < 4; ++i)
             stage[i] = 0.0f;
+        lastInput = 0.0f;
     }
 
     void setCutoff(float freq)
@@ -209,6 +293,9 @@ public:
         resonance = std::clamp(res, 0.0f, 1.0f);
     }
 
+    void setMode(Mode m) { mode = m; }
+    void setMode(int m) { mode = static_cast<Mode>(std::clamp(m, 0, 1)); }
+
     float process(float input)
     {
         float feedback = resonance * 4.0f * (stage[3] - 0.5f * input);
@@ -220,6 +307,10 @@ public:
             x = stage[i];
         }
 
+        lastInput = input;
+
+        if (mode == HIGHPASS)
+            return input - stage[3];  // Subtract LP to get HP
         return stage[3];
     }
 
@@ -236,6 +327,270 @@ private:
     float resonance = 0.0f;
     float g = 0.0f;
     float stage[4] = {0, 0, 0, 0};
+    float lastInput = 0.0f;
+    Mode mode = LOWPASS;
+};
+
+/**
+ * @brief Saturator using SST tanh7 clipping algorithm
+ * Uses sst-basic-blocks/dsp/Clippers.h for high-quality saturation
+ */
+class Saturator
+{
+public:
+    void setDrive(float d) { drive = std::clamp(d, 1.0f, 20.0f); }
+    void setMix(float m) { mix = std::clamp(m, 0.0f, 1.0f); }
+
+    float process(float input)
+    {
+        // Use SST tanh7 for high-quality saturation
+        // tanh7 uses 7th-order polynomial approximation for accurate tanh
+        alignas(16) float vals[4] = {input * drive, 0.0f, 0.0f, 0.0f};
+        auto simdIn = SIMD_MM(load_ps)(vals);
+        auto simdOut = sst::basic_blocks::dsp::tanh7_ps(simdIn);
+        SIMD_MM(store_ps)(vals, simdOut);
+
+        float driven = vals[0];
+        return input * (1.0f - mix) + driven * mix;
+    }
+
+    // Block processing for efficiency (uses SST block functions)
+    void processBlock(float* buffer, int numSamples)
+    {
+        if (mix < 0.001f) return;  // Bypass if no effect
+
+        // Process in blocks of 4 for SIMD efficiency
+        int i = 0;
+        for (; i + 4 <= numSamples; i += 4)
+        {
+            alignas(16) float dry[4];
+            alignas(16) float wet[4];
+
+            for (int j = 0; j < 4; ++j)
+            {
+                dry[j] = buffer[i + j];
+                wet[j] = buffer[i + j] * drive;
+            }
+
+            auto simdIn = SIMD_MM(load_ps)(wet);
+            auto simdOut = sst::basic_blocks::dsp::tanh7_ps(simdIn);
+            SIMD_MM(store_ps)(wet, simdOut);
+
+            for (int j = 0; j < 4; ++j)
+                buffer[i + j] = dry[j] * (1.0f - mix) + wet[j] * mix;
+        }
+
+        // Handle remaining samples
+        for (; i < numSamples; ++i)
+            buffer[i] = process(buffer[i]);
+    }
+
+private:
+    float drive = 1.0f;
+    float mix = 0.0f;
+};
+
+/**
+ * @brief Simple stereo delay
+ */
+class StereoDelay
+{
+public:
+    void prepare(double sr)
+    {
+        sampleRate = sr;
+        bufferSize = static_cast<size_t>(sr * 2.0);  // 2 seconds max
+        bufferL.resize(bufferSize, 0.0f);
+        bufferR.resize(bufferSize, 0.0f);
+        writePos = 0;
+    }
+
+    void setTime(float seconds)
+    {
+        delayTime = std::clamp(seconds, 0.001f, 2.0f);
+        delaySamples = static_cast<size_t>(delayTime * sampleRate);
+    }
+
+    void setFeedback(float fb) { feedback = std::clamp(fb, 0.0f, 0.95f); }
+    void setMix(float m) { mix = std::clamp(m, 0.0f, 1.0f); }
+
+    void process(float& left, float& right)
+    {
+        size_t readPos = (writePos + bufferSize - delaySamples) % bufferSize;
+
+        float delayedL = bufferL[readPos];
+        float delayedR = bufferR[readPos];
+
+        bufferL[writePos] = left + delayedL * feedback;
+        bufferR[writePos] = right + delayedR * feedback;
+
+        left = left * (1.0f - mix) + delayedL * mix;
+        right = right * (1.0f - mix) + delayedR * mix;
+
+        writePos = (writePos + 1) % bufferSize;
+    }
+
+private:
+    double sampleRate = 44100.0;
+    std::vector<float> bufferL;
+    std::vector<float> bufferR;
+    size_t bufferSize = 88200;
+    size_t writePos = 0;
+    size_t delaySamples = 22050;
+    float delayTime = 0.5f;
+    float feedback = 0.3f;
+    float mix = 0.0f;
+};
+
+/**
+ * @brief Simple ambisonic-style reverb (Schroeder-style with diffusion)
+ */
+class AmbisonicReverb
+{
+public:
+    void prepare(double sr)
+    {
+        sampleRate = sr;
+
+        // Allpass delays for diffusion
+        for (int i = 0; i < 4; ++i)
+        {
+            apDelays[i].resize(static_cast<size_t>(sr * apTimes[i]), 0.0f);
+            apPos[i] = 0;
+        }
+
+        // Comb filters for reverb tail
+        for (int i = 0; i < 8; ++i)
+        {
+            combDelays[i].resize(static_cast<size_t>(sr * combTimes[i]), 0.0f);
+            combPos[i] = 0;
+            combFilters[i] = 0.0f;
+        }
+    }
+
+    void setDecay(float d) { decay = std::clamp(d, 0.1f, 10.0f); }
+    void setMix(float m) { mix = std::clamp(m, 0.0f, 1.0f); }
+    void setDamping(float d) { damping = std::clamp(d, 0.0f, 1.0f); }
+
+    void process(float& left, float& right)
+    {
+        float input = (left + right) * 0.5f;
+
+        // Allpass diffusion
+        float diffused = input;
+        for (int i = 0; i < 4; ++i)
+            diffused = processAllpass(i, diffused);
+
+        // Parallel comb filters
+        float reverbL = 0.0f;
+        float reverbR = 0.0f;
+        float combGain = std::pow(0.001f, 1.0f / (decay * static_cast<float>(sampleRate)));
+
+        for (int i = 0; i < 4; ++i)
+            reverbL += processComb(i, diffused, combGain);
+        for (int i = 4; i < 8; ++i)
+            reverbR += processComb(i, diffused, combGain);
+
+        reverbL *= 0.25f;
+        reverbR *= 0.25f;
+
+        left = left * (1.0f - mix) + reverbL * mix;
+        right = right * (1.0f - mix) + reverbR * mix;
+    }
+
+private:
+    float processAllpass(int idx, float input)
+    {
+        float delayed = apDelays[idx][apPos[idx]];
+        float output = -input + delayed;
+        apDelays[idx][apPos[idx]] = input + delayed * 0.5f;
+        apPos[idx] = (apPos[idx] + 1) % apDelays[idx].size();
+        return output;
+    }
+
+    float processComb(int idx, float input, float gain)
+    {
+        float delayed = combDelays[idx][combPos[idx]];
+        combFilters[idx] = delayed * (1.0f - damping) + combFilters[idx] * damping;
+        combDelays[idx][combPos[idx]] = input + combFilters[idx] * gain;
+        combPos[idx] = (combPos[idx] + 1) % combDelays[idx].size();
+        return delayed;
+    }
+
+    double sampleRate = 44100.0;
+    float decay = 2.0f;
+    float mix = 0.0f;
+    float damping = 0.5f;
+
+    // Allpass filter delays (in seconds)
+    float apTimes[4] = {0.0051f, 0.0076f, 0.01f, 0.0123f};
+    std::vector<float> apDelays[4];
+    size_t apPos[4] = {0, 0, 0, 0};
+
+    // Comb filter delays (in seconds) - slightly different for L/R
+    float combTimes[8] = {0.0297f, 0.0371f, 0.0411f, 0.0437f,
+                          0.0299f, 0.0373f, 0.0413f, 0.0439f};
+    std::vector<float> combDelays[8];
+    size_t combPos[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    float combFilters[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+};
+
+/**
+ * @brief Simple compressor
+ */
+class Compressor
+{
+public:
+    void prepare(double sr)
+    {
+        sampleRate = sr;
+        updateCoefficients();
+    }
+
+    void setThreshold(float db) { threshold = db; }
+    void setRatio(float r) { ratio = std::clamp(r, 1.0f, 20.0f); }
+    void setAttack(float ms) { attackMs = std::clamp(ms, 0.1f, 100.0f); updateCoefficients(); }
+    void setRelease(float ms) { releaseMs = std::clamp(ms, 10.0f, 1000.0f); updateCoefficients(); }
+    void setMakeupGain(float db) { makeupGain = std::pow(10.0f, db / 20.0f); }
+
+    void process(float& left, float& right)
+    {
+        float inputLevel = std::max(std::abs(left), std::abs(right));
+        float inputDb = 20.0f * std::log10(inputLevel + 1e-6f);
+
+        // Calculate gain reduction
+        float gainReduction = 0.0f;
+        if (inputDb > threshold)
+            gainReduction = (inputDb - threshold) * (1.0f - 1.0f / ratio);
+
+        // Smooth envelope
+        float targetGain = std::pow(10.0f, -gainReduction / 20.0f);
+        if (targetGain < envelope)
+            envelope = attackCoef * envelope + (1.0f - attackCoef) * targetGain;
+        else
+            envelope = releaseCoef * envelope + (1.0f - releaseCoef) * targetGain;
+
+        float gain = envelope * makeupGain;
+        left *= gain;
+        right *= gain;
+    }
+
+private:
+    void updateCoefficients()
+    {
+        attackCoef = std::exp(-1.0f / (attackMs * 0.001f * static_cast<float>(sampleRate)));
+        releaseCoef = std::exp(-1.0f / (releaseMs * 0.001f * static_cast<float>(sampleRate)));
+    }
+
+    double sampleRate = 44100.0;
+    float threshold = -10.0f;
+    float ratio = 4.0f;
+    float attackMs = 10.0f;
+    float releaseMs = 100.0f;
+    float makeupGain = 1.0f;
+    float attackCoef = 0.0f;
+    float releaseCoef = 0.0f;
+    float envelope = 1.0f;
 };
 
 /**
@@ -263,12 +618,31 @@ public:
     void trigger(float vel = 1.0f)
     {
         velocity = vel;
+
+        // Apply pitch-to-decay modulation (bipolar)
+        // Normalized pitch: -24 to +24 -> 0 to 1
+        float pitchNormalized = std::clamp((pitchOffset + 24.0f) / 48.0f, 0.0f, 1.0f);
+
+        // Bipolar modulation: positive = high pitch = longer decay
+        // negative = high pitch = shorter decay
+        float decayMod = pitchToDecayAmount * (pitchNormalized - 0.5f) * 2.0f;  // -1 to +1
+        float modulatedDecay = baseVcfVcaDecay * (1.0f + decayMod);
+        modulatedDecay = std::clamp(modulatedDecay, 0.01f, 4.0f);  // Clamp to reasonable range
+        vcfVcaEnv.setDecay(modulatedDecay);
+
         pitchEnv.trigger();
         vcfVcaEnv.trigger();
     }
 
     void render(float* outputL, float* outputR, int numSamples)
     {
+        // Calculate pitch-based modulation (normalized 0-1 based on pitchOffset range -24 to +24)
+        float pitchNormalized = std::clamp((pitchOffset + 24.0f) / 48.0f, 0.0f, 1.0f);
+
+        // Modulate noise level based on pitch (high pitch = more noise)
+        float modulatedNoiseLevel = noiseLevel + pitchToNoiseAmount * pitchNormalized;
+        modulatedNoiseLevel = std::clamp(modulatedNoiseLevel, 0.0f, 1.0f);
+
         for (int i = 0; i < numSamples; ++i)
         {
             float pitchEnvValue = pitchEnv.process();
@@ -286,11 +660,11 @@ public:
             vco2.setFrequency(vco2Freq + fmMod);
             float vco2Out = vco2.process();
 
-            // Noise
+            // Noise with pitch modulation
             float noiseOut = noise.process();
 
-            // Mix
-            float mix = vco1Out * vco1Level + vco2Out * vco2Level + noiseOut * noiseLevel;
+            // Mix with pitch-modulated noise
+            float mix = vco1Out * vco1Level + vco2Out * vco2Level + noiseOut * modulatedNoiseLevel;
 
             // Filter with envelope
             float filterMod = filterCutoff + vcfVcaEnvValue * filterEnvAmount * 10000.0f;
@@ -320,11 +694,13 @@ public:
 
     // Noise
     void setNoiseLevel(float level) { noiseLevel = level; }
+    void setPitchToNoiseAmount(float amount) { pitchToNoiseAmount = std::clamp(amount, 0.0f, 1.0f); }
 
     // Filter
     void setFilterCutoff(float freq) { filterCutoff = freq; filter.setCutoff(freq); }
     void setFilterResonance(float res) { filter.setResonance(res); }
     void setFilterEnvAmount(float amount) { filterEnvAmount = amount; }
+    void setFilterMode(int mode) { filter.setMode(mode); }
 
     // Pitch envelope
     void setPitchEnvAttack(float t) { pitchEnv.setAttack(t); }
@@ -333,7 +709,8 @@ public:
 
     // VCF/VCA envelope
     void setVCFVCAEnvAttack(float t) { vcfVcaEnv.setAttack(t); }
-    void setVCFVCAEnvDecay(float t) { vcfVcaEnv.setDecay(t); }
+    void setVCFVCAEnvDecay(float t) { baseVcfVcaDecay = t; }
+    void setPitchToDecayAmount(float amount) { pitchToDecayAmount = std::clamp(amount, -1.0f, 1.0f); }
 
     // Sequencer pitch offset
     void setPitchOffset(float semitones) { pitchOffset = semitones; }
@@ -359,6 +736,7 @@ private:
     float vco2Level = 0.5f;
     float noiseLevel = 0.0f;
     float fmAmount = 0.0f;
+    float pitchToNoiseAmount = 0.0f;  // 0-1: how much pitch affects noise level
 
     float filterCutoff = 5000.0f;
     float filterEnvAmount = 0.5f;
@@ -367,6 +745,9 @@ private:
     float pitchOffset = 0.0f;
     float velocity = 1.0f;
     float masterLevel = 0.8f;
+
+    float baseVcfVcaDecay = 0.5f;     // Base decay time before modulation
+    float pitchToDecayAmount = 0.0f;  // -1 to +1: bipolar pitch-to-decay mod
 };
 
 // Compatibility alias

@@ -1,9 +1,9 @@
 /**
  * @file App.tsx
- * @brief DFAM - Drum From Another Machine
+ * @brief Famdrum - Percussion Synthesizer
  *
- * A clone of the Moog DFAM percussion synthesizer.
- * Features: 2 VCOs, noise, FM, ladder filter, 8-step sequencer, AD envelopes
+ * A percussion synthesizer inspired by the Moog DFAM.
+ * Features: 2 VCOs, noise, FM, ladder filter (LP/HP), 8-step sequencer, AD envelopes, effects
  */
 
 import React, { useState, useEffect } from 'react';
@@ -12,6 +12,8 @@ import { useParameters, normalizeValue, denormalizeValue } from './hooks/usePara
 import { PARAMETER_DEFINITIONS, WAVEFORM_OPTIONS, SequencerState } from './types/parameters';
 
 import { SynthKnob } from './components/SynthKnob';
+import { SynthRow } from './components/SynthRow';
+import { DFAMSequencer } from './components/DFAMSequencer';
 import Oscilloscope from './components/Oscilloscope';
 import { SynthLED } from './components/SynthLED';
 import { TransportControls } from './components/TransportControls';
@@ -50,12 +52,31 @@ const App: React.FC = () => {
 
   const isRunning = getDenormalized('running', paramValues.running ?? 0) > 0.5;
 
+  // Get sequencer pitch values as array
+  const pitchValues = Array.from({ length: 8 }, (_, i) =>
+    getDenormalized(`seq_pitch_${i}`, paramValues[`seq_pitch_${i}`] ?? 0.5)
+  );
+
+  // Get sequencer velocity values as array
+  const velocityValues = Array.from({ length: 8 }, (_, i) =>
+    getDenormalized(`seq_vel_${i}`, paramValues[`seq_vel_${i}`] ?? 1)
+  );
+
+  // Get per-step LFO enable states
+  const pitchLfoEnabled = Array.from({ length: 8 }, (_, i) =>
+    getDenormalized(`pitch_lfo_en_${i}`, paramValues[`pitch_lfo_en_${i}`] ?? 0) > 0.5
+  );
+
+  const velocityLfoEnabled = Array.from({ length: 8 }, (_, i) =>
+    getDenormalized(`vel_lfo_en_${i}`, paramValues[`vel_lfo_en_${i}`] ?? 0) > 0.5
+  );
+
   return (
     <div className="synth-container" style={{ padding: '16px', minHeight: '100vh', background: '#1a1a1a' }}>
       {/* HEADER */}
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+      <SynthRow justify="space-between" align="center" padding="0" style={{ marginBottom: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <h1 style={{ color: '#ff6600', fontSize: '28px', fontWeight: 'bold', letterSpacing: '3px', margin: 0 }}>DFAM</h1>
+          <h1 style={{ color: '#ff6600', fontSize: '28px', fontWeight: 'bold', letterSpacing: '3px', margin: 0 }}>FAMDRUM</h1>
           <SynthLED label="JUCE" active={isConnected} color="green" />
         </div>
 
@@ -90,59 +111,87 @@ const App: React.FC = () => {
             onChange={(v) => handleChange('master_volume', getNormalized('master_volume', v))}
           />
         </div>
-      </header>
+      </SynthRow>
 
-      {/* 8-STEP SEQUENCER */}
-      <section style={{ marginBottom: '24px' }}>
-        <div style={{ color: '#888', fontSize: '12px', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '8px' }}>
-          8-STEP SEQUENCER
-        </div>
-        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-          {[0, 1, 2, 3, 4, 5, 6, 7].map((step) => (
-            <div
-              key={step}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '12px',
-                borderRadius: '8px',
-                background: currentStep === step ? 'rgba(255, 102, 0, 0.2)' : 'rgba(40, 40, 40, 0.8)',
-                border: currentStep === step ? '2px solid #ff6600' : '2px solid #333',
-              }}
-            >
-              <div style={{ color: currentStep === step ? '#ff6600' : '#666', fontWeight: 'bold', fontSize: '12px' }}>
-                {step + 1}
-              </div>
-              <SynthKnob
-                label="PITCH"
-                min={-24}
-                max={24}
-                step={1}
-                value={getDenormalized(`seq_pitch_${step}`, paramValues[`seq_pitch_${step}`] ?? 0.5)}
-                onChange={(v) => handleChange(`seq_pitch_${step}`, getNormalized(`seq_pitch_${step}`, v))}
-              />
-              <SynthKnob
-                label="VEL"
-                min={0}
-                max={1}
-                value={getDenormalized(`seq_vel_${step}`, paramValues[`seq_vel_${step}`] ?? 1)}
-                onChange={(v) => handleChange(`seq_vel_${step}`, getNormalized(`seq_vel_${step}`, v))}
-              />
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* SYNTH CONTROLS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-        {/* VCO 1 */}
-        <div style={{ background: 'rgba(40, 40, 40, 0.6)', borderRadius: '8px', padding: '16px' }}>
-          <div style={{ color: '#888', fontSize: '12px', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '12px' }}>
-            VCO 1
+      {/* 8-STEP SEQUENCER - Pitch with LFO */}
+      <SynthRow showPanel padding="16px" gap="24px" align="flex-start" style={{ marginBottom: '12px' }}>
+        <DFAMSequencer
+          label="PITCH SEQUENCE"
+          values={pitchValues}
+          currentStep={currentStep}
+          min={-24}
+          max={24}
+          bipolar={true}
+          onChange={(step, value) => handleChange(`seq_pitch_${step}`, getNormalized(`seq_pitch_${step}`, value))}
+          formatValue={(v) => `${v > 0 ? '+' : ''}${v}`}
+          lfoEnabled={pitchLfoEnabled}
+          onLfoToggle={(step, enabled) => handleChange(`pitch_lfo_en_${step}`, enabled ? 1 : 0)}
+          lfoColor="#ff00ff"
+        />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '20px' }}>
+          <div style={{ color: '#ff00ff', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px' }}>PITCH LFO</div>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <SynthKnob
+              label="RATE"
+              min={0.1}
+              max={10}
+              value={getDenormalized('pitch_lfo_rate', paramValues.pitch_lfo_rate ?? 0.1)}
+              onChange={(v) => handleChange('pitch_lfo_rate', getNormalized('pitch_lfo_rate', v))}
+            />
+            <SynthKnob
+              label="AMOUNT"
+              min={0}
+              max={24}
+              value={getDenormalized('pitch_lfo_amount', paramValues.pitch_lfo_amount ?? 0.5)}
+              onChange={(v) => handleChange('pitch_lfo_amount', getNormalized('pitch_lfo_amount', v))}
+            />
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
+        </div>
+      </SynthRow>
+
+      {/* 8-STEP SEQUENCER - Velocity with LFO */}
+      <SynthRow showPanel padding="16px" gap="24px" align="flex-start" style={{ marginBottom: '24px' }}>
+        <DFAMSequencer
+          label="VELOCITY SEQUENCE"
+          values={velocityValues.map(v => Math.round(v * 100))}
+          currentStep={currentStep}
+          min={0}
+          max={100}
+          bipolar={false}
+          accentColor="#4a9eff"
+          onChange={(step, value) => handleChange(`seq_vel_${step}`, getNormalized(`seq_vel_${step}`, value / 100))}
+          formatValue={(v) => `${v}%`}
+          lfoEnabled={velocityLfoEnabled}
+          onLfoToggle={(step, enabled) => handleChange(`vel_lfo_en_${step}`, enabled ? 1 : 0)}
+          lfoColor="#00ffff"
+        />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '20px' }}>
+          <div style={{ color: '#00ffff', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px' }}>VEL LFO</div>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <SynthKnob
+              label="RATE"
+              min={0.1}
+              max={10}
+              value={getDenormalized('vel_lfo_rate', paramValues.vel_lfo_rate ?? 0.1)}
+              onChange={(v) => handleChange('vel_lfo_rate', getNormalized('vel_lfo_rate', v))}
+            />
+            <SynthKnob
+              label="AMOUNT"
+              min={0}
+              max={1}
+              value={getDenormalized('vel_lfo_amount', paramValues.vel_lfo_amount ?? 0.5)}
+              onChange={(v) => handleChange('vel_lfo_amount', getNormalized('vel_lfo_amount', v))}
+            />
+          </div>
+        </div>
+      </SynthRow>
+
+      {/* VCO ROW */}
+      <SynthRow label="OSCILLATORS" showPanel padding="16px" gap="32px" style={{ marginBottom: '16px' }}>
+        {/* VCO 1 */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ color: '#ff6600', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px' }}>VCO 1</div>
+          <div style={{ display: 'flex', gap: '12px' }}>
             <SynthKnob
               label="FREQ"
               min={20}
@@ -170,11 +219,9 @@ const App: React.FC = () => {
         </div>
 
         {/* VCO 2 */}
-        <div style={{ background: 'rgba(40, 40, 40, 0.6)', borderRadius: '8px', padding: '16px' }}>
-          <div style={{ color: '#888', fontSize: '12px', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '12px' }}>
-            VCO 2
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ color: '#ff6600', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px' }}>VCO 2</div>
+          <div style={{ display: 'flex', gap: '12px' }}>
             <SynthKnob
               label="FREQ"
               min={20}
@@ -201,19 +248,27 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* MIXER */}
-        <div style={{ background: 'rgba(40, 40, 40, 0.6)', borderRadius: '8px', padding: '16px' }}>
-          <div style={{ color: '#888', fontSize: '12px', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '12px' }}>
-            MIXER
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
+        {/* FM */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ color: '#ff6600', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px' }}>FM</div>
+          <div style={{ display: 'flex', gap: '12px' }}>
             <SynthKnob
-              label="FM"
+              label="AMOUNT"
               min={0}
               max={1}
               value={getDenormalized('fm_amount', paramValues.fm_amount ?? 0)}
               onChange={(v) => handleChange('fm_amount', getNormalized('fm_amount', v))}
             />
+          </div>
+        </div>
+      </SynthRow>
+
+      {/* MIXER & FILTER ROW */}
+      <SynthRow label="MIXER & FILTER" showPanel padding="16px" gap="32px" style={{ marginBottom: '16px' }}>
+        {/* Noise & Modulation */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ color: '#4a9eff', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px' }}>NOISE / MOD</div>
+          <div style={{ display: 'flex', gap: '12px' }}>
             <SynthKnob
               label="NOISE"
               min={0}
@@ -221,15 +276,27 @@ const App: React.FC = () => {
               value={getDenormalized('noise_level', paramValues.noise_level ?? 0)}
               onChange={(v) => handleChange('noise_level', getNormalized('noise_level', v))}
             />
+            <SynthKnob
+              label="P→NOISE"
+              min={0}
+              max={1}
+              value={getDenormalized('pitch_to_noise', paramValues.pitch_to_noise ?? 0)}
+              onChange={(v) => handleChange('pitch_to_noise', getNormalized('pitch_to_noise', v))}
+            />
+            <SynthKnob
+              label="P→DECAY"
+              min={-1}
+              max={1}
+              value={getDenormalized('pitch_to_decay', paramValues.pitch_to_decay ?? 0)}
+              onChange={(v) => handleChange('pitch_to_decay', getNormalized('pitch_to_decay', v))}
+            />
           </div>
         </div>
 
-        {/* FILTER */}
-        <div style={{ background: 'rgba(40, 40, 40, 0.6)', borderRadius: '8px', padding: '16px' }}>
-          <div style={{ color: '#888', fontSize: '12px', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '12px' }}>
-            FILTER
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
+        {/* Filter */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ color: '#4a9eff', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px' }}>LADDER FILTER</div>
+          <div style={{ display: 'flex', gap: '12px' }}>
             <SynthKnob
               label="CUTOFF"
               min={20}
@@ -251,18 +318,46 @@ const App: React.FC = () => {
               value={getDenormalized('filter_env_amount', paramValues.filter_env_amount ?? 0.5)}
               onChange={(v) => handleChange('filter_env_amount', getNormalized('filter_env_amount', v))}
             />
+            <SynthKnob
+              label="MODE"
+              min={0}
+              max={1}
+              step={1}
+              value={getDenormalized('filter_mode', paramValues.filter_mode ?? 0)}
+              onChange={(v) => handleChange('filter_mode', getNormalized('filter_mode', v))}
+              options={['LP', 'HP']}
+            />
           </div>
         </div>
-      </div>
 
-      {/* ENVELOPES */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '16px' }}>
-        {/* PITCH ENVELOPE */}
-        <div style={{ background: 'rgba(40, 40, 40, 0.6)', borderRadius: '8px', padding: '16px' }}>
-          <div style={{ color: '#888', fontSize: '12px', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '12px' }}>
-            PITCH ENVELOPE
+        {/* Filter LFO */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ color: '#4a9eff', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px' }}>FILTER LFO</div>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <SynthKnob
+              label="RATE"
+              min={0.1}
+              max={10}
+              value={getDenormalized('filter_lfo_rate', paramValues.filter_lfo_rate ?? 0.1)}
+              onChange={(v) => handleChange('filter_lfo_rate', getNormalized('filter_lfo_rate', v))}
+            />
+            <SynthKnob
+              label="AMOUNT"
+              min={0}
+              max={1}
+              value={getDenormalized('filter_lfo_amount', paramValues.filter_lfo_amount ?? 0)}
+              onChange={(v) => handleChange('filter_lfo_amount', getNormalized('filter_lfo_amount', v))}
+            />
           </div>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+        </div>
+      </SynthRow>
+
+      {/* ENVELOPES ROW */}
+      <SynthRow label="ENVELOPES" showPanel padding="16px" gap="32px">
+        {/* Pitch Envelope */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ color: '#00cc66', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px' }}>PITCH ENV</div>
+          <div style={{ display: 'flex', gap: '12px' }}>
             <SynthKnob
               label="ATTACK"
               min={0.001}
@@ -287,12 +382,10 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* VCF/VCA ENVELOPE */}
-        <div style={{ background: 'rgba(40, 40, 40, 0.6)', borderRadius: '8px', padding: '16px' }}>
-          <div style={{ color: '#888', fontSize: '12px', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '12px' }}>
-            VCF / VCA ENVELOPE
-          </div>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+        {/* VCF/VCA Envelope */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ color: '#00cc66', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px' }}>VCF / VCA ENV</div>
+          <div style={{ display: 'flex', gap: '12px' }}>
             <SynthKnob
               label="ATTACK"
               min={0.001}
@@ -309,7 +402,115 @@ const App: React.FC = () => {
             />
           </div>
         </div>
-      </div>
+      </SynthRow>
+
+      {/* EFFECTS ROW */}
+      <SynthRow label="EFFECTS" showPanel padding="16px" gap="32px" style={{ marginTop: '16px' }}>
+        {/* Drive/Saturator */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ color: '#ff3366', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px' }}>DRIVE</div>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <SynthKnob
+              label="DRIVE"
+              min={1}
+              max={20}
+              value={getDenormalized('sat_drive', paramValues.sat_drive ?? 0)}
+              onChange={(v) => handleChange('sat_drive', getNormalized('sat_drive', v))}
+            />
+            <SynthKnob
+              label="MIX"
+              min={0}
+              max={1}
+              value={getDenormalized('sat_mix', paramValues.sat_mix ?? 0)}
+              onChange={(v) => handleChange('sat_mix', getNormalized('sat_mix', v))}
+            />
+          </div>
+        </div>
+
+        {/* Delay */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ color: '#ff3366', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px' }}>DELAY</div>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <SynthKnob
+              label="TIME"
+              min={0.001}
+              max={2}
+              value={getDenormalized('delay_time', paramValues.delay_time ?? 0.125)}
+              onChange={(v) => handleChange('delay_time', getNormalized('delay_time', v))}
+            />
+            <SynthKnob
+              label="FDBK"
+              min={0}
+              max={0.95}
+              value={getDenormalized('delay_feedback', paramValues.delay_feedback ?? 0.315)}
+              onChange={(v) => handleChange('delay_feedback', getNormalized('delay_feedback', v))}
+            />
+            <SynthKnob
+              label="MIX"
+              min={0}
+              max={1}
+              value={getDenormalized('delay_mix', paramValues.delay_mix ?? 0)}
+              onChange={(v) => handleChange('delay_mix', getNormalized('delay_mix', v))}
+            />
+          </div>
+        </div>
+
+        {/* Reverb */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ color: '#ff3366', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px' }}>REVERB</div>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <SynthKnob
+              label="DECAY"
+              min={0.1}
+              max={10}
+              value={getDenormalized('reverb_decay', paramValues.reverb_decay ?? 0.2)}
+              onChange={(v) => handleChange('reverb_decay', getNormalized('reverb_decay', v))}
+            />
+            <SynthKnob
+              label="DAMP"
+              min={0}
+              max={1}
+              value={getDenormalized('reverb_damping', paramValues.reverb_damping ?? 0.5)}
+              onChange={(v) => handleChange('reverb_damping', getNormalized('reverb_damping', v))}
+            />
+            <SynthKnob
+              label="MIX"
+              min={0}
+              max={1}
+              value={getDenormalized('reverb_mix', paramValues.reverb_mix ?? 0)}
+              onChange={(v) => handleChange('reverb_mix', getNormalized('reverb_mix', v))}
+            />
+          </div>
+        </div>
+
+        {/* Compressor */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ color: '#ff3366', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px' }}>COMPRESSOR</div>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <SynthKnob
+              label="THRESH"
+              min={-60}
+              max={0}
+              value={getDenormalized('comp_threshold', paramValues.comp_threshold ?? 0.83)}
+              onChange={(v) => handleChange('comp_threshold', getNormalized('comp_threshold', v))}
+            />
+            <SynthKnob
+              label="RATIO"
+              min={1}
+              max={20}
+              value={getDenormalized('comp_ratio', paramValues.comp_ratio ?? 0.16)}
+              onChange={(v) => handleChange('comp_ratio', getNormalized('comp_ratio', v))}
+            />
+            <SynthKnob
+              label="MAKEUP"
+              min={0}
+              max={24}
+              value={getDenormalized('comp_makeup', paramValues.comp_makeup ?? 0)}
+              onChange={(v) => handleChange('comp_makeup', getNormalized('comp_makeup', v))}
+            />
+          </div>
+        </div>
+      </SynthRow>
     </div>
   );
 };

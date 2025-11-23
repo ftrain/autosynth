@@ -113,13 +113,27 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParam
     ));
 
     // =========================================================================
-    // NOISE
+    // NOISE & MODULATION
     // =========================================================================
 
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{"noise_level", 1},
         "Noise Level",
         juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"pitch_to_noise", 1},
+        "Pitch→Noise",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"pitch_to_decay", 1},
+        "Pitch→Decay",
+        juce::NormalisableRange<float>(-1.0f, 1.0f, 0.01f),
         0.0f
     ));
 
@@ -227,6 +241,208 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParam
     }
 
     // =========================================================================
+    // PITCH LFO
+    // =========================================================================
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"pitch_lfo_rate", 1},
+        "Pitch LFO Rate",
+        juce::NormalisableRange<float>(0.1f, 10.0f, 0.1f),
+        1.0f,
+        juce::AudioParameterFloatAttributes().withLabel("Hz")
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"pitch_lfo_amount", 1},
+        "Pitch LFO Amount",
+        juce::NormalisableRange<float>(0.0f, 24.0f, 0.1f),
+        12.0f,
+        juce::AudioParameterFloatAttributes().withLabel("st")
+    ));
+
+    // Per-step pitch LFO enables
+    for (int i = 0; i < 8; ++i)
+    {
+        params.push_back(std::make_unique<juce::AudioParameterBool>(
+            juce::ParameterID{"pitch_lfo_en_" + juce::String(i), 1},
+            "Step " + juce::String(i + 1) + " Pitch LFO",
+            false
+        ));
+    }
+
+    // =========================================================================
+    // VELOCITY LFO
+    // =========================================================================
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"vel_lfo_rate", 1},
+        "Velocity LFO Rate",
+        juce::NormalisableRange<float>(0.1f, 10.0f, 0.1f),
+        1.0f,
+        juce::AudioParameterFloatAttributes().withLabel("Hz")
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"vel_lfo_amount", 1},
+        "Velocity LFO Amount",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.5f
+    ));
+
+    // Per-step velocity LFO enables
+    for (int i = 0; i < 8; ++i)
+    {
+        params.push_back(std::make_unique<juce::AudioParameterBool>(
+            juce::ParameterID{"vel_lfo_en_" + juce::String(i), 1},
+            "Step " + juce::String(i + 1) + " Velocity LFO",
+            false
+        ));
+    }
+
+    // =========================================================================
+    // FILTER LFO
+    // =========================================================================
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"filter_lfo_rate", 1},
+        "Filter LFO Rate",
+        juce::NormalisableRange<float>(0.1f, 10.0f, 0.1f),
+        1.0f,
+        juce::AudioParameterFloatAttributes().withLabel("Hz")
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"filter_lfo_amount", 1},
+        "Filter LFO Amount",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f
+    ));
+
+    // =========================================================================
+    // FILTER MODE
+    // =========================================================================
+
+    params.push_back(std::make_unique<juce::AudioParameterChoice>(
+        juce::ParameterID{"filter_mode", 1},
+        "Filter Mode",
+        juce::StringArray{"Low Pass", "High Pass"},
+        0  // default to LP
+    ));
+
+    // =========================================================================
+    // EFFECTS - SATURATOR
+    // =========================================================================
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"sat_drive", 1},
+        "Drive",
+        juce::NormalisableRange<float>(1.0f, 20.0f, 0.1f),
+        1.0f
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"sat_mix", 1},
+        "Drive Mix",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f
+    ));
+
+    // =========================================================================
+    // EFFECTS - DELAY
+    // =========================================================================
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"delay_time", 1},
+        "Delay Time",
+        juce::NormalisableRange<float>(0.001f, 2.0f, 0.001f),
+        0.25f,
+        juce::AudioParameterFloatAttributes().withLabel("s")
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"delay_feedback", 1},
+        "Delay Feedback",
+        juce::NormalisableRange<float>(0.0f, 0.95f, 0.01f),
+        0.3f
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"delay_mix", 1},
+        "Delay Mix",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f
+    ));
+
+    // =========================================================================
+    // EFFECTS - REVERB
+    // =========================================================================
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"reverb_decay", 1},
+        "Reverb Decay",
+        juce::NormalisableRange<float>(0.1f, 10.0f, 0.1f),
+        2.0f,
+        juce::AudioParameterFloatAttributes().withLabel("s")
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"reverb_damping", 1},
+        "Reverb Damping",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.5f
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"reverb_mix", 1},
+        "Reverb Mix",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f
+    ));
+
+    // =========================================================================
+    // EFFECTS - COMPRESSOR
+    // =========================================================================
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"comp_threshold", 1},
+        "Comp Threshold",
+        juce::NormalisableRange<float>(-60.0f, 0.0f, 0.1f),
+        -10.0f,
+        juce::AudioParameterFloatAttributes().withLabel("dB")
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"comp_ratio", 1},
+        "Comp Ratio",
+        juce::NormalisableRange<float>(1.0f, 20.0f, 0.1f),
+        4.0f
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"comp_attack", 1},
+        "Comp Attack",
+        juce::NormalisableRange<float>(0.1f, 100.0f, 0.1f),
+        10.0f,
+        juce::AudioParameterFloatAttributes().withLabel("ms")
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"comp_release", 1},
+        "Comp Release",
+        juce::NormalisableRange<float>(10.0f, 1000.0f, 1.0f),
+        100.0f,
+        juce::AudioParameterFloatAttributes().withLabel("ms")
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"comp_makeup", 1},
+        "Comp Makeup",
+        juce::NormalisableRange<float>(0.0f, 24.0f, 0.1f),
+        0.0f,
+        juce::AudioParameterFloatAttributes().withLabel("dB")
+    ));
+
+    // =========================================================================
     // MASTER
     // =========================================================================
 
@@ -289,6 +505,8 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
 
     float fmAmount = *apvts.getRawParameterValue("fm_amount");
     float noiseLevel = *apvts.getRawParameterValue("noise_level");
+    float pitchToNoise = *apvts.getRawParameterValue("pitch_to_noise");
+    float pitchToDecay = *apvts.getRawParameterValue("pitch_to_decay");
 
     float filterCutoff = *apvts.getRawParameterValue("filter_cutoff");
     float filterReso = *apvts.getRawParameterValue("filter_reso");
@@ -317,6 +535,8 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
 
     synthEngine.setFMAmount(fmAmount);
     synthEngine.setNoiseLevel(noiseLevel);
+    synthEngine.setPitchToNoiseAmount(pitchToNoise);
+    synthEngine.setPitchToDecayAmount(pitchToDecay);
 
     synthEngine.setFilterCutoff(filterCutoff);
     synthEngine.setFilterResonance(filterReso);
@@ -339,6 +559,70 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
         synthEngine.setStepPitch(i, pitch);
         synthEngine.setStepVelocity(i, velocity);
     }
+
+    // Update LFO parameters
+    float pitchLfoRate = *apvts.getRawParameterValue("pitch_lfo_rate");
+    float pitchLfoAmount = *apvts.getRawParameterValue("pitch_lfo_amount");
+    float velLfoRate = *apvts.getRawParameterValue("vel_lfo_rate");
+    float velLfoAmount = *apvts.getRawParameterValue("vel_lfo_amount");
+
+    synthEngine.setPitchLfoRate(pitchLfoRate);
+    synthEngine.setPitchLfoAmount(pitchLfoAmount);
+    synthEngine.setVelocityLfoRate(velLfoRate);
+    synthEngine.setVelocityLfoAmount(velLfoAmount);
+
+    // Update per-step LFO enables
+    for (int i = 0; i < 8; ++i)
+    {
+        bool pitchLfoEn = *apvts.getRawParameterValue("pitch_lfo_en_" + juce::String(i)) > 0.5f;
+        bool velLfoEn = *apvts.getRawParameterValue("vel_lfo_en_" + juce::String(i)) > 0.5f;
+        synthEngine.setStepPitchLfoEnabled(i, pitchLfoEn);
+        synthEngine.setStepVelocityLfoEnabled(i, velLfoEn);
+    }
+
+    // Update filter LFO
+    float filterLfoRate = *apvts.getRawParameterValue("filter_lfo_rate");
+    float filterLfoAmount = *apvts.getRawParameterValue("filter_lfo_amount");
+    synthEngine.setFilterLfoRate(filterLfoRate);
+    synthEngine.setFilterLfoAmount(filterLfoAmount);
+
+    // Update filter mode
+    int filterMode = static_cast<int>(*apvts.getRawParameterValue("filter_mode"));
+    synthEngine.setFilterMode(filterMode);
+
+    // Update effects - Saturator
+    float satDrive = *apvts.getRawParameterValue("sat_drive");
+    float satMix = *apvts.getRawParameterValue("sat_mix");
+    synthEngine.setSaturatorDrive(satDrive);
+    synthEngine.setSaturatorMix(satMix);
+
+    // Update effects - Delay
+    float delayTime = *apvts.getRawParameterValue("delay_time");
+    float delayFeedback = *apvts.getRawParameterValue("delay_feedback");
+    float delayMix = *apvts.getRawParameterValue("delay_mix");
+    synthEngine.setDelayTime(delayTime);
+    synthEngine.setDelayFeedback(delayFeedback);
+    synthEngine.setDelayMix(delayMix);
+
+    // Update effects - Reverb
+    float reverbDecay = *apvts.getRawParameterValue("reverb_decay");
+    float reverbDamping = *apvts.getRawParameterValue("reverb_damping");
+    float reverbMix = *apvts.getRawParameterValue("reverb_mix");
+    synthEngine.setReverbDecay(reverbDecay);
+    synthEngine.setReverbDamping(reverbDamping);
+    synthEngine.setReverbMix(reverbMix);
+
+    // Update effects - Compressor
+    float compThreshold = *apvts.getRawParameterValue("comp_threshold");
+    float compRatio = *apvts.getRawParameterValue("comp_ratio");
+    float compAttack = *apvts.getRawParameterValue("comp_attack");
+    float compRelease = *apvts.getRawParameterValue("comp_release");
+    float compMakeup = *apvts.getRawParameterValue("comp_makeup");
+    synthEngine.setCompThreshold(compThreshold);
+    synthEngine.setCompRatio(compRatio);
+    synthEngine.setCompAttack(compAttack);
+    synthEngine.setCompRelease(compRelease);
+    synthEngine.setCompMakeup(compMakeup);
 
     // Handle MIDI messages (for manual triggering)
     for (const auto metadata : midiMessages)
