@@ -1,0 +1,101 @@
+id,name,description,synthesis_type,key_feature,genre_tags,weirdness_level
+1,Modem Carrier,FM synthesis modulated by baud rate parameters (300-56k),fm,Baud-rate-locked frequency modulation,ambient;experimental;retro,5
+2,Floppy Seek Engine,Physical modeling of stepper motor resonance and disk rotation,physical_modeling,Actual floppy drive mechanical frequencies,idm;glitch;techno,7
+3,CRT Phosphor Synth,Subtractive filter with time-decay envelope mimicking CRT persistence,subtractive,Exponential brightness decay like old monitor phosphors,ambient;cinematic;retro,4
+4,Dial-Up Chorus,Wavetable modulation using 33.6k handshake frequency spectrum,wavetable,Chorus depth controlled by connection speed,electronic;vapor;lo-fi,6
+5,Dot Matrix Percussion,Sample-based drum synthesis from dot matrix printer impact sounds,sample_based,Printhead striking patterns as percussion layers,industrial;experimental;rhythm,6
+6,Punch Card Reader,Granular synthesis triggered by punch hole patterns,granular,Granule rate matches card feed speed,glitch;experimental;abstract,8
+7,ENIAC Echo,Additive synthesis with 18000+ tube-derived harmonic series,additive,Recreates all 18000 tube resonances as harmonics,ambient;vintage;experimental,7
+8,Hard Drive Platter,Physical modeling of spinning disk resonances and seek arm harmonics,physical_modeling,Three frequencies: spindle rotation + two seek motor ranges,industrial;experimental;ambient,6
+9,Boot Sequence,Feedback synthesis creating self-referential oscillation patterns,feedback,Feedback gains corresponding to boot stage completion,experimental;glitch;ambient,8
+10,Memory Parity,Additive using error-correction polynomial harmonics,additive,Hamming code creates unique harmonic relationships,experimental;digital;abstract,9
+101,Moog Prophet Fusion,Minimoog ladder filter with Prophet-5 wavetables and bipolar modulation,hybrid,Prophet/Moog parameter crossfading,synthwave;synth-pop,3
+102,Buchla-East Oscillator,West coast random voltage mixed with east coast precision tuning,hybrid,Dual-mode oscillator with West/East toggle,experimental;drone,7
+103,TB-Phone,303-style monophonic with phoneme synthesis modulation,sample_based,Speech-integrated filter sweep,acid;experimental,8
+104,TR-Euclidean,808/909 hybrid with Euclidean rhythm step sequencing,noise,Polyrhythmic pattern generation,techno;minimal,6
+105,Fairlight Spectral,Fairlight CMI sampling with FFT spectral resynthesis,sample_based,Real-time spectral morph,soundtrack;experimental,7
+106,DX Feedback Loop,Yamaha DX7 with analog feedback oscillator in operator chain,fm,Feedback-modulated FM,synthwave;industrial,7
+107,MS-20 Voltage Chaos,Korg MS-20 with chaotic attractor LFO modulation,feedback,Lorenz attractor modulation,experimental;dark-ambient,9
+108,Serge Wobbulator,Serge random source with nested recursive modulation depth,noise,Fractal chaos modulation,drone;experimental,9
+109,Jupiter Harmonic Echo,Jupiter-8 with harmonic series feedback across voices,feedback,Overtone feedback loop,drone;ambient,7
+110,PPG Chaos Wave,PPG with chaotic wavetable distortion oscillator,wavetable,Non-euclidean waveforms,experimental;industrial,9
+201,Thunderstorm,Dynamic FM synthesis that models lightning strikes and rolling thunder,fm,electrical_feedback_distortion,ambient;experimental,7
+202,Aurora Borealis,Wavetable synth with slowly evolving aurora-like color shifts,wavetable,slow_harmonic_drift,ambient;ethereal,4
+203,Earthquake Rumble,Subtractive synth with deep envelope modulation and resonant pitch sliding,subtractive,deep_envelope_resonance,industrial;dark,7
+204,Volcanic Eruption,Feedback synthesis with explosive envelope attacks,feedback,explosive_rise_feedback,dark-ambient;glitch,8
+205,Crystal Resonance,Additive synthesis based on natural crystal harmonic ratios,additive,perfect_harmonic_ratios,experimental;ambient,4
+206,Ocean Waves,Physical modeling of wave interference and foam dynamics,physical_modeling,wave_interference_foam,ambient;chill,3
+207,Deep Sea Vent,FM synthesis of pressure changes and mineral-rich bubbling,fm,pressure_modulation,dark-ambient,5
+208,Glacier Cracking,Feedback synthesis with sudden phase discontinuities,feedback,crystalline_shattering,glitch;ambient,7
+209,Neural Impulse,FM synthesis modeled on action potential firing patterns,fm,action_potential_modulation,experimental;glitch,6
+210,DNA Helix,Wavetable synth with intertwined harmonic strands,wavetable,helical_modulation,experimental;abstract,6
+301,Gear Cascade,Multi-oscillator FM mimicking interlocking mechanical gears,fm,Harmonic gear ratios,industrial;mechanical,3
+302,Piston Engine Bass,Subtractive synth with velocity-triggered pulse patterns,subtractive,Rhythmic sub-bass,industrial;bass,4
+303,Turbine Drone,Wavetable with morphing turbine waveforms,wavetable,Morphing rotor waves,industrial;ambient,5
+304,Welding Arc,FM with modulated noise bursts,fm,Arc intensity modulation,industrial;noise,6
+305,Pneumatic Release,Physical modeling of compressed air escape,physical_modeling,Pressure decay simulation,industrial;experimental,7
+306,Steam Whistle,Subtractive with resonant filter sweep,subtractive,Fixed frequency sweeps,industrial;vintage,4
+307,Furnace Roar,Additive synthesis of multiple metal resonances,additive,Harmonic richness,industrial;dark,5
+308,Jackhammer Beat,Noise synth with rapid amplitude modulation,noise,Rhythmic intensity,industrial;percussion,4
+309,Hydraulic Pump,Subtractive saw with amplitude modulation,subtractive,Pump-like oscillation,industrial;mechanical,3
+310,Factory Ambience,Additive synthesis of layered machine hums,additive,Complex layering,industrial;ambient,3
+401,Superposition Synth,Oscillators exist in multiple frequency states until playback begins,fm,Uncertainty-driven frequency generation,experimental;electronic,8
+402,Entanglement Oscillator,Linked oscillators maintain instantaneous phase correlation,fm,Non-local oscillator coupling,ambient,9
+403,Chaos Attractor,Chaotic feedback endlessly evolves timbre without repeating,feedback,Strange attractor state space,ambient;drone,9
+404,Mandelbrot Synth,Mandelbrot set iteration drives frequency/filter exploration,wavetable,Fractal escape-time algorithm,ambient,9
+405,Fibonacci Oscillator,Harmonic partials spaced at Fibonacci intervals,additive,Fibonacci harmonic spacing,ambient,6
+406,Golden Ratio Filter,Filter cutoff modulation follows golden ratio proportions,subtractive,Phi-based cutoff modulation,ambient,5
+407,Entropy Synth,Chaos and disorder increase over time like thermodynamic entropy,feedback,Progressive entropy increase,ambient,8
+408,Doppler Synthesizer,Pitch shift based on oscillator velocity through frequency space,fm,Velocity-dependent pitch shift,experimental,7
+409,Quantum Tunneling Synth,Audio signal tunnels through frequency barriers at probability rates,granular,Stochastic frequency barrier crossing,noise,8
+410,Wave Function Collapse,Smooth waveform snaps discontinuously when envelope reaches peak,fm,Discontinuous phase transitions,glitch,9
+501,Gamelan Bronze,FM synthesis modeling bronze plate vibrations with morphing resonance,fm,Resonance morphing,world;electronica,4
+502,Sitar Dreams,Additive synthesis with sympathetic string resonance,additive,Sympathetic strings,world;ambient,5
+503,Didgeridoo Eternal,Wavetable synthesis with circular breathing modulation,wavetable,Circular breathing,world;drones,7
+504,Kalimba Metallic,Additive synthesis modeling metallic tine resonance,additive,Tine resonance,world;bright,3
+505,Koto String,Physical modeling of koto strings with sliding and plucking,physical_modeling,String sliding,world;meditative,5
+506,Throat Singing,Additive synthesis with resonance cavity modeling,additive,Cavity modeling,world;exotic,8
+507,Singing Bowl,Sample-based synthesis with sustained resonance,sample_based,Sustained resonance,world;healing,3
+508,Glass Harmonica,Additive synthesis with circular modulation,additive,Circular modulation,world;ethereal,6
+509,Hang Drum,Physical modeling of hang drum with multiple strike zones,physical_modeling,Strike zones,world;percussive,5
+510,Bullroarer Wind,Noise synthesis with rotational modulation,noise,Rotational modulation,world;primal,7
+601,Pulsar Beat,Rhythmic oscillator based on neutron star rotation periods,fm,Synchronized pulsing modulation,techno;ambient;sci-fi,3
+602,Black Hole Warp,Gravity-simulated frequency bending and time stretching,wavetable,Gravitational lensing effect,ambient;drone;experimental,8
+603,Supernova Flash,Explosive attack with exponential decay on every note,sample_based,Captured explosion samples,cinematic;sci-fi,4
+604,Solar Wind Echo,Streaming wavetable with environmental reverb simulation,wavetable,Wind-like parameter sweeping,ambient;textural,4
+605,Nebula Birth,Additive synthesis gradually introducing harmonics,additive,Harmonic emergence sequence,ambient;ethereal,3
+606,Cosmic Ray Shower,Granular with high-rate stochastic triggering,granular,Shower-like random granule firing,glitch;experimental,7
+607,Saturn Rings,Additive with ring-resonance frequencies,additive,Ring harmonic tuning,ambient;ethereal,3
+608,Gravitational Wave,Subtractive with modulation from wave equation solution,subtractive,Wave equation automation,experimental;ambient,6
+609,Event Horizon Synth,Parameters inverted beyond threshold creating unpredictable behavior,hybrid,Threshold-based parameter inversion,generative;dark-ambient,8
+610,Hawking Radiation,Low-level noise floor slowly accumulating in amplitude,noise,Entropy-driven noise accumulation,ambient;experimental,7
+701,Helix Oscillator,DNA double helix motion controls pitch oscillation patterns,fm,Intertwined carrier/modulator creating spiral frequency patterns,ambient;electronic;sci-fi,4
+702,Synapse Delay,Neural signal propagation modeled as delay with probabilistic feedback,feedback,Variable delay time triggers cross-feedback,idm;experimental,7
+703,Heartbeat Engine,Percussive rhythm generator with pulse pattern derived from vital signs,granular,Granules trigger at cardiac intervals,darkwave;ambient,5
+704,Breathing Modulator,Amplitude and filter modulation following natural respiratory patterns,wavetable,Slow LFO shapes create human respiration,meditation;ambient,2
+705,Muscle Twitch,Granular sampler triggered by muscle contraction simulation,granular,Short impulses combine into dynamic texture,experimental;glitch,6
+706,Mycelium Network,Feedback network simulating fungal spreading and colony growth,feedback,Multiple cross-modulated oscillators with delayed coupling,experimental;ambient,7
+707,Metamorphosis Engine,Morphing wavetable that cycles through transformation states,wavetable,Smooth evolution through life stages,ambient;experimental,4
+708,Memory Decay Engine,Samples slowly degrade into noise then reconstruct imperfectly,sample_based,Corrupted recall,ambient;glitch;experimental,8
+709,Photosynthesis Converter,Light input creates harmonic energy output,additive,Energy conversion from external stimulus,ambient;electronic,3
+710,Evolution Morphing,Smooth parameter evolution triggered by mutation events,wavetable,Random mutations shift wavetable interpolation,experimental;ambient,5
+801,Escher's Nightmare,Impossible staircase acoustic space where frequencies climb forever,physical_modeling,infinite_ascent,ambient;experimental;unsettling,9
+802,Paradox Oscillator,Generates tones that are simultaneously rising and falling,fm,bidirectional_modulation,psychoacoustic;glitch;ambient,8
+803,Hypnagogic Drifter,Captures the moment between sleep and waking as spectral clouds,granular,sleep_state_sampling,ambient;experimental;surreal,8
+804,Synesthetic Chromaphone,Maps visual colors directly to FM parameters,fm,color_input_modulation,experimental;ambient;weird,8
+805,Temporal Dilation Engine,Stretches single moments into infinite time scales,granular,moment_stretching,ambient;drone;experimental,9
+806,Recursive Dream Loop,Endlessly nested oscillators where each is a miniature of the whole,hybrid,fractal_voices,drone;ambient;experimental,9
+807,Consciousness Crystallizer,Sonifies the moment neurons fire into unified awareness,additive,consciousness_mapping,experimental;ambient;weird,9
+808,Uncanny Valley Formant,Creates vowel-like sounds that almost match human speech,additive,near_speech,unsettling;experimental;ambient,8
+809,Liminal Space Resonator,Generates acoustic equivalent of empty hallways and abandoned malls,granular,liminal_sampling,ambient;unsettling;experimental,8
+810,Void Articulation Synth,Attempts to give voice to the space between all sounds,noise,silence_sound,ambient;experimental;weird,9
+901,Conway Life Synth,Cellular automata patterns drive oscillator activation,hybrid,Game of Life modulation,generative;ambient,7
+902,Wolfram Rule 110,Elementary cellular automata generates melodic patterns,wavetable,Rule-based pattern generation,generative;glitch,8
+903,L-System Growth,Recursive branching creates evolving harmonic structures,additive,Fractal growth patterns,ambient;generative,6
+904,Genetic Algorithm Synth,Parameters evolve through selection and mutation,hybrid,Evolutionary optimization,experimental;generative,8
+905,Markov Chain Melody,Probabilistic state transitions generate sequences,sample_based,Stochastic composition,generative;ambient,5
+906,Perlin Noise Modulator,Smooth noise functions drive all modulation,noise,Coherent noise modulation,ambient;generative,4
+907,Flocking Boids,Swarm behavior of oscillators creates emergent harmony,hybrid,Emergent behavior synthesis,experimental;ambient,8
+908,Ant Colony Sequencer,Pheromone trails determine note selection,feedback,Swarm intelligence patterns,generative;experimental,7
+909,Lorenz Attractor,Three coupled oscillators create 3D chaos space,hybrid,Three-body chaotic modulation,techno;experimental,8
+910,Turing Pattern,Reaction-diffusion creates evolving timbral textures,granular,Self-organizing patterns,ambient;generative,7
