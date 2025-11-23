@@ -171,131 +171,143 @@ const App: React.FC = () => {
       </SynthRow>
 
       {/* =====================================================================
-          FILTER + ENVELOPES - Combined section (blue + green submodules)
+          FILTER + ENVELOPES - Combined into one row (blue theme)
           ===================================================================== */}
-      <div style={{ display: 'flex', gap: '0px', flexWrap: 'wrap' }}>
-        {/* FILTER - Liquid Blue */}
-        <SynthRow label="FILTER" theme="blue" icon="〰" justify="center" gap="12px" style={{ flex: 2, minWidth: '400px' }}>
-          <SynthKnob label="CUTOFF" min={20} max={20000}
-            value={getDenormalized('filter_cutoff', paramValues.filter_cutoff ?? 0.3)}
-            onChange={(v) => handleChange('filter_cutoff', getNormalized('filter_cutoff', v))}
-          />
-          <SynthKnob label="RESO" min={0} max={1}
-            value={getDenormalized('filter_reso', paramValues.filter_reso ?? 0)}
-            onChange={(v) => handleChange('filter_reso', getNormalized('filter_reso', v))}
-          />
-          <SynthKnob label="ENV" min={0} max={1}
-            value={getDenormalized('filter_env_amount', paramValues.filter_env_amount ?? 0.5)}
-            onChange={(v) => handleChange('filter_env_amount', getNormalized('filter_env_amount', v))}
-          />
-          <SynthKnob label="MODE" min={0} max={1} step={1} options={['LP', 'HP']}
-            value={getDenormalized('filter_mode', paramValues.filter_mode ?? 0)}
-            onChange={(v) => handleChange('filter_mode', getNormalized('filter_mode', v))}
-          />
-          <div style={{ width: '1px', height: '60px', background: 'rgba(102,102,255,0.3)' }} />
-          <SynthKnob label="LFO ↻" min={0.1} max={10}
-            value={getDenormalized('filter_lfo_rate', paramValues.filter_lfo_rate ?? 0.1)}
-            onChange={(v) => handleChange('filter_lfo_rate', getNormalized('filter_lfo_rate', v))}
-          />
-          <SynthKnob label="LFO ↕" min={0} max={1}
-            value={getDenormalized('filter_lfo_amount', paramValues.filter_lfo_amount ?? 0)}
-            onChange={(v) => handleChange('filter_lfo_amount', getNormalized('filter_lfo_amount', v))}
-          />
-        </SynthRow>
-
-        {/* ENVELOPES - Sharp Green */}
-        <SynthRow label="ENVELOPES" theme="green" icon="▲" justify="center" gap="16px" style={{ flex: 1, minWidth: '300px' }}>
-          {/* Pitch Envelope */}
-          <div style={{ background: 'rgba(0,40,20,0.5)', border: '1px solid #008833', borderRadius: '6px', padding: '10px' }}>
-            <div style={{ color: '#66ff99', fontSize: '10px', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '8px', textAlign: 'center' }}>PITCH</div>
-            <div style={{ display: 'flex', gap: '6px' }}>
-              <SynthKnob label="ATK" min={0.001} max={2}
-                value={getDenormalized('pitch_env_attack', paramValues.pitch_env_attack ?? 0)}
-                onChange={(v) => handleChange('pitch_env_attack', getNormalized('pitch_env_attack', v))}
-              />
-              <SynthKnob label="DCY" min={0.001} max={2}
-                value={getDenormalized('pitch_env_decay', paramValues.pitch_env_decay ?? 0.15)}
-                onChange={(v) => handleChange('pitch_env_decay', getNormalized('pitch_env_decay', v))}
-              />
-              <SynthKnob label="AMT" min={0} max={48}
-                value={getDenormalized('pitch_env_amount', paramValues.pitch_env_amount ?? 0.5)}
-                onChange={(v) => handleChange('pitch_env_amount', getNormalized('pitch_env_amount', v))}
-              />
-            </div>
+      <SynthRow label="FILTER & ENVELOPES" theme="blue" icon="〰" justify="center" gap="16px">
+        {/* Filter Controls */}
+        <div style={{ background: 'rgba(0,0,30,0.4)', border: '1px solid #5555cc', borderRadius: '8px', padding: '12px' }}>
+          <div style={{ color: '#aaaaff', fontSize: '10px', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '8px', textAlign: 'center' }}>FILTER</div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <SynthKnob label="CUTOFF" min={20} max={20000}
+              value={getDenormalized('filter_cutoff', paramValues.filter_cutoff ?? 0.3)}
+              onChange={(v) => handleChange('filter_cutoff', getNormalized('filter_cutoff', v))}
+            />
+            <SynthKnob label="RESO" min={0} max={1}
+              value={getDenormalized('filter_reso', paramValues.filter_reso ?? 0)}
+              onChange={(v) => handleChange('filter_reso', getNormalized('filter_reso', v))}
+            />
+            <SynthKnob label="ENV" min={0} max={1}
+              value={getDenormalized('filter_env_amount', paramValues.filter_env_amount ?? 0.5)}
+              onChange={(v) => handleChange('filter_env_amount', getNormalized('filter_env_amount', v))}
+            />
+            <SynthKnob label="MODE" min={0} max={1} step={1} options={['LP', 'HP']}
+              value={getDenormalized('filter_mode', paramValues.filter_mode ?? 0)}
+              onChange={(v) => handleChange('filter_mode', getNormalized('filter_mode', v))}
+            />
           </div>
+        </div>
 
-          {/* VCF/VCA Envelope */}
-          <div style={{ background: 'rgba(0,40,20,0.5)', border: '1px solid #008833', borderRadius: '6px', padding: '10px' }}>
-            <div style={{ color: '#66ff99', fontSize: '10px', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '8px', textAlign: 'center' }}>VCF/VCA</div>
-            <div style={{ display: 'flex', gap: '6px' }}>
-              <SynthKnob label="ATK" min={0.001} max={2}
-                value={getDenormalized('vcf_vca_attack', paramValues.vcf_vca_attack ?? 0)}
-                onChange={(v) => handleChange('vcf_vca_attack', getNormalized('vcf_vca_attack', v))}
-              />
-              <SynthKnob label="DCY" min={0.001} max={2}
-                value={getDenormalized('vcf_vca_decay', paramValues.vcf_vca_decay ?? 0.25)}
-                onChange={(v) => handleChange('vcf_vca_decay', getNormalized('vcf_vca_decay', v))}
-              />
-            </div>
+        {/* Filter LFO */}
+        <div style={{ background: 'rgba(0,0,30,0.4)', border: '1px solid #5555cc', borderRadius: '8px', padding: '12px' }}>
+          <div style={{ color: '#aaaaff', fontSize: '10px', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '8px', textAlign: 'center' }}>FILTER LFO</div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <SynthKnob label="RATE" min={0.1} max={10}
+              value={getDenormalized('filter_lfo_rate', paramValues.filter_lfo_rate ?? 0.1)}
+              onChange={(v) => handleChange('filter_lfo_rate', getNormalized('filter_lfo_rate', v))}
+            />
+            <SynthKnob label="AMT" min={0} max={1}
+              value={getDenormalized('filter_lfo_amount', paramValues.filter_lfo_amount ?? 0)}
+              onChange={(v) => handleChange('filter_lfo_amount', getNormalized('filter_lfo_amount', v))}
+            />
           </div>
-        </SynthRow>
-      </div>
+        </div>
+
+        {/* Pitch Envelope */}
+        <div style={{ background: 'rgba(0,30,15,0.5)', border: '1px solid #00aa44', borderRadius: '8px', padding: '12px' }}>
+          <div style={{ color: '#66ff99', fontSize: '10px', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '8px', textAlign: 'center' }}>▲ PITCH ENV</div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <SynthKnob label="ATK" min={0.001} max={2}
+              value={getDenormalized('pitch_env_attack', paramValues.pitch_env_attack ?? 0)}
+              onChange={(v) => handleChange('pitch_env_attack', getNormalized('pitch_env_attack', v))}
+            />
+            <SynthKnob label="DCY" min={0.001} max={2}
+              value={getDenormalized('pitch_env_decay', paramValues.pitch_env_decay ?? 0.15)}
+              onChange={(v) => handleChange('pitch_env_decay', getNormalized('pitch_env_decay', v))}
+            />
+            <SynthKnob label="AMT" min={0} max={48}
+              value={getDenormalized('pitch_env_amount', paramValues.pitch_env_amount ?? 0.5)}
+              onChange={(v) => handleChange('pitch_env_amount', getNormalized('pitch_env_amount', v))}
+            />
+          </div>
+        </div>
+
+        {/* VCF/VCA Envelope */}
+        <div style={{ background: 'rgba(0,30,15,0.5)', border: '1px solid #00aa44', borderRadius: '8px', padding: '12px' }}>
+          <div style={{ color: '#66ff99', fontSize: '10px', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '8px', textAlign: 'center' }}>▲ VCF/VCA ENV</div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <SynthKnob label="ATK" min={0.001} max={2}
+              value={getDenormalized('vcf_vca_attack', paramValues.vcf_vca_attack ?? 0)}
+              onChange={(v) => handleChange('vcf_vca_attack', getNormalized('vcf_vca_attack', v))}
+            />
+            <SynthKnob label="DCY" min={0.001} max={2}
+              value={getDenormalized('vcf_vca_decay', paramValues.vcf_vca_decay ?? 0.25)}
+              onChange={(v) => handleChange('vcf_vca_decay', getNormalized('vcf_vca_decay', v))}
+            />
+          </div>
+        </div>
+      </SynthRow>
 
       {/* =====================================================================
-          SEQUENCERS - Side by side on one row (magenta + cyan)
+          SEQUENCERS - Combined into one row (magenta theme)
           ===================================================================== */}
-      <div style={{ display: 'flex', gap: '0px', flexWrap: 'wrap' }}>
-        {/* PITCH SEQUENCER - Neon Magenta */}
-        <SynthRow label="PITCH SEQUENCE" theme="magenta" icon="◆" align="center" gap="16px" style={{ flex: 1, minWidth: '400px' }}>
-          <DFAMSequencer
-            label=""
-            values={pitchValues}
-            currentStep={currentStep}
-            min={-24} max={24} bipolar={true}
-            onChange={(step, value) => handleChange(`seq_pitch_${step}`, getNormalized(`seq_pitch_${step}`, value))}
-            formatValue={(v) => `${v > 0 ? '+' : ''}${v}`}
-            lfoEnabled={pitchLfoEnabled}
-            onLfoToggle={(step, enabled) => handleChange(`pitch_lfo_en_${step}`, enabled ? 1 : 0)}
-            lfoColor="#ff00ff"
-          />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <SynthKnob label="LFO ↻" min={0.1} max={10}
-              value={getDenormalized('pitch_lfo_rate', paramValues.pitch_lfo_rate ?? 0.1)}
-              onChange={(v) => handleChange('pitch_lfo_rate', getNormalized('pitch_lfo_rate', v))}
+      <SynthRow label="SEQUENCERS" theme="magenta" icon="◆" align="center" justify="center" gap="24px">
+        {/* PITCH SEQUENCER */}
+        <div style={{ background: 'rgba(40,0,40,0.4)', border: '1px solid #cc00cc', borderRadius: '8px', padding: '12px' }}>
+          <div style={{ color: '#ff66ff', fontSize: '10px', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '8px', textAlign: 'center' }}>PITCH</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <DFAMSequencer
+              label=""
+              values={pitchValues}
+              currentStep={currentStep}
+              min={-24} max={24} bipolar={true}
+              onChange={(step, value) => handleChange(`seq_pitch_${step}`, getNormalized(`seq_pitch_${step}`, value))}
+              formatValue={(v) => `${v > 0 ? '+' : ''}${v}`}
+              lfoEnabled={pitchLfoEnabled}
+              onLfoToggle={(step, enabled) => handleChange(`pitch_lfo_en_${step}`, enabled ? 1 : 0)}
+              lfoColor="#ff00ff"
             />
-            <SynthKnob label="LFO ↕" min={0} max={24}
-              value={getDenormalized('pitch_lfo_amount', paramValues.pitch_lfo_amount ?? 0.5)}
-              onChange={(v) => handleChange('pitch_lfo_amount', getNormalized('pitch_lfo_amount', v))}
-            />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <SynthKnob label="LFO ↻" min={0.1} max={10}
+                value={getDenormalized('pitch_lfo_rate', paramValues.pitch_lfo_rate ?? 0.1)}
+                onChange={(v) => handleChange('pitch_lfo_rate', getNormalized('pitch_lfo_rate', v))}
+              />
+              <SynthKnob label="LFO ↕" min={0} max={24}
+                value={getDenormalized('pitch_lfo_amount', paramValues.pitch_lfo_amount ?? 0.5)}
+                onChange={(v) => handleChange('pitch_lfo_amount', getNormalized('pitch_lfo_amount', v))}
+              />
+            </div>
           </div>
-        </SynthRow>
+        </div>
 
-        {/* VELOCITY SEQUENCER - Digital Cyan */}
-        <SynthRow label="VELOCITY SEQUENCE" theme="cyan" icon="◆" align="center" gap="16px" style={{ flex: 1, minWidth: '400px' }}>
-          <DFAMSequencer
-            label=""
-            values={velocityValues.map(v => Math.round(v * 100))}
-            currentStep={currentStep}
-            min={0} max={100} bipolar={false}
-            accentColor="#4a9eff"
-            onChange={(step, value) => handleChange(`seq_vel_${step}`, getNormalized(`seq_vel_${step}`, value / 100))}
-            formatValue={(v) => `${v}%`}
-            lfoEnabled={velocityLfoEnabled}
-            onLfoToggle={(step, enabled) => handleChange(`vel_lfo_en_${step}`, enabled ? 1 : 0)}
-            lfoColor="#00ffff"
-          />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <SynthKnob label="LFO ↻" min={0.1} max={10}
-              value={getDenormalized('vel_lfo_rate', paramValues.vel_lfo_rate ?? 0.1)}
-              onChange={(v) => handleChange('vel_lfo_rate', getNormalized('vel_lfo_rate', v))}
+        {/* VELOCITY SEQUENCER */}
+        <div style={{ background: 'rgba(0,40,40,0.4)', border: '1px solid #00cccc', borderRadius: '8px', padding: '12px' }}>
+          <div style={{ color: '#66ffff', fontSize: '10px', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '8px', textAlign: 'center' }}>VELOCITY</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <DFAMSequencer
+              label=""
+              values={velocityValues.map(v => Math.round(v * 100))}
+              currentStep={currentStep}
+              min={0} max={100} bipolar={false}
+              accentColor="#4a9eff"
+              onChange={(step, value) => handleChange(`seq_vel_${step}`, getNormalized(`seq_vel_${step}`, value / 100))}
+              formatValue={(v) => `${v}%`}
+              lfoEnabled={velocityLfoEnabled}
+              onLfoToggle={(step, enabled) => handleChange(`vel_lfo_en_${step}`, enabled ? 1 : 0)}
+              lfoColor="#00ffff"
             />
-            <SynthKnob label="LFO ↕" min={0} max={1}
-              value={getDenormalized('vel_lfo_amount', paramValues.vel_lfo_amount ?? 0.5)}
-              onChange={(v) => handleChange('vel_lfo_amount', getNormalized('vel_lfo_amount', v))}
-            />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <SynthKnob label="LFO ↻" min={0.1} max={10}
+                value={getDenormalized('vel_lfo_rate', paramValues.vel_lfo_rate ?? 0.1)}
+                onChange={(v) => handleChange('vel_lfo_rate', getNormalized('vel_lfo_rate', v))}
+              />
+              <SynthKnob label="LFO ↕" min={0} max={1}
+                value={getDenormalized('vel_lfo_amount', paramValues.vel_lfo_amount ?? 0.5)}
+                onChange={(v) => handleChange('vel_lfo_amount', getNormalized('vel_lfo_amount', v))}
+              />
+            </div>
           </div>
-        </SynthRow>
-      </div>
+        </div>
+      </SynthRow>
 
       {/* =====================================================================
           EFFECTS - Deep Space Pink
