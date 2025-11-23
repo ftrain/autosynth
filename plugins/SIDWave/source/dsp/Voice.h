@@ -24,9 +24,6 @@
 // SST Filter
 #include "sst/filters/CytomicSVF.h"
 
-// SST Envelope
-#include "sst/basic-blocks/modulators/ADSREnvelope.h"
-
 /**
  * @brief SID-style waveform types
  */
@@ -49,6 +46,18 @@ enum class FilterMode
 };
 
 /**
+ * @brief Simple envelope stages
+ */
+enum class EnvStage
+{
+    Idle = 0,
+    Attack,
+    Decay,
+    Sustain,
+    Release
+};
+
+/**
  * @brief Single SID Wave voice
  */
 class Voice
@@ -67,12 +76,13 @@ public:
     {
         sampleRate = sr;
 
-        // Initialize SST envelope
-        ampEnv.setSampleRate(static_cast<float>(sampleRate));
-
         // Initialize noise generator
         noiseValue1 = 0.0f;
         noiseValue2 = 0.0f;
+
+        // Reset envelope
+        envStage = EnvStage::Idle;
+        envLevel = 0.0f;
 
         // Reset sample-and-hold state
         sampleHoldCounter = 0;
@@ -105,14 +115,15 @@ public:
         noiseShift2 = 0x7FFFF8;
         noiseShift3 = 0x7FFFF8;
 
-        // Trigger envelope
-        ampEnv.attackFrom(0.0f, attackTime, decayTime, sustainLevel, releaseTime, 1.0f, 1.0f);
+        // Start envelope
+        envStage = EnvStage::Attack;
+        envLevel = 0.0f;
     }
 
     void noteOff()
     {
         releasing = true;
-        ampEnv.release();
+        envStage = EnvStage::Release;
     }
 
     void kill()
@@ -276,6 +287,61 @@ private:
         return heldSample;
     }
 
+    /**
+     * @brief Process ADSR envelope
+     */
+    float processEnvelope()
+    {
+        float delta = 1.0f / static_cast<float>(sampleRate);
+
+        switch (envStage)
+        {
+            case EnvStage::Attack:
+            {
+                float rate = (attackTime > 0.001f) ? delta / attackTime : 1.0f;
+                envLevel += rate;
+                if (envLevel >= 1.0f)
+                {
+                    envLevel = 1.0f;
+                    envStage = EnvStage::Decay;
+                }
+                break;
+            }
+            case EnvStage::Decay:
+            {
+                float rate = (decayTime > 0.001f) ? delta / decayTime : 1.0f;
+                envLevel -= rate * (1.0f - sustainLevel);
+                if (envLevel <= sustainLevel)
+                {
+                    envLevel = sustainLevel;
+                    envStage = EnvStage::Sustain;
+                }
+                break;
+            }
+            case EnvStage::Sustain:
+                envLevel = sustainLevel;
+                break;
+
+            case EnvStage::Release:
+            {
+                float rate = (releaseTime > 0.001f) ? delta / releaseTime : 1.0f;
+                envLevel -= rate * sustainLevel;
+                if (envLevel <= 0.0f)
+                {
+                    envLevel = 0.0f;
+                    envStage = EnvStage::Idle;
+                }
+                break;
+            }
+            case EnvStage::Idle:
+            default:
+                envLevel = 0.0f;
+                break;
+        }
+
+        return envLevel;
+    }
+
     //==========================================================================
     // Block Rendering
     //==========================================================================
@@ -291,13 +357,10 @@ private:
         float phaseInc3 = basePhaseInc * tune3;
 
         // Process filter coefficients
-        using FilterType = sst::filters::CytomicSVF;
+        using FilterMode_t = sst::filters::CytomicSVF::Mode;
 
-        float normalizedCutoff = filterCutoff / static_cast<float>(sampleRate);
-        normalizedCutoff = std::clamp(normalizedCutoff, 0.001f, 0.45f);
-
-        // Q from resonance (0-1 -> 0.5-20)
-        float q = 0.5f + filterReso * 19.5f;
+        float srInv = 1.0f / static_cast<float>(sampleRate);
+        float res = std::clamp(filterReso, 0.0f, 0.98f);
 
         for (int i = 0; i < blockSize; ++i)
         {
@@ -340,28 +403,26 @@ private:
             switch (filterMode)
             {
                 case FilterMode::LowPass:
-                    filterL.setCoeff(FilterType::LP, normalizedCutoff, q);
-                    filterR.setCoeff(FilterType::LP, normalizedCutoff, q);
+                    filterL.setCoeff(FilterMode_t::Lowpass, filterCutoff, res, srInv);
                     break;
                 case FilterMode::BandPass:
-                    filterL.setCoeff(FilterType::BP, normalizedCutoff, q);
-                    filterR.setCoeff(FilterType::BP, normalizedCutoff, q);
+                    filterL.setCoeff(FilterMode_t::Bandpass, filterCutoff, res, srInv);
                     break;
                 case FilterMode::HighPass:
-                    filterL.setCoeff(FilterType::HP, normalizedCutoff, q);
-                    filterR.setCoeff(FilterType::HP, normalizedCutoff, q);
+                    filterL.setCoeff(FilterMode_t::Highpass, filterCutoff, res, srInv);
                     break;
             }
 
-            float filtered = filterL.process(lofi);
+            filterL.processBlockStep(lofi);
+            float filtered = lofi;
 
             // ================================================================
             // ENVELOPE
             // ================================================================
 
-            float envOut = ampEnv.processSample();
+            float envOut = processEnvelope();
 
-            if (ampEnv.stage == sst::basic_blocks::modulators::ADSREnvelope<1, true>::s_complete)
+            if (envStage == EnvStage::Idle)
             {
                 active = false;
                 return;
@@ -418,7 +479,10 @@ private:
 
     sst::filters::CytomicSVF filterL;
     sst::filters::CytomicSVF filterR;
-    sst::basic_blocks::modulators::ADSREnvelope<1, true> ampEnv;
+
+    // Simple envelope state
+    EnvStage envStage = EnvStage::Idle;
+    float envLevel = 0.0f;
 
     //==========================================================================
     // Parameters

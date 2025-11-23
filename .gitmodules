@@ -28,3 +28,6 @@
 [submodule "plugins/FMDrone/libs/sst/sst-waveshapers"]
 	path = plugins/FMDrone/libs/sst/sst-waveshapers
 	url = https://github.com/surge-synthesizer/sst-waveshapers.git
+[submodule "plugins/A1115VCO/libs/simde"]
+	path = plugins/A1115VCO/libs/simde
+	url = https://github.com/simd-everywhere/simde.git

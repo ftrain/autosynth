@@ -46,6 +46,7 @@ target_include_directories(sst-libraries INTERFACE
     ${CMAKE_SOURCE_DIR}/libs/sst/sst-filters/include
     ${CMAKE_SOURCE_DIR}/libs/sst/sst-effects/include
     ${CMAKE_SOURCE_DIR}/libs/sst/sst-waveshapers/include
+    ${CMAKE_SOURCE_DIR}/libs/simde
 )
 
 # ============================================================================

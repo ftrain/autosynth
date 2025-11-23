@@ -15,8 +15,17 @@
 #include <cmath>
 #include <array>
 
-// SST envelope include
-#include "sst/basic-blocks/modulators/ADSREnvelope.h"
+/**
+ * @brief Simple envelope stages
+ */
+enum class EnvStage
+{
+    Idle = 0,
+    Attack,
+    Decay,
+    Sustain,
+    Release
+};
 
 /**
  * @brief 2-operator FM voice for drone synthesis
@@ -39,9 +48,11 @@ public:
         this->sampleRate = sampleRate;
         sampleRateInv = 1.0f / static_cast<float>(sampleRate);
 
-        // Initialize SST envelopes
-        ampEnv.setSampleRate(sampleRate);
-        modEnv.setSampleRate(sampleRate);
+        // Reset envelope state
+        ampEnvStage = EnvStage::Idle;
+        ampEnvLevel = 0.0f;
+        modEnvStage = EnvStage::Idle;
+        modEnvLevel = 0.0f;
     }
 
     //==========================================================================
@@ -66,15 +77,17 @@ public:
         feedbackSample = 0.0f;
 
         // Trigger envelopes
-        ampEnv.attackFrom(0.0f, ampAttack, ampDecay, ampSustain, ampRelease, 1.0f, 1.0f);
-        modEnv.attackFrom(0.0f, modAttack, modDecay, modSustain, modRelease, 1.0f, 1.0f);
+        ampEnvStage = EnvStage::Attack;
+        ampEnvLevel = 0.0f;
+        modEnvStage = EnvStage::Attack;
+        modEnvLevel = 0.0f;
     }
 
     void noteOff()
     {
         releasing = true;
-        ampEnv.release();
-        modEnv.release();
+        ampEnvStage = EnvStage::Release;
+        modEnvStage = EnvStage::Release;
     }
 
     void kill()
@@ -172,11 +185,11 @@ private:
         for (int i = 0; i < blockSize; ++i)
         {
             // Process envelopes
-            float ampEnvOut = ampEnv.processSample(ampAttack, ampDecay, ampSustain, ampRelease, 1.0f, 1.0f);
-            float modEnvOut = modEnv.processSample(modAttack, modDecay, modSustain, modRelease, 1.0f, 1.0f);
+            float ampEnvOut = processEnvelope(ampEnvStage, ampEnvLevel, ampAttack, ampDecay, ampSustain, ampRelease);
+            float modEnvOut = processEnvelope(modEnvStage, modEnvLevel, modAttack, modDecay, modSustain, modRelease);
 
             // Check if voice has finished
-            if (ampEnvOut <= 0.0001f && releasing)
+            if (ampEnvStage == EnvStage::Idle && releasing)
             {
                 active = false;
                 return;
@@ -254,11 +267,68 @@ private:
     float feedbackSample = 0.0f;
 
     //==========================================================================
-    // SST Envelopes
+    // Envelope State
     //==========================================================================
 
-    sst::basic_blocks::modulators::ADSREnvelope<256, false> ampEnv;
-    sst::basic_blocks::modulators::ADSREnvelope<256, false> modEnv;
+    EnvStage ampEnvStage = EnvStage::Idle;
+    float ampEnvLevel = 0.0f;
+    EnvStage modEnvStage = EnvStage::Idle;
+    float modEnvLevel = 0.0f;
+
+    /**
+     * @brief Process ADSR envelope
+     */
+    float processEnvelope(EnvStage& stage, float& level, float attack, float decay, float sustain, float release)
+    {
+        float delta = sampleRateInv;
+
+        switch (stage)
+        {
+            case EnvStage::Attack:
+            {
+                float rate = (attack > 0.001f) ? delta / attack : 1.0f;
+                level += rate;
+                if (level >= 1.0f)
+                {
+                    level = 1.0f;
+                    stage = EnvStage::Decay;
+                }
+                break;
+            }
+            case EnvStage::Decay:
+            {
+                float rate = (decay > 0.001f) ? delta / decay : 1.0f;
+                level -= rate * (1.0f - sustain);
+                if (level <= sustain)
+                {
+                    level = sustain;
+                    stage = EnvStage::Sustain;
+                }
+                break;
+            }
+            case EnvStage::Sustain:
+                level = sustain;
+                break;
+
+            case EnvStage::Release:
+            {
+                float rate = (release > 0.001f) ? delta / release : 1.0f;
+                level -= rate * sustain;
+                if (level <= 0.0f)
+                {
+                    level = 0.0f;
+                    stage = EnvStage::Idle;
+                }
+                break;
+            }
+            case EnvStage::Idle:
+            default:
+                level = 0.0f;
+                break;
+        }
+
+        return level;
+    }
 
     //==========================================================================
     // Parameter Values
