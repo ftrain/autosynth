@@ -1,0 +1,1001 @@
+id,name,description,synthesis_type,key_feature,genre_tags,weirdness_level
+1,Modem Processor,Hybrid synthesis combining multiple modem characteristics,fm,harmonic excitation,Experimental;Ambient;Chiptune,8
+2,Floppy Synth,Wavetable morphing based on floppy waveforms,subtractive,spectral morphing,Digital;Retro;Lo-Fi,7
+3,CRT Modulator,Additive synthesis recreating crt spectra,wavetable,formant filtering,Experimental;Lo-Fi;Chiptune,2
+4,Dial-Up Processor,Physical modeling of dial-up acoustic properties,granular,granular freeze,Ambient;Lo-Fi;Retro,8
+5,Dot Matrix Sequencer,Hybrid synthesis combining multiple dot matrix characteristics,physical_modeling,convolution,Lo-Fi;Glitch;Industrial,2
+6,Punch Card Synth,Punch Card patterns drive oscillator and modulation parameters,additive,time stretching,Digital;Ambient;Experimental,8
+7,ENIAC Synth,ENIAC patterns drive oscillator and modulation parameters,sample_based,spectral morphing,Experimental;Chiptune;Lo-Fi,6
+8,BBS Processor,FM synthesis capturing bbs harmonic relationships,feedback,spectral morphing,Chiptune;Lo-Fi;Industrial,8
+9,Hard Drive Synth,Hard Drive-inspired synthesis with unique timbral characteristics,noise,comb filtering,Experimental;Industrial;Chiptune,5
+10,Serial Synth,FM synthesis capturing serial harmonic relationships,hybrid,granular density,Retro;Lo-Fi;Glitch,4
+11,Parallel Synth,Hybrid synthesis combining multiple parallel characteristics,fm,pattern sequencing,Experimental;Ambient;Lo-Fi,2
+12,Vacuum Tube Oscillator,FM synthesis capturing vacuum tube harmonic relationships,subtractive,spectral freeze,Experimental;Glitch;Retro,4
+13,Transistor Synth,FM synthesis capturing transistor harmonic relationships,wavetable,sample rate reduction,Ambient;Experimental;Industrial,8
+14,Calculator Synth,Models calculator behavior using advanced DSP techniques,granular,harmonic excitation,Retro;Chiptune;Digital,2
+15,Atari Synth,Feedback network simulating atari dynamics,physical_modeling,filter topology,Retro;Experimental;Industrial,8
+16,Teletext Sequencer,Models teletext behavior using advanced DSP techniques,additive,granular freeze,Lo-Fi;Experimental;Glitch,3
+17,Fax Engine,Models fax behavior using advanced DSP techniques,sample_based,physical resonance,Ambient;Lo-Fi;Industrial,8
+18,Boot Engine,Models boot behavior using advanced DSP techniques,feedback,sample rate reduction,Digital;Retro;Lo-Fi,3
+19,Command Line Synth,Wavetable morphing based on command line waveforms,noise,stochastic triggering,Glitch;Lo-Fi;Digital,3
+20,Tape Synth,FM synthesis capturing tape harmonic relationships,hybrid,spectral freeze,Ambient;Retro;Digital,8
+21,Memory Synth,Wavetable morphing based on memory waveforms,fm,spectral blur,Lo-Fi;Experimental;Digital,7
+22,Network Synth,Network-inspired synthesis with unique timbral characteristics,subtractive,envelope shaping,Lo-Fi;Glitch;Retro,5
+23,CPU Oscillator,Granular processing inspired by cpu textures,wavetable,granular density,Digital;Experimental;Ambient,2
+24,Sinclair Generator,Sinclair patterns drive oscillator and modulation parameters,granular,filter topology,Digital;Lo-Fi;Retro,4
+25,TRS-80 Synth,Hybrid synthesis combining multiple trs-80 characteristics,physical_modeling,phase distortion,Lo-Fi;Chiptune;Ambient,3
+26,Commodore Modulator,Hybrid synthesis combining multiple commodore characteristics,additive,recursive feedback,Chiptune;Glitch;Lo-Fi,8
+27,BBC Micro Synth,Physical modeling of bbc micro acoustic properties,sample_based,stochastic triggering,Ambient;Digital;Chiptune,3
+28,Apple II Filter,Feedback network simulating apple ii dynamics,feedback,pitch shifting,Ambient;Industrial;Experimental,4
+29,Plotter Oscillator,Granular processing inspired by plotter textures,noise,physical resonance,Experimental;Digital;Glitch,7
+30,OCR Modulator,OCR patterns drive oscillator and modulation parameters,hybrid,chaos modulation,Glitch;Retro;Industrial,9
+31,Paper Tape Synth,Paper Tape-inspired synthesis with unique timbral characteristics,fm,allpass diffusion,Lo-Fi;Ambient;Retro,9
+32,Telex Synth,FM synthesis capturing telex harmonic relationships,subtractive,sample rate reduction,Glitch;Ambient;Lo-Fi,8
+33,Morse Oscillator,Models morse behavior using advanced DSP techniques,wavetable,convolution,Retro;Ambient;Digital,2
+34,Telegraph Filter,FM synthesis capturing telegraph harmonic relationships,granular,frequency shifting,Industrial;Chiptune;Glitch,4
+35,Rectifier Oscillator,Hybrid synthesis combining multiple rectifier characteristics,physical_modeling,wavefolding,Experimental;Digital;Chiptune,8
+36,Triode Synth,Additive synthesis recreating triode spectra,additive,comb filtering,Lo-Fi;Industrial;Retro,7
+37,Cathode Oscillator,Physical modeling of cathode acoustic properties,sample_based,wavetable scanning,Chiptune;Retro;Lo-Fi,5
+38,Phosphor Synth,Granular processing inspired by phosphor textures,feedback,harmonic series,Glitch;Ambient;Chiptune,6
+39,Scan Line Oscillator,Models scan line behavior using advanced DSP techniques,noise,filter topology,Ambient;Retro;Digital,5
+40,NTSC Synth,Physical modeling of ntsc acoustic properties,hybrid,convolution,Retro;Lo-Fi;Ambient,9
+41,Magnetic Resonator,Magnetic patterns drive oscillator and modulation parameters,fm,fractal generation,Ambient;Retro;Experimental,8
+42,Ferrite Generator,FM synthesis capturing ferrite harmonic relationships,subtractive,feedback routing,Digital;Experimental;Retro,5
+43,Spark Gap Synth,Physical modeling of spark gap acoustic properties,wavetable,bit crushing,Industrial;Ambient;Retro,3
+44,Crystal Radio Engine,Wavetable morphing based on crystal radio waveforms,granular,ring modulation,Glitch;Experimental;Industrial,3
+45,Phonograph Processor,FM synthesis capturing phonograph harmonic relationships,physical_modeling,bit crushing,Retro;Lo-Fi;Industrial,8
+46,Shellac Processor,Wavetable morphing based on shellac waveforms,additive,phase distortion,Digital;Lo-Fi;Chiptune,4
+47,Wax Cylinder Synth,Models wax cylinder behavior using advanced DSP techniques,sample_based,convolution,Lo-Fi;Glitch;Digital,6
+48,Bakelite Synth,Feedback network simulating bakelite dynamics,feedback,granular density,Chiptune;Ambient;Industrial,2
+49,PCB Trace Synth,PCB Trace-inspired synthesis with unique timbral characteristics,noise,wavefolding,Glitch;Digital;Experimental,4
+50,Solder Synth,Feedback network simulating solder dynamics,hybrid,physical resonance,Retro;Digital;Ambient,9
+51,Potentiometer Modulator,Hybrid synthesis combining multiple potentiometer characteristics,fm,granular freeze,Digital;Ambient;Glitch,5
+52,Stepper Generator,Models stepper behavior using advanced DSP techniques,subtractive,phase distortion,Industrial;Retro;Glitch,8
+53,Servo Synth,Feedback network simulating servo dynamics,wavetable,wavefolding,Retro;Glitch;Ambient,4
+54,PWM Synth,Feedback network simulating pwm dynamics,granular,fractal generation,Retro;Ambient;Industrial,4
+55,Capacitor Synth,FM synthesis capturing capacitor harmonic relationships,physical_modeling,formant filtering,Ambient;Retro;Industrial,6
+56,Transistor Sequencer,Wavetable morphing based on transistor waveforms,additive,filter topology,Retro;Chiptune;Experimental,7
+57,Diode Sequencer,Hybrid synthesis combining multiple diode characteristics,sample_based,frequency shifting,Ambient;Digital;Experimental,2
+58,MOSFET Resonator,Additive synthesis recreating mosfet spectra,feedback,stochastic triggering,Ambient;Glitch;Experimental,5
+59,Zener Synth,Zener patterns drive oscillator and modulation parameters,noise,bit crushing,Digital;Experimental;Lo-Fi,2
+60,Thermistor Synth,Thermistor patterns drive oscillator and modulation parameters,hybrid,harmonic mapping,Experimental;Chiptune;Industrial,3
+61,Photoresistor Synth,Wavetable morphing based on photoresistor waveforms,fm,wavetable scanning,Digital;Retro;Lo-Fi,6
+62,Solar Cell Synth,Granular processing inspired by solar cell textures,subtractive,harmonic excitation,Chiptune;Glitch;Digital,8
+63,LED Synth,Models led behavior using advanced DSP techniques,wavetable,feedback routing,Ambient;Industrial;Digital,3
+64,Optocoupler Synth,Feedback network simulating optocoupler dynamics,granular,fractal generation,Industrial;Lo-Fi;Chiptune,5
+65,LDR Resonator,LDR-inspired synthesis with unique timbral characteristics,physical_modeling,phase distortion,Lo-Fi;Glitch;Retro,4
+66,Tape Saturation Oscillator,Tape Saturation-inspired synthesis with unique timbral characteristics,additive,pattern sequencing,Ambient;Lo-Fi;Glitch,4
+67,Demagnetization Sequencer,Wavetable morphing based on demagnetization waveforms,sample_based,stochastic triggering,Lo-Fi;Industrial;Chiptune,6
+68,Hysteresis Synth,Granular processing inspired by hysteresis textures,feedback,modulation matrix,Industrial;Lo-Fi;Chiptune,2
+69,Eddy Current Synth,FM synthesis capturing eddy current harmonic relationships,noise,physical resonance,Glitch;Experimental;Lo-Fi,2
+70,Transformer Resonator,Transformer patterns drive oscillator and modulation parameters,hybrid,spectral morphing,Industrial;Chiptune;Lo-Fi,7
+71,Y2K Engine,Wavetable morphing based on y2k waveforms,fm,spectral freeze,Ambient;Retro;Experimental,2
+72,Blue Screen Resonator,Feedback network simulating blue screen dynamics,subtractive,spectral freeze,Experimental;Glitch;Industrial,7
+73,Defrag Synth,Defrag patterns drive oscillator and modulation parameters,wavetable,chaos modulation,Digital;Industrial;Experimental,6
+74,Dial Tone Modulator,Models dial tone behavior using advanced DSP techniques,granular,ring modulation,Retro;Glitch;Ambient,7
+75,Touch Tone Engine,Touch Tone-inspired synthesis with unique timbral characteristics,physical_modeling,modulation matrix,Industrial;Ambient;Glitch,2
+76,Busy Signal Modulator,Busy Signal patterns drive oscillator and modulation parameters,additive,spectral freeze,Digital;Ambient;Glitch,6
+77,Ring Cycle Synth,Granular processing inspired by ring cycle textures,sample_based,convolution,Ambient;Chiptune;Glitch,4
+78,Off Hook Synth,Physical modeling of off hook acoustic properties,feedback,convolution,Industrial;Ambient;Lo-Fi,4
+79,Area Code Synth,Wavetable morphing based on area code waveforms,noise,phase distortion,Lo-Fi;Ambient;Industrial,9
+80,Long Distance Synth,Wavetable morphing based on long distance waveforms,hybrid,formant filtering,Glitch;Chiptune;Industrial,8
+81,Rotary Oscillator,Feedback network simulating rotary dynamics,fm,harmonic series,Experimental;Industrial;Digital,4
+82,Phone Booth Oscillator,Phone Booth patterns drive oscillator and modulation parameters,subtractive,spectral morphing,Lo-Fi;Retro;Industrial,6
+83,Answering Machine Synth,FM synthesis capturing answering machine harmonic relationships,wavetable,chaos modulation,Ambient;Retro;Industrial,7
+84,Cordless Synth,FM synthesis capturing cordless harmonic relationships,granular,spectral blur,Ambient;Retro;Industrial,8
+85,Acoustic Coupler Generator,Additive synthesis recreating acoustic coupler spectra,physical_modeling,spectral blur,Ambient;Retro;Industrial,3
+86,Party Line Resonator,Feedback network simulating party line dynamics,additive,pitch shifting,Ambient;Chiptune;Digital,8
+87,Operator Synth,Operator patterns drive oscillator and modulation parameters,sample_based,pattern sequencing,Glitch;Experimental;Retro,8
+88,Time Announce Synth,Physical modeling of time announce acoustic properties,feedback,spectral morphing,Chiptune;Retro;Industrial,8
+89,Weather Service Synth,Hybrid synthesis combining multiple weather service characteristics,noise,formant filtering,Digital;Ambient;Lo-Fi,7
+90,Emergency Engine,Models emergency behavior using advanced DSP techniques,hybrid,harmonic series,Lo-Fi;Digital;Chiptune,3
+91,Payphone Synth,Payphone patterns drive oscillator and modulation parameters,fm,chaos modulation,Digital;Industrial;Retro,8
+92,Phone Card Synth,Phone Card-inspired synthesis with unique timbral characteristics,subtractive,convolution,Industrial;Experimental;Glitch,2
+93,Voicemail Synth,Physical modeling of voicemail acoustic properties,wavetable,spectral freeze,Industrial;Ambient;Retro,7
+94,Conference Synth,Conference patterns drive oscillator and modulation parameters,granular,harmonic series,Glitch;Ambient;Lo-Fi,2
+95,Modem Synth,Feedback network simulating modem dynamics,physical_modeling,ring modulation,Ambient;Lo-Fi;Experimental,2
+96,Floppy Synth,Models floppy behavior using advanced DSP techniques,additive,sample rate reduction,Chiptune;Lo-Fi;Industrial,5
+97,CRT Oscillator,Models crt behavior using advanced DSP techniques,sample_based,chaos modulation,Chiptune;Retro;Lo-Fi,6
+98,Dial-Up Synth,Physical modeling of dial-up acoustic properties,feedback,pitch shifting,Digital;Industrial;Lo-Fi,5
+99,Dot Matrix Synth,Dot Matrix patterns drive oscillator and modulation parameters,noise,sample rate reduction,Lo-Fi;Industrial;Retro,3
+100,Punch Card Synth,FM synthesis capturing punch card harmonic relationships,hybrid,pattern sequencing,Retro;Ambient;Digital,9
+101,Moog Generator,Moog patterns drive oscillator and modulation parameters,hybrid,harmonic excitation,Experimental;Acid;Synthwave,8
+102,Buchla Synth,Feedback network simulating buchla dynamics,subtractive,formant filtering,Ambient;Progressive;Synthwave,8
+103,ARP Synth,ARP patterns drive oscillator and modulation parameters,fm,wavetable scanning,Synthwave;Drone;Progressive,8
+104,Oberheim Synth,Feedback network simulating oberheim dynamics,wavetable,ring modulation,Industrial;Synthwave;Techno,5
+105,Prophet Synth,Prophet-inspired synthesis with unique timbral characteristics,additive,pattern sequencing,Drone;Ambient;Techno,6
+106,Juno Synth,Hybrid synthesis combining multiple juno characteristics,feedback,formant filtering,Industrial;Synthwave;Experimental,9
+107,Jupiter Synth,Jupiter-inspired synthesis with unique timbral characteristics,noise,chaos modulation,Experimental;Techno;Drone,8
+108,TB-303 Synth,Models tb-303 behavior using advanced DSP techniques,granular,phase distortion,Industrial;Acid;Ambient,5
+109,TR-808 Synth,Hybrid synthesis combining multiple tr-808 characteristics,sample_based,chaos modulation,Industrial;Experimental;Synthwave,9
+110,TR-909 Engine,TR-909-inspired synthesis with unique timbral characteristics,physical_modeling,granular density,Techno;Ambient;Experimental,2
+111,Fairlight Synth,Models fairlight behavior using advanced DSP techniques,hybrid,ring modulation,Synthwave;Ambient;Experimental,8
+112,Synclavier Synth,Wavetable morphing based on synclavier waveforms,subtractive,spectral freeze,Experimental;Industrial;Acid,6
+113,PPG Synth,Granular processing inspired by ppg textures,fm,pitch shifting,Techno;Acid;Ambient,5
+114,DX Synth,DX patterns drive oscillator and modulation parameters,wavetable,time stretching,Synthwave;Acid;Techno,8
+115,MS-20 Synth,MS-20-inspired synthesis with unique timbral characteristics,additive,modulation matrix,Progressive;Acid;Synthwave,5
+116,Odyssey Synth,Physical modeling of odyssey acoustic properties,feedback,sample rate reduction,Experimental;Ambient;Drone,5
+117,Serge Oscillator,Serge-inspired synthesis with unique timbral characteristics,noise,formant filtering,Synthwave;Ambient;Experimental,4
+118,EMS Resonator,Models ems behavior using advanced DSP techniques,granular,allpass diffusion,Progressive;Techno;Ambient,4
+119,Korg Oscillator,Wavetable morphing based on korg waveforms,sample_based,feedback routing,Experimental;Techno;Synthwave,8
+120,Roland Engine,FM synthesis capturing roland harmonic relationships,physical_modeling,comb filtering,Progressive;Experimental;Drone,7
+121,Sequential Synth,Physical modeling of sequential acoustic properties,hybrid,time stretching,Ambient;Acid;Drone,4
+122,Ensoniq Synth,Ensoniq patterns drive oscillator and modulation parameters,subtractive,ring modulation,Drone;Ambient;Experimental,2
+123,Kurzweil Modulator,Models kurzweil behavior using advanced DSP techniques,fm,ring modulation,Experimental;Acid;Industrial,5
+124,Waldorf Resonator,Models waldorf behavior using advanced DSP techniques,wavetable,granular freeze,Ambient;Drone;Techno,8
+125,Access Synth,Additive synthesis recreating access spectra,additive,sample rate reduction,Techno;Experimental;Progressive,4
+126,Clavia Synth,Hybrid synthesis combining multiple clavia characteristics,feedback,envelope shaping,Progressive;Drone;Ambient,9
+127,Novation Sequencer,Novation patterns drive oscillator and modulation parameters,noise,fractal generation,Acid;Experimental;Industrial,9
+128,Arturia Synth,Feedback network simulating arturia dynamics,granular,pattern sequencing,Experimental;Progressive;Acid,5
+129,DSI Oscillator,Hybrid synthesis combining multiple dsi characteristics,sample_based,harmonic mapping,Acid;Ambient;Synthwave,2
+130,Elektron Synth,FM synthesis capturing elektron harmonic relationships,physical_modeling,harmonic excitation,Acid;Experimental;Industrial,6
+131,Teenage Synth,Hybrid synthesis combining multiple teenage characteristics,hybrid,modulation matrix,Progressive;Experimental;Drone,8
+132,Modal Oscillator,Feedback network simulating modal dynamics,subtractive,comb filtering,Techno;Synthwave;Drone,8
+133,Mutable Generator,Models mutable behavior using advanced DSP techniques,fm,chaos modulation,Drone;Techno;Synthwave,8
+134,Make Noise Engine,Additive synthesis recreating make noise spectra,wavetable,fractal generation,Synthwave;Ambient;Acid,7
+135,Intellijel Synth,Hybrid synthesis combining multiple intellijel characteristics,additive,convolution,Industrial;Experimental;Acid,2
+136,Doepfer Synth,Hybrid synthesis combining multiple doepfer characteristics,feedback,ring modulation,Ambient;Techno;Progressive,7
+137,Modcan Synth,Physical modeling of modcan acoustic properties,noise,sample rate reduction,Industrial;Drone;Ambient,7
+138,Analogue Synth,Hybrid synthesis combining multiple analogue characteristics,granular,frequency shifting,Acid;Drone;Progressive,9
+139,Cwejman Filter,Hybrid synthesis combining multiple cwejman characteristics,sample_based,spectral freeze,Industrial;Progressive;Experimental,4
+140,Metasonix Engine,Models metasonix behavior using advanced DSP techniques,physical_modeling,granular density,Synthwave;Drone;Techno,7
+141,Macbeth Processor,Granular processing inspired by macbeth textures,hybrid,chaos modulation,Experimental;Acid;Ambient,3
+142,Studio Electronics Processor,Models studio electronics behavior using advanced DSP techniques,subtractive,allpass diffusion,Industrial;Synthwave;Ambient,4
+143,Vermona Synth,Additive synthesis recreating vermona spectra,fm,spectral blur,Industrial;Techno;Progressive,4
+144,MFB Modulator,FM synthesis capturing mfb harmonic relationships,wavetable,stochastic triggering,Ambient;Acid;Industrial,4
+145,Dreadbox Synth,Granular processing inspired by dreadbox textures,additive,convolution,Techno;Industrial;Progressive,5
+146,Erica Engine,Hybrid synthesis combining multiple erica characteristics,feedback,filter topology,Synthwave;Progressive;Techno,5
+147,Pittsburgh Synth,Hybrid synthesis combining multiple pittsburgh characteristics,noise,spectral blur,Progressive;Acid;Ambient,9
+148,4ms Synth,Physical modeling of 4ms acoustic properties,granular,comb filtering,Techno;Industrial;Drone,6
+149,Tiptop Sequencer,Feedback network simulating tiptop dynamics,sample_based,physical resonance,Progressive;Industrial;Acid,9
+150,WMD Synth,WMD-inspired synthesis with unique timbral characteristics,physical_modeling,physical resonance,Acid;Drone;Industrial,2
+151,Qu-Bit Synth,Feedback network simulating qu-bit dynamics,hybrid,pattern sequencing,Experimental;Industrial;Progressive,2
+152,Noise Engineering Synth,Wavetable morphing based on noise engineering waveforms,subtractive,wavefolding,Progressive;Industrial;Drone,6
+153,Joranalogue Resonator,Hybrid synthesis combining multiple joranalogue characteristics,fm,pitch shifting,Drone;Techno;Acid,8
+154,Instruo Synth,FM synthesis capturing instruo harmonic relationships,wavetable,spectral freeze,Synthwave;Techno;Progressive,9
+155,Frap Synth,Feedback network simulating frap dynamics,additive,harmonic excitation,Experimental;Progressive;Synthwave,4
+156,Verbos Synth,FM synthesis capturing verbos harmonic relationships,feedback,wavefolding,Synthwave;Acid;Experimental,4
+157,Endorphin Synth,Granular processing inspired by endorphin textures,noise,time stretching,Acid;Ambient;Experimental,7
+158,Steady State Resonator,Granular processing inspired by steady state textures,granular,pattern sequencing,Drone;Industrial;Techno,8
+159,Rossum Synth,Models rossum behavior using advanced DSP techniques,sample_based,recursive feedback,Ambient;Techno;Industrial,7
+160,Livestock Modulator,Physical modeling of livestock acoustic properties,physical_modeling,feedback routing,Progressive;Ambient;Acid,2
+161,ALM Oscillator,ALM patterns drive oscillator and modulation parameters,hybrid,pattern sequencing,Drone;Progressive;Ambient,5
+162,After Later Oscillator,Additive synthesis recreating after later spectra,subtractive,sample rate reduction,Techno;Industrial;Acid,4
+163,Blue Lantern Synth,Blue Lantern-inspired synthesis with unique timbral characteristics,fm,sample rate reduction,Ambient;Experimental;Techno,9
+164,Circuit Abbey Modulator,Physical modeling of circuit abbey acoustic properties,wavetable,convolution,Industrial;Experimental;Acid,4
+165,Dove Resonator,Wavetable morphing based on dove waveforms,additive,filter topology,Progressive;Techno;Industrial,7
+166,EMW Oscillator,FM synthesis capturing emw harmonic relationships,feedback,wavetable scanning,Experimental;Synthwave;Ambient,8
+167,Future Sound Synth,FM synthesis capturing future sound harmonic relationships,noise,harmonic series,Ambient;Industrial;Synthwave,6
+168,Gezeiten Synth,Granular processing inspired by gezeiten textures,granular,pitch shifting,Progressive;Experimental;Acid,9
+169,Happy Nerding Synth,FM synthesis capturing happy nerding harmonic relationships,sample_based,chaos modulation,Progressive;Experimental;Acid,6
+170,Industrial Music Resonator,Industrial Music patterns drive oscillator and modulation parameters,physical_modeling,comb filtering,Ambient;Industrial;Synthwave,2
+171,Joranalogue Oscillator,Wavetable morphing based on joranalogue waveforms,hybrid,comb filtering,Industrial;Drone;Ambient,5
+172,Kammerl Processor,Kammerl-inspired synthesis with unique timbral characteristics,subtractive,fractal generation,Synthwave;Drone;Experimental,2
+173,LPZW Resonator,FM synthesis capturing lpzw harmonic relationships,fm,granular density,Acid;Experimental;Ambient,2
+174,Manhattan Synth,Feedback network simulating manhattan dynamics,wavetable,stochastic triggering,Synthwave;Progressive;Acid,3
+175,New Systems Synth,Wavetable morphing based on new systems waveforms,additive,harmonic series,Experimental;Industrial;Progressive,3
+176,Olegtron Synth,Additive synthesis recreating olegtron spectra,feedback,fractal generation,Industrial;Acid;Ambient,7
+177,Paratek Synth,Paratek patterns drive oscillator and modulation parameters,noise,filter topology,Progressive;Synthwave;Ambient,5
+178,Qubit Sequencer,Qubit patterns drive oscillator and modulation parameters,granular,stochastic triggering,Industrial;Ambient;Progressive,9
+179,RYO Modulator,Physical modeling of ryo acoustic properties,sample_based,wavetable scanning,Acid;Experimental;Ambient,3
+180,SSF Synth,Feedback network simulating ssf dynamics,physical_modeling,phase distortion,Techno;Drone;Acid,3
+181,Tesseract Synth,Physical modeling of tesseract acoustic properties,hybrid,wavefolding,Synthwave;Drone;Industrial,3
+182,Ultrasound Synth,Hybrid synthesis combining multiple ultrasound characteristics,subtractive,pitch shifting,Acid;Drone;Experimental,4
+183,Void Synth,FM synthesis capturing void harmonic relationships,fm,ring modulation,Acid;Progressive;Experimental,8
+184,WMD Engine,Models wmd behavior using advanced DSP techniques,wavetable,stochastic triggering,Synthwave;Drone;Ambient,8
+185,Xaoc Sequencer,Physical modeling of xaoc acoustic properties,additive,filter topology,Drone;Experimental;Industrial,8
+186,York Synth,York patterns drive oscillator and modulation parameters,feedback,filter topology,Industrial;Techno;Acid,5
+187,Zlob Synth,Models zlob behavior using advanced DSP techniques,noise,fractal generation,Synthwave;Experimental;Techno,7
+188,Atomosynth Synth,Hybrid synthesis combining multiple atomosynth characteristics,granular,modulation matrix,Drone;Acid;Industrial,2
+189,Behringer Synth,Behringer patterns drive oscillator and modulation parameters,sample_based,harmonic excitation,Techno;Progressive;Synthwave,3
+190,Cre8audio Synth,Additive synthesis recreating cre8audio spectra,physical_modeling,phase distortion,Experimental;Progressive;Industrial,7
+191,Error Filter,Wavetable morphing based on error waveforms,hybrid,physical resonance,Techno;Ambient;Synthwave,2
+192,Folktek Synth,Physical modeling of folktek acoustic properties,subtractive,time stretching,Progressive;Synthwave;Techno,9
+193,G-Storm Modulator,Physical modeling of g-storm acoustic properties,fm,spectral blur,Acid;Ambient;Experimental,4
+194,Moog Synth,Additive synthesis recreating moog spectra,wavetable,harmonic series,Acid;Drone;Progressive,6
+195,Buchla Filter,Physical modeling of buchla acoustic properties,additive,sample rate reduction,Industrial;Techno;Acid,6
+196,ARP Generator,Additive synthesis recreating arp spectra,feedback,modulation matrix,Ambient;Synthwave;Acid,4
+197,Oberheim Synth,Oberheim patterns drive oscillator and modulation parameters,noise,recursive feedback,Acid;Synthwave;Experimental,6
+198,Prophet Modulator,Hybrid synthesis combining multiple prophet characteristics,granular,harmonic mapping,Techno;Industrial;Ambient,7
+199,Juno Processor,Additive synthesis recreating juno spectra,sample_based,pitch shifting,Synthwave;Techno;Progressive,5
+200,Jupiter Modulator,Additive synthesis recreating jupiter spectra,physical_modeling,recursive feedback,Experimental;Techno;Synthwave,9
+201,Thunder Synth,Thunder-inspired synthesis with unique timbral characteristics,fm,granular density,Meditative;Cinematic;Natural,9
+202,Aurora Synth,Wavetable morphing based on aurora waveforms,subtractive,spectral morphing,Cinematic;Natural;Ethereal,6
+203,Rain Synth,Physical modeling of rain acoustic properties,wavetable,harmonic series,Experimental;Drone;Dark Ambient,3
+204,Wind Sequencer,Hybrid synthesis combining multiple wind characteristics,granular,granular density,Dark Ambient;Experimental;Drone,4
+205,Hurricane Engine,Feedback network simulating hurricane dynamics,physical_modeling,stochastic triggering,Cinematic;Ambient;Ethereal,7
+206,Blizzard Engine,Physical modeling of blizzard acoustic properties,additive,pitch shifting,Meditative;Experimental;Ambient,6
+207,Earthquake Synth,Physical modeling of earthquake acoustic properties,feedback,harmonic mapping,Natural;Ethereal;Drone,7
+208,Volcanic Oscillator,Volcanic-inspired synthesis with unique timbral characteristics,noise,frequency shifting,Ethereal;Experimental;Cinematic,4
+209,Geothermal Resonator,FM synthesis capturing geothermal harmonic relationships,hybrid,frequency shifting,Dark Ambient;Drone;Meditative,2
+210,Crystal Generator,Models crystal behavior using advanced DSP techniques,sample_based,harmonic series,Dark Ambient;Cinematic;Natural,5
+211,Cave Synth,Feedback network simulating cave dynamics,fm,harmonic series,Meditative;Ambient;Ethereal,6
+212,Mineral Modulator,Mineral patterns drive oscillator and modulation parameters,subtractive,chaos modulation,Meditative;Natural;Ethereal,2
+213,Tectonic Modulator,Wavetable morphing based on tectonic waveforms,wavetable,spectral blur,Cinematic;Experimental;Drone,7
+214,Lava Modulator,Lava patterns drive oscillator and modulation parameters,granular,granular density,Ethereal;Experimental;Ambient,9
+215,Stalactite Synth,Feedback network simulating stalactite dynamics,physical_modeling,chaos modulation,Ambient;Cinematic;Experimental,8
+216,Ocean Synth,Ocean patterns drive oscillator and modulation parameters,additive,sample rate reduction,Drone;Meditative;Experimental,7
+217,Tsunami Processor,FM synthesis capturing tsunami harmonic relationships,feedback,spectral freeze,Cinematic;Meditative;Ethereal,3
+218,Deep Sea Oscillator,Wavetable morphing based on deep sea waveforms,noise,pitch shifting,Cinematic;Drone;Ethereal,7
+219,Waterfall Synth,Waterfall-inspired synthesis with unique timbral characteristics,hybrid,frequency shifting,Natural;Ambient;Dark Ambient,3
+220,Glacier Oscillator,Additive synthesis recreating glacier spectra,sample_based,sample rate reduction,Experimental;Ambient;Meditative,7
+221,River Generator,Models river behavior using advanced DSP techniques,fm,stochastic triggering,Dark Ambient;Cinematic;Natural,8
+222,Frozen Lake Processor,Additive synthesis recreating frozen lake spectra,subtractive,filter topology,Ethereal;Natural;Ambient,2
+223,Whirlpool Filter,Whirlpool-inspired synthesis with unique timbral characteristics,wavetable,physical resonance,Ambient;Dark Ambient;Meditative,5
+224,Ice Processor,Granular processing inspired by ice textures,granular,harmonic excitation,Dark Ambient;Meditative;Drone,7
+225,Heartbeat Filter,Heartbeat-inspired synthesis with unique timbral characteristics,physical_modeling,pattern sequencing,Drone;Natural;Ambient,7
+226,Breath Synth,Breath-inspired synthesis with unique timbral characteristics,additive,bit crushing,Drone;Ethereal;Experimental,3
+227,Neural Synth,Feedback network simulating neural dynamics,feedback,granular density,Dark Ambient;Ethereal;Natural,9
+228,Neuron Sequencer,Wavetable morphing based on neuron waveforms,noise,chaos modulation,Ethereal;Drone;Experimental,3
+229,Cell Resonator,Feedback network simulating cell dynamics,hybrid,wavetable scanning,Cinematic;Natural;Dark Ambient,4
+230,DNA Synth,Wavetable morphing based on dna waveforms,sample_based,frequency shifting,Meditative;Experimental;Ethereal,4
+231,Bacterial Engine,Bacterial-inspired synthesis with unique timbral characteristics,fm,spectral blur,Ethereal;Experimental;Meditative,2
+232,Amino Sequencer,FM synthesis capturing amino harmonic relationships,subtractive,envelope shaping,Natural;Ambient;Drone,2
+233,Mitochondria Resonator,Physical modeling of mitochondria acoustic properties,wavetable,bit crushing,Meditative;Ambient;Natural,9
+234,Protein Modulator,FM synthesis capturing protein harmonic relationships,granular,stochastic triggering,Ambient;Drone;Ethereal,4
+235,Organ Modulator,Additive synthesis recreating organ spectra,physical_modeling,recursive feedback,Natural;Cinematic;Ethereal,5
+236,Bone Generator,Bone patterns drive oscillator and modulation parameters,additive,bit crushing,Meditative;Cinematic;Experimental,8
+237,Forest Resonator,Physical modeling of forest acoustic properties,feedback,stochastic triggering,Drone;Ethereal;Natural,4
+238,Desert Synth,Granular processing inspired by desert textures,noise,fractal generation,Cinematic;Ambient;Natural,7
+239,Swamp Synth,Physical modeling of swamp acoustic properties,hybrid,oscillator coupling,Ethereal;Ambient;Dark Ambient,3
+240,Rainforest Modulator,Models rainforest behavior using advanced DSP techniques,sample_based,feedback routing,Ethereal;Natural;Cinematic,6
+241,Grassland Synth,Models grassland behavior using advanced DSP techniques,fm,oscillator coupling,Experimental;Meditative;Ambient,2
+242,Reef Synth,Models reef behavior using advanced DSP techniques,subtractive,comb filtering,Experimental;Natural;Ethereal,3
+243,Fungal Synth,Hybrid synthesis combining multiple fungal characteristics,wavetable,harmonic excitation,Drone;Dark Ambient;Ethereal,7
+244,Coral Synth,Coral-inspired synthesis with unique timbral characteristics,granular,spectral morphing,Natural;Experimental;Ethereal,5
+245,Ant Colony Synth,Wavetable morphing based on ant colony waveforms,physical_modeling,harmonic excitation,Ambient;Dark Ambient;Cinematic,7
+246,Wolf Pack Synth,Granular processing inspired by wolf pack textures,additive,harmonic series,Dark Ambient;Natural;Experimental,3
+247,Pulsar Oscillator,Hybrid synthesis combining multiple pulsar characteristics,feedback,time stretching,Cinematic;Dark Ambient;Experimental,6
+248,Solar Wind Filter,Additive synthesis recreating solar wind spectra,noise,envelope shaping,Meditative;Ethereal;Experimental,3
+249,Black Hole Processor,Additive synthesis recreating black hole spectra,hybrid,wavetable scanning,Dark Ambient;Natural;Cinematic,5
+250,Supernova Synth,Hybrid synthesis combining multiple supernova characteristics,sample_based,recursive feedback,Natural;Ambient;Experimental,8
+251,Quasar Processor,Hybrid synthesis combining multiple quasar characteristics,fm,harmonic excitation,Natural;Experimental;Meditative,8
+252,Neutron Synth,Neutron patterns drive oscillator and modulation parameters,subtractive,pattern sequencing,Meditative;Ethereal;Natural,4
+253,Cosmic Generator,Granular processing inspired by cosmic textures,wavetable,convolution,Dark Ambient;Drone;Ethereal,8
+254,Magnetar Synth,Additive synthesis recreating magnetar spectra,granular,ring modulation,Meditative;Cinematic;Natural,8
+255,Zodiacal Synth,Zodiacal-inspired synthesis with unique timbral characteristics,physical_modeling,stochastic triggering,Meditative;Natural;Experimental,3
+256,Chemical Synth,Granular processing inspired by chemical textures,additive,modulation matrix,Meditative;Drone;Natural,3
+257,Catalyst Synth,Catalyst patterns drive oscillator and modulation parameters,feedback,time stretching,Natural;Ethereal;Meditative,8
+258,Exothermic Sequencer,Models exothermic behavior using advanced DSP techniques,noise,wavetable scanning,Drone;Cinematic;Ethereal,3
+259,Crystal Synth,Granular processing inspired by crystal textures,hybrid,wavefolding,Ambient;Experimental;Natural,3
+260,Oxidation Synth,Physical modeling of oxidation acoustic properties,sample_based,pitch shifting,Natural;Cinematic;Ambient,3
+261,Fermentation Synth,Feedback network simulating fermentation dynamics,fm,spectral blur,Drone;Meditative;Dark Ambient,7
+262,Polymer Synth,Polymer-inspired synthesis with unique timbral characteristics,subtractive,wavetable scanning,Meditative;Ethereal;Cinematic,3
+263,Photosynthesis Generator,Wavetable morphing based on photosynthesis waveforms,wavetable,harmonic mapping,Drone;Dark Ambient;Meditative,2
+264,Combustion Synth,Granular processing inspired by combustion textures,granular,frequency shifting,Ethereal;Experimental;Meditative,5
+265,Radioactive Processor,Feedback network simulating radioactive dynamics,physical_modeling,time stretching,Meditative;Natural;Cinematic,4
+266,Entropy Resonator,Entropy patterns drive oscillator and modulation parameters,additive,bit crushing,Dark Ambient;Ethereal;Natural,5
+267,Wave Sequencer,Additive synthesis recreating wave spectra,feedback,ring modulation,Meditative;Dark Ambient;Ambient,8
+268,Harmonic Sequencer,Models harmonic behavior using advanced DSP techniques,noise,allpass diffusion,Cinematic;Meditative;Dark Ambient,7
+269,Frequency Resonator,Models frequency behavior using advanced DSP techniques,hybrid,feedback routing,Dark Ambient;Experimental;Ambient,3
+270,Phase Modulator,Phase patterns drive oscillator and modulation parameters,sample_based,spectral freeze,Ambient;Meditative;Ethereal,6
+271,Doppler Synth,Physical modeling of doppler acoustic properties,fm,convolution,Natural;Drone;Dark Ambient,6
+272,Acoustic Synth,Granular processing inspired by acoustic textures,subtractive,phase distortion,Natural;Ambient;Cinematic,2
+273,Overtone Synth,Feedback network simulating overtone dynamics,wavetable,filter topology,Ambient;Dark Ambient;Drone,4
+274,Spring Processor,Hybrid synthesis combining multiple spring characteristics,granular,allpass diffusion,Natural;Experimental;Ambient,4
+275,Summer Generator,Granular processing inspired by summer textures,physical_modeling,fractal generation,Cinematic;Ambient;Drone,7
+276,Autumn Synth,Autumn-inspired synthesis with unique timbral characteristics,additive,envelope shaping,Cinematic;Dark Ambient;Natural,6
+277,Winter Synth,Wavetable morphing based on winter waveforms,feedback,fractal generation,Ethereal;Cinematic;Meditative,3
+278,Thaw Processor,Hybrid synthesis combining multiple thaw characteristics,noise,modulation matrix,Ethereal;Ambient;Dark Ambient,3
+279,Monsoon Engine,Feedback network simulating monsoon dynamics,hybrid,bit crushing,Drone;Experimental;Meditative,3
+280,Dry Season Synth,Wavetable morphing based on dry season waveforms,sample_based,wavefolding,Drone;Dark Ambient;Experimental,4
+281,Permafrost Synth,Feedback network simulating permafrost dynamics,fm,envelope shaping,Cinematic;Natural;Ambient,8
+282,Tidal Filter,Wavetable morphing based on tidal waveforms,subtractive,fractal generation,Drone;Ethereal;Meditative,3
+283,Spring Tide Synth,Granular processing inspired by spring tide textures,wavetable,pattern sequencing,Drone;Ethereal;Natural,4
+284,Neap Tide Resonator,Additive synthesis recreating neap tide spectra,granular,physical resonance,Ambient;Ethereal;Drone,9
+285,Rip Current Synth,Physical modeling of rip current acoustic properties,physical_modeling,spectral freeze,Dark Ambient;Ambient;Natural,4
+286,Undertow Modulator,Undertow-inspired synthesis with unique timbral characteristics,additive,harmonic mapping,Ethereal;Dark Ambient;Drone,2
+287,Ebb Flow Oscillator,Hybrid synthesis combining multiple ebb flow characteristics,feedback,modulation matrix,Ethereal;Meditative;Natural,8
+288,Coastline Generator,Additive synthesis recreating coastline spectra,noise,allpass diffusion,Experimental;Dark Ambient;Natural,3
+289,River Meander Resonator,Models river meander behavior using advanced DSP techniques,hybrid,convolution,Meditative;Natural;Drone,2
+290,Sediment Synth,Models sediment behavior using advanced DSP techniques,sample_based,spectral freeze,Experimental;Ethereal;Cinematic,3
+291,Canyon Generator,Additive synthesis recreating canyon spectra,fm,oscillator coupling,Ambient;Dark Ambient;Natural,9
+292,Dune Resonator,Dune-inspired synthesis with unique timbral characteristics,subtractive,envelope shaping,Ethereal;Meditative;Experimental,9
+293,Landslide Resonator,Physical modeling of landslide acoustic properties,wavetable,recursive feedback,Natural;Experimental;Drone,7
+294,Weathering Synth,Weathering patterns drive oscillator and modulation parameters,granular,oscillator coupling,Ambient;Meditative;Cinematic,5
+295,Fractal Synth,Models fractal behavior using advanced DSP techniques,physical_modeling,harmonic series,Ambient;Cinematic;Natural,3
+296,Spiral Synth,Models spiral behavior using advanced DSP techniques,additive,spectral freeze,Natural;Meditative;Dark Ambient,4
+297,Fibonacci Synth,Wavetable morphing based on fibonacci waveforms,feedback,physical resonance,Ethereal;Experimental;Drone,5
+298,Sunflower Synth,Wavetable morphing based on sunflower waveforms,noise,physical resonance,Ambient;Experimental;Cinematic,7
+299,Thunder Engine,Thunder patterns drive oscillator and modulation parameters,hybrid,filter topology,Experimental;Meditative;Drone,3
+300,Aurora Resonator,Granular processing inspired by aurora textures,sample_based,filter topology,Drone;Ethereal;Ambient,4
+301,Gear Synth,Physical modeling of gear acoustic properties,fm,convolution,Ambient;Rhythmic;Texture,8
+302,Piston Modulator,FM synthesis capturing piston harmonic relationships,subtractive,phase distortion,Rhythmic;Texture;Percussion,9
+303,Turbine Synth,Turbine-inspired synthesis with unique timbral characteristics,wavetable,harmonic excitation,Texture;Dark;Mechanical,8
+304,Conveyor Synth,Models conveyor behavior using advanced DSP techniques,granular,chaos modulation,Industrial;Rhythmic;Percussion,7
+305,Welding Processor,Welding-inspired synthesis with unique timbral characteristics,physical_modeling,chaos modulation,Percussion;Industrial;Mechanical,7
+306,Pneumatic Sequencer,Pneumatic-inspired synthesis with unique timbral characteristics,additive,allpass diffusion,Percussion;Texture;Industrial,2
+307,Steam Oscillator,Feedback network simulating steam dynamics,noise,physical resonance,Rhythmic;Texture;Mechanical,7
+308,Furnace Engine,Models furnace behavior using advanced DSP techniques,feedback,pitch shifting,Aggressive;Dark;Percussion,9
+309,Jackhammer Synth,Additive synthesis recreating jackhammer spectra,hybrid,granular freeze,Industrial;Aggressive;Rhythmic,7
+310,Transformer Synth,Models transformer behavior using advanced DSP techniques,sample_based,pitch shifting,Industrial;Rhythmic;Mechanical,3
+311,Relay Modulator,Physical modeling of relay acoustic properties,fm,modulation matrix,Mechanical;Industrial;Percussion,2
+312,Valve Filter,Valve patterns drive oscillator and modulation parameters,subtractive,recursive feedback,Percussion;Mechanical;Texture,9
+313,Grinding Engine,Grinding-inspired synthesis with unique timbral characteristics,wavetable,allpass diffusion,Rhythmic;Ambient;Industrial,7
+314,Chain Synth,Physical modeling of chain acoustic properties,granular,comb filtering,Texture;Aggressive;Dark,2
+315,Hydraulic Synth,Models hydraulic behavior using advanced DSP techniques,physical_modeling,stochastic triggering,Ambient;Industrial;Dark,4
+316,Drill Synth,FM synthesis capturing drill harmonic relationships,additive,wavefolding,Industrial;Ambient;Aggressive,5
+317,Stamping Oscillator,Hybrid synthesis combining multiple stamping characteristics,noise,feedback routing,Industrial;Aggressive;Ambient,4
+318,Factory Synth,Wavetable morphing based on factory waveforms,feedback,sample rate reduction,Rhythmic;Industrial;Mechanical,8
+319,Demolition Generator,Granular processing inspired by demolition textures,hybrid,pitch shifting,Texture;Ambient;Aggressive,5
+320,Engine Processor,Additive synthesis recreating engine spectra,sample_based,pitch shifting,Dark;Percussion;Rhythmic,3
+321,Motor Synth,Granular processing inspired by motor textures,fm,formant filtering,Industrial;Rhythmic;Ambient,3
+322,Compressor Modulator,Models compressor behavior using advanced DSP techniques,subtractive,harmonic mapping,Texture;Aggressive;Percussion,8
+323,Electromagnetic Generator,Electromagnetic-inspired synthesis with unique timbral characteristics,wavetable,phase distortion,Dark;Mechanical;Aggressive,7
+324,Siren Oscillator,FM synthesis capturing siren harmonic relationships,granular,harmonic mapping,Texture;Percussion;Dark,5
+325,Saw Blade Synth,Saw Blade patterns drive oscillator and modulation parameters,physical_modeling,granular freeze,Industrial;Texture;Ambient,6
+326,Forging Oscillator,Physical modeling of forging acoustic properties,additive,harmonic series,Ambient;Industrial;Rhythmic,4
+327,Magnetic Synth,Additive synthesis recreating magnetic spectra,noise,spectral morphing,Texture;Aggressive;Mechanical,6
+328,Electrical Generator,FM synthesis capturing electrical harmonic relationships,feedback,sample rate reduction,Industrial;Rhythmic;Mechanical,3
+329,Air Brake Generator,Physical modeling of air brake acoustic properties,hybrid,phase distortion,Dark;Texture;Aggressive,9
+330,Compression Processor,Granular processing inspired by compression textures,sample_based,convolution,Aggressive;Texture;Percussion,7
+331,Pulse Resonator,Models pulse behavior using advanced DSP techniques,fm,bit crushing,Texture;Dark;Percussion,4
+332,Speed Ramp Filter,Feedback network simulating speed ramp dynamics,subtractive,stochastic triggering,Texture;Ambient;Mechanical,2
+333,Clock Synth,Granular processing inspired by clock textures,wavetable,time stretching,Dark;Industrial;Rhythmic,5
+334,Rotor Synth,Additive synthesis recreating rotor spectra,granular,granular density,Texture;Rhythmic;Dark,8
+335,Spindle Processor,FM synthesis capturing spindle harmonic relationships,physical_modeling,pitch shifting,Ambient;Aggressive;Industrial,9
+336,Lathe Filter,Models lathe behavior using advanced DSP techniques,additive,stochastic triggering,Texture;Ambient;Percussion,6
+337,Press Synth,Press-inspired synthesis with unique timbral characteristics,noise,ring modulation,Ambient;Dark;Texture,5
+338,Roller Synth,FM synthesis capturing roller harmonic relationships,feedback,spectral blur,Ambient;Percussion;Dark,7
+339,Conveyor Modulator,Conveyor patterns drive oscillator and modulation parameters,hybrid,fractal generation,Aggressive;Texture;Ambient,7
+340,Hoist Oscillator,Granular processing inspired by hoist textures,sample_based,ring modulation,Texture;Mechanical;Ambient,5
+341,Crane Synth,Granular processing inspired by crane textures,fm,time stretching,Industrial;Texture;Dark,5
+342,Winch Oscillator,Winch-inspired synthesis with unique timbral characteristics,subtractive,wavefolding,Aggressive;Industrial;Dark,6
+343,Pulley Synth,Hybrid synthesis combining multiple pulley characteristics,wavetable,time stretching,Industrial;Dark;Texture,5
+344,Lever Synth,Hybrid synthesis combining multiple lever characteristics,granular,ring modulation,Mechanical;Industrial;Ambient,5
+345,Cam Synth,Wavetable morphing based on cam waveforms,physical_modeling,spectral freeze,Rhythmic;Aggressive;Ambient,6
+346,Crank Filter,Feedback network simulating crank dynamics,additive,chaos modulation,Percussion;Aggressive;Rhythmic,8
+347,Flywheel Oscillator,Wavetable morphing based on flywheel waveforms,noise,envelope shaping,Aggressive;Dark;Percussion,5
+348,Governor Oscillator,Governor patterns drive oscillator and modulation parameters,feedback,convolution,Rhythmic;Texture;Industrial,2
+349,Clutch Filter,Feedback network simulating clutch dynamics,hybrid,spectral blur,Rhythmic;Industrial;Percussion,5
+350,Brake Synth,Brake-inspired synthesis with unique timbral characteristics,sample_based,harmonic series,Ambient;Dark;Aggressive,9
+351,Bearing Synth,Models bearing behavior using advanced DSP techniques,fm,spectral blur,Aggressive;Industrial;Percussion,7
+352,Bushing Synth,Wavetable morphing based on bushing waveforms,subtractive,wavetable scanning,Mechanical;Dark;Industrial,8
+353,Gasket Filter,Feedback network simulating gasket dynamics,wavetable,bit crushing,Mechanical;Dark;Ambient,9
+354,Seal Synth,Seal patterns drive oscillator and modulation parameters,granular,modulation matrix,Mechanical;Dark;Percussion,6
+355,Pump Modulator,Models pump behavior using advanced DSP techniques,physical_modeling,sample rate reduction,Texture;Industrial;Dark,3
+356,Fan Generator,Models fan behavior using advanced DSP techniques,additive,modulation matrix,Mechanical;Percussion;Industrial,3
+357,Blower Modulator,Physical modeling of blower acoustic properties,noise,sample rate reduction,Mechanical;Percussion;Industrial,5
+358,Compressor Synth,Physical modeling of compressor acoustic properties,feedback,oscillator coupling,Percussion;Industrial;Dark,9
+359,Turbine Filter,Physical modeling of turbine acoustic properties,hybrid,phase distortion,Texture;Industrial;Aggressive,2
+360,Generator Synth,Hybrid synthesis combining multiple generator characteristics,sample_based,granular freeze,Rhythmic;Percussion;Aggressive,3
+361,Alternator Generator,Feedback network simulating alternator dynamics,fm,bit crushing,Industrial;Percussion;Mechanical,9
+362,Dynamo Synth,Additive synthesis recreating dynamo spectra,subtractive,filter topology,Percussion;Dark;Texture,4
+363,Motor Synth,Wavetable morphing based on motor waveforms,wavetable,harmonic series,Aggressive;Percussion;Ambient,6
+364,Engine Filter,Feedback network simulating engine dynamics,granular,formant filtering,Mechanical;Percussion;Aggressive,8
+365,Boiler Oscillator,Models boiler behavior using advanced DSP techniques,physical_modeling,filter topology,Mechanical;Percussion;Industrial,7
+366,Condenser Synth,Additive synthesis recreating condenser spectra,additive,spectral freeze,Mechanical;Percussion;Texture,7
+367,Heat Exchanger Synth,Feedback network simulating heat exchanger dynamics,noise,physical resonance,Aggressive;Industrial;Texture,5
+368,Radiator Synth,Models radiator behavior using advanced DSP techniques,feedback,pattern sequencing,Dark;Percussion;Rhythmic,3
+369,Cooler Modulator,Feedback network simulating cooler dynamics,hybrid,time stretching,Aggressive;Industrial;Mechanical,4
+370,Heater Filter,Heater patterns drive oscillator and modulation parameters,sample_based,pitch shifting,Aggressive;Rhythmic;Ambient,6
+371,Furnace Synth,Wavetable morphing based on furnace waveforms,fm,convolution,Ambient;Dark;Percussion,7
+372,Kiln Synth,Kiln-inspired synthesis with unique timbral characteristics,subtractive,harmonic mapping,Mechanical;Texture;Dark,7
+373,Oven Generator,FM synthesis capturing oven harmonic relationships,wavetable,chaos modulation,Ambient;Rhythmic;Industrial,8
+374,Dryer Synth,Granular processing inspired by dryer textures,granular,spectral freeze,Rhythmic;Industrial;Ambient,2
+375,Mixer Engine,Mixer-inspired synthesis with unique timbral characteristics,physical_modeling,time stretching,Industrial;Percussion;Texture,6
+376,Agitator Synth,Wavetable morphing based on agitator waveforms,additive,feedback routing,Rhythmic;Dark;Aggressive,3
+377,Centrifuge Synth,Additive synthesis recreating centrifuge spectra,noise,envelope shaping,Percussion;Industrial;Ambient,2
+378,Filter Modulator,Hybrid synthesis combining multiple filter characteristics,feedback,pitch shifting,Mechanical;Rhythmic;Industrial,2
+379,Separator Processor,Feedback network simulating separator dynamics,hybrid,oscillator coupling,Rhythmic;Percussion;Dark,6
+380,Crusher Synth,Models crusher behavior using advanced DSP techniques,sample_based,frequency shifting,Ambient;Dark;Percussion,6
+381,Grinder Synth,Hybrid synthesis combining multiple grinder characteristics,fm,feedback routing,Mechanical;Rhythmic;Dark,2
+382,Mill Filter,Mill patterns drive oscillator and modulation parameters,subtractive,frequency shifting,Ambient;Dark;Texture,4
+383,Shredder Synth,Shredder patterns drive oscillator and modulation parameters,wavetable,phase distortion,Ambient;Dark;Percussion,4
+384,Chipper Engine,Hybrid synthesis combining multiple chipper characteristics,granular,comb filtering,Ambient;Industrial;Rhythmic,8
+385,Cutter Synth,Models cutter behavior using advanced DSP techniques,physical_modeling,wavetable scanning,Dark;Rhythmic;Mechanical,8
+386,Slicer Synth,FM synthesis capturing slicer harmonic relationships,additive,bit crushing,Percussion;Ambient;Texture,7
+387,Chopper Synth,Wavetable morphing based on chopper waveforms,noise,spectral morphing,Industrial;Ambient;Percussion,5
+388,Press Synth,Granular processing inspired by press textures,feedback,bit crushing,Dark;Mechanical;Rhythmic,7
+389,Extruder Filter,Physical modeling of extruder acoustic properties,hybrid,granular density,Percussion;Aggressive;Industrial,7
+390,Molder Synth,Molder-inspired synthesis with unique timbral characteristics,sample_based,modulation matrix,Dark;Industrial;Mechanical,9
+391,Former Sequencer,Former patterns drive oscillator and modulation parameters,fm,frequency shifting,Industrial;Aggressive;Percussion,5
+392,Welder Synth,Additive synthesis recreating welder spectra,subtractive,comb filtering,Rhythmic;Ambient;Percussion,2
+393,Solder Generator,Hybrid synthesis combining multiple solder characteristics,wavetable,envelope shaping,Aggressive;Ambient;Industrial,9
+394,Riveter Synth,Additive synthesis recreating riveter spectra,granular,comb filtering,Aggressive;Texture;Ambient,7
+395,Bolter Synth,FM synthesis capturing bolter harmonic relationships,physical_modeling,recursive feedback,Ambient;Rhythmic;Texture,3
+396,Screwer Resonator,Physical modeling of screwer acoustic properties,additive,stochastic triggering,Dark;Texture;Aggressive,4
+397,Assembler Processor,Granular processing inspired by assembler textures,noise,recursive feedback,Ambient;Rhythmic;Dark,7
+398,Tester Modulator,Physical modeling of tester acoustic properties,feedback,spectral morphing,Industrial;Mechanical;Dark,5
+399,Inspector Synth,Additive synthesis recreating inspector spectra,hybrid,pitch shifting,Mechanical;Aggressive;Percussion,8
+400,Gear Filter,Gear patterns drive oscillator and modulation parameters,sample_based,time stretching,Dark;Mechanical;Rhythmic,5
+401,Superposition Filter,Additive synthesis recreating superposition spectra,fm,formant filtering,Ambient;Electronic;Psychoacoustic,3
+402,Entanglement Synth,Entanglement-inspired synthesis with unique timbral characteristics,wavetable,frequency shifting,Experimental;Psychoacoustic;Ambient,5
+403,Heisenberg Resonator,Heisenberg patterns drive oscillator and modulation parameters,additive,wavefolding,Electronic;Psychoacoustic;Mathematical,4
+404,Schrödinger Synth,Additive synthesis recreating schrödinger spectra,granular,stochastic triggering,Psychoacoustic;Drone;Ambient,8
+405,Quantum Synth,Quantum-inspired synthesis with unique timbral characteristics,subtractive,spectral freeze,Ambient;Drone;Psychoacoustic,2
+406,Planck Synth,FM synthesis capturing planck harmonic relationships,feedback,ring modulation,Electronic;Psychoacoustic;Generative,9
+407,Wave Function Resonator,Wavetable morphing based on wave function waveforms,hybrid,wavetable scanning,Generative;Psychoacoustic;Drone,4
+408,Photon Synth,Photon-inspired synthesis with unique timbral characteristics,noise,stochastic triggering,Abstract;Generative;Drone,6
+409,Antiparticle Filter,Antiparticle-inspired synthesis with unique timbral characteristics,physical_modeling,modulation matrix,Psychoacoustic;Experimental;Generative,2
+410,Qubit Oscillator,Qubit patterns drive oscillator and modulation parameters,sample_based,wavetable scanning,Generative;Ambient;Abstract,3
+411,Strange Attractor Synth,Granular processing inspired by strange attractor textures,fm,filter topology,Experimental;Electronic;Ambient,9
+412,Butterfly Filter,Physical modeling of butterfly acoustic properties,wavetable,wavefolding,Ambient;Electronic;Abstract,4
+413,Logistic Engine,Feedback network simulating logistic dynamics,additive,physical resonance,Psychoacoustic;Generative;Abstract,9
+414,Lorenz Synth,Wavetable morphing based on lorenz waveforms,granular,harmonic mapping,Drone;Mathematical;Psychoacoustic,4
+415,Mandelbrot Synth,Physical modeling of mandelbrot acoustic properties,subtractive,modulation matrix,Abstract;Experimental;Drone,6
+416,Bifurcation Modulator,Bifurcation-inspired synthesis with unique timbral characteristics,feedback,pattern sequencing,Electronic;Psychoacoustic;Generative,9
+417,Chaos Synth,Additive synthesis recreating chaos spectra,hybrid,granular freeze,Drone;Experimental;Generative,7
+418,Sensitive Generator,Sensitive patterns drive oscillator and modulation parameters,noise,formant filtering,Ambient;Generative;Mathematical,5
+419,Strange Loop Synth,Models strange loop behavior using advanced DSP techniques,physical_modeling,oscillator coupling,Experimental;Generative;Abstract,9
+420,Attractor Synth,Models attractor behavior using advanced DSP techniques,sample_based,oscillator coupling,Abstract;Electronic;Ambient,7
+421,Fractal Synth,Fractal patterns drive oscillator and modulation parameters,fm,harmonic series,Drone;Electronic;Mathematical,5
+422,Julia Generator,Julia-inspired synthesis with unique timbral characteristics,wavetable,sample rate reduction,Electronic;Drone;Experimental,3
+423,Sierpinski Processor,Granular processing inspired by sierpinski textures,additive,wavetable scanning,Electronic;Mathematical;Drone,5
+424,Koch Modulator,Hybrid synthesis combining multiple koch characteristics,granular,spectral blur,Experimental;Psychoacoustic;Generative,8
+425,Apollonian Generator,Hybrid synthesis combining multiple apollonian characteristics,subtractive,harmonic excitation,Generative;Electronic;Experimental,8
+426,Droste Processor,Droste patterns drive oscillator and modulation parameters,feedback,recursive feedback,Ambient;Psychoacoustic;Experimental,2
+427,Barnsley Modulator,FM synthesis capturing barnsley harmonic relationships,hybrid,frequency shifting,Mathematical;Ambient;Psychoacoustic,9
+428,Menger Resonator,Wavetable morphing based on menger waveforms,noise,granular freeze,Experimental;Electronic;Ambient,8
+429,Möbius Filter,Granular processing inspired by möbius textures,physical_modeling,sample rate reduction,Abstract;Ambient;Mathematical,3
+430,Klein Synth,Hybrid synthesis combining multiple klein characteristics,sample_based,convolution,Mathematical;Abstract;Ambient,4
+431,Toroidal Synth,FM synthesis capturing toroidal harmonic relationships,fm,pitch shifting,Psychoacoustic;Mathematical;Generative,7
+432,Genus Synth,Genus patterns drive oscillator and modulation parameters,wavetable,physical resonance,Drone;Generative;Mathematical,5
+433,Knot Resonator,Wavetable morphing based on knot waveforms,additive,formant filtering,Mathematical;Electronic;Drone,8
+434,Handle Oscillator,Wavetable morphing based on handle waveforms,granular,envelope shaping,Psychoacoustic;Abstract;Mathematical,3
+435,Topological Engine,Hybrid synthesis combining multiple topological characteristics,subtractive,granular freeze,Abstract;Mathematical;Psychoacoustic,5
+436,Surface Generator,Surface patterns drive oscillator and modulation parameters,feedback,bit crushing,Electronic;Generative;Psychoacoustic,9
+437,Prime Generator,Prime-inspired synthesis with unique timbral characteristics,hybrid,recursive feedback,Ambient;Generative;Electronic,9
+438,Sieve Oscillator,Granular processing inspired by sieve textures,noise,harmonic mapping,Electronic;Mathematical;Drone,5
+439,RSA Sequencer,FM synthesis capturing rsa harmonic relationships,physical_modeling,bit crushing,Experimental;Mathematical;Drone,4
+440,Fermat Synth,Additive synthesis recreating fermat spectra,sample_based,feedback routing,Experimental;Abstract;Generative,8
+441,Goldbach Resonator,Hybrid synthesis combining multiple goldbach characteristics,fm,oscillator coupling,Electronic;Abstract;Psychoacoustic,7
+442,Mersenne Sequencer,Mersenne patterns drive oscillator and modulation parameters,wavetable,physical resonance,Psychoacoustic;Drone;Mathematical,4
+443,Twin Prime Synth,Granular processing inspired by twin prime textures,additive,convolution,Abstract;Drone;Mathematical,5
+444,Riemann Processor,Granular processing inspired by riemann textures,granular,oscillator coupling,Drone;Abstract;Psychoacoustic,5
+445,Modular Resonator,Modular-inspired synthesis with unique timbral characteristics,subtractive,harmonic excitation,Ambient;Abstract;Electronic,5
+446,Fibonacci Synth,Fibonacci-inspired synthesis with unique timbral characteristics,feedback,spectral blur,Electronic;Drone;Generative,6
+447,Golden Ratio Synth,Feedback network simulating golden ratio dynamics,hybrid,comb filtering,Generative;Mathematical;Electronic,7
+448,Spiral Sequencer,Spiral-inspired synthesis with unique timbral characteristics,noise,oscillator coupling,Experimental;Generative;Electronic,7
+449,Phyllotaxis Synth,Phyllotaxis-inspired synthesis with unique timbral characteristics,physical_modeling,oscillator coupling,Mathematical;Drone;Generative,8
+450,Nautilus Synth,Nautilus-inspired synthesis with unique timbral characteristics,sample_based,allpass diffusion,Psychoacoustic;Mathematical;Ambient,5
+451,Entropy Synth,Models entropy behavior using advanced DSP techniques,fm,wavefolding,Experimental;Mathematical;Psychoacoustic,7
+452,Thermal Synth,FM synthesis capturing thermal harmonic relationships,wavetable,pitch shifting,Electronic;Abstract;Generative,8
+453,Second Law Synth,Physical modeling of second law acoustic properties,additive,wavefolding,Psychoacoustic;Abstract;Generative,4
+454,Heat Death Synth,Feedback network simulating heat death dynamics,granular,sample rate reduction,Abstract;Generative;Experimental,5
+455,Boltzmann Synth,FM synthesis capturing boltzmann harmonic relationships,subtractive,stochastic triggering,Abstract;Generative;Mathematical,7
+456,Temperature Modulator,Additive synthesis recreating temperature spectra,feedback,pattern sequencing,Mathematical;Experimental;Ambient,3
+457,Phase Transition Synth,Phase Transition-inspired synthesis with unique timbral characteristics,hybrid,ring modulation,Electronic;Mathematical;Drone,3
+458,Equilibrium Synth,Wavetable morphing based on equilibrium waveforms,noise,allpass diffusion,Generative;Experimental;Mathematical,3
+459,Reversibility Synth,Feedback network simulating reversibility dynamics,physical_modeling,stochastic triggering,Electronic;Mathematical;Abstract,9
+460,Black Body Oscillator,Wavetable morphing based on black body waveforms,sample_based,pattern sequencing,Experimental;Ambient;Electronic,2
+461,Doppler Synth,Granular processing inspired by doppler textures,fm,formant filtering,Experimental;Drone;Mathematical,4
+462,Time Dilation Resonator,Models time dilation behavior using advanced DSP techniques,wavetable,oscillator coupling,Electronic;Experimental;Drone,8
+463,Spacetime Generator,Additive synthesis recreating spacetime spectra,additive,harmonic excitation,Electronic;Generative;Psychoacoustic,6
+464,Gravitational Sequencer,Gravitational-inspired synthesis with unique timbral characteristics,granular,time stretching,Abstract;Drone;Experimental,4
+465,Light Cone Engine,Feedback network simulating light cone dynamics,subtractive,harmonic mapping,Generative;Experimental;Electronic,6
+466,Frame Dragging Synth,Additive synthesis recreating frame dragging spectra,feedback,convolution,Abstract;Psychoacoustic;Mathematical,9
+467,Relativistic Engine,Feedback network simulating relativistic dynamics,hybrid,comb filtering,Electronic;Ambient;Mathematical,2
+468,Singularity Synth,Singularity patterns drive oscillator and modulation parameters,noise,spectral morphing,Mathematical;Electronic;Psychoacoustic,8
+469,String Synth,Models string behavior using advanced DSP techniques,physical_modeling,harmonic series,Psychoacoustic;Ambient;Mathematical,4
+470,Superstring Resonator,Wavetable morphing based on superstring waveforms,sample_based,frequency shifting,Generative;Electronic;Psychoacoustic,4
+471,Higgs Sequencer,FM synthesis capturing higgs harmonic relationships,fm,wavefolding,Psychoacoustic;Ambient;Electronic,6
+472,Gauge Resonator,Physical modeling of gauge acoustic properties,wavetable,harmonic series,Mathematical;Generative;Abstract,5
+473,Quark Oscillator,FM synthesis capturing quark harmonic relationships,additive,frequency shifting,Electronic;Mathematical;Drone,8
+474,Gluon Sequencer,Hybrid synthesis combining multiple gluon characteristics,granular,pattern sequencing,Mathematical;Psychoacoustic;Ambient,6
+475,Lepton Synth,Lepton-inspired synthesis with unique timbral characteristics,subtractive,harmonic excitation,Drone;Psychoacoustic;Electronic,9
+476,Muon Synth,Granular processing inspired by muon textures,feedback,modulation matrix,Experimental;Ambient;Electronic,3
+477,Neutrino Synth,Neutrino-inspired synthesis with unique timbral characteristics,hybrid,fractal generation,Mathematical;Generative;Drone,2
+478,Hadron Modulator,Granular processing inspired by hadron textures,noise,modulation matrix,Drone;Abstract;Generative,8
+479,Double Slit Synth,Double Slit patterns drive oscillator and modulation parameters,physical_modeling,chaos modulation,Generative;Drone;Experimental,9
+480,Interference Synth,Feedback network simulating interference dynamics,sample_based,bit crushing,Experimental;Drone;Electronic,3
+481,Standing Wave Synth,Standing Wave-inspired synthesis with unique timbral characteristics,fm,harmonic mapping,Psychoacoustic;Mathematical;Generative,5
+482,Node Synth,Node-inspired synthesis with unique timbral characteristics,wavetable,comb filtering,Experimental;Abstract;Mathematical,3
+483,Beat Frequency Generator,FM synthesis capturing beat frequency harmonic relationships,additive,envelope shaping,Mathematical;Psychoacoustic;Electronic,7
+484,Phase Coherence Synth,Models phase coherence behavior using advanced DSP techniques,granular,granular freeze,Psychoacoustic;Generative;Abstract,8
+485,Diffraction Synth,Diffraction-inspired synthesis with unique timbral characteristics,subtractive,harmonic excitation,Abstract;Ambient;Electronic,6
+486,Resonance Synth,FM synthesis capturing resonance harmonic relationships,feedback,feedback routing,Electronic;Ambient;Drone,5
+487,Harmonic Synth,Additive synthesis recreating harmonic spectra,hybrid,harmonic excitation,Psychoacoustic;Experimental;Abstract,7
+488,Overtone Synth,Additive synthesis recreating overtone spectra,noise,phase distortion,Mathematical;Experimental;Ambient,3
+489,Formant Synth,Feedback network simulating formant dynamics,physical_modeling,ring modulation,Mathematical;Generative;Electronic,6
+490,Coupled Oscillator,Granular processing inspired by coupled textures,sample_based,convolution,Experimental;Electronic;Drone,9
+491,Superposition Engine,Superposition-inspired synthesis with unique timbral characteristics,fm,spectral freeze,Mathematical;Abstract;Drone,4
+492,Entanglement Sequencer,Models entanglement behavior using advanced DSP techniques,wavetable,granular freeze,Drone;Electronic;Ambient,6
+493,Heisenberg Processor,FM synthesis capturing heisenberg harmonic relationships,additive,pitch shifting,Experimental;Abstract;Psychoacoustic,5
+494,Schrödinger Synth,Granular processing inspired by schrödinger textures,granular,stochastic triggering,Psychoacoustic;Generative;Abstract,2
+495,Quantum Synth,Feedback network simulating quantum dynamics,subtractive,convolution,Abstract;Mathematical;Psychoacoustic,5
+496,Planck Synth,Wavetable morphing based on planck waveforms,feedback,allpass diffusion,Drone;Mathematical;Electronic,8
+497,Wave Function Filter,Additive synthesis recreating wave function spectra,hybrid,harmonic excitation,Ambient;Generative;Psychoacoustic,6
+498,Photon Synth,Physical modeling of photon acoustic properties,noise,bit crushing,Abstract;Drone;Ambient,6
+499,Antiparticle Resonator,Feedback network simulating antiparticle dynamics,physical_modeling,spectral blur,Psychoacoustic;Experimental;Mathematical,5
+500,Qubit Synth,Hybrid synthesis combining multiple qubit characteristics,sample_based,envelope shaping,Mathematical;Drone;Ambient,5
+501,Gamelan Filter,FM synthesis capturing gamelan harmonic relationships,fm,modulation matrix,Meditative;Percussive;Experimental,6
+502,Sitar Synth,Granular processing inspired by sitar textures,additive,phase distortion,Experimental;Traditional;Percussive,6
+503,Tabla Generator,Hybrid synthesis combining multiple tabla characteristics,physical_modeling,chaos modulation,Percussive;Meditative;World,8
+504,Didgeridoo Synth,Additive synthesis recreating didgeridoo spectra,granular,pitch shifting,Experimental;Expressive;Ambient,8
+505,Kalimba Sequencer,FM synthesis capturing kalimba harmonic relationships,wavetable,oscillator coupling,World;Ethnic;Ambient,8
+506,Mbira Engine,FM synthesis capturing mbira harmonic relationships,sample_based,formant filtering,Expressive;World;Meditative,9
+507,Koto Synth,FM synthesis capturing koto harmonic relationships,hybrid,ring modulation,Ethnic;World;Ambient,9
+508,Shamisen Engine,Feedback network simulating shamisen dynamics,subtractive,allpass diffusion,Meditative;World;Expressive,8
+509,Erhu Synth,Hybrid synthesis combining multiple erhu characteristics,feedback,physical resonance,Ethnic;Expressive;Meditative,2
+510,Pipa Synth,Feedback network simulating pipa dynamics,noise,harmonic series,Experimental;World;Ethnic,5
+511,Oud Synth,Oud-inspired synthesis with unique timbral characteristics,fm,physical resonance,Percussive;Ethnic;Expressive,3
+512,Santoor Modulator,Wavetable morphing based on santoor waveforms,additive,pitch shifting,Experimental;Meditative;World,7
+513,Balalaika Resonator,Hybrid synthesis combining multiple balalaika characteristics,physical_modeling,formant filtering,Ethnic;Experimental;World,3
+514,Bouzouki Filter,Physical modeling of bouzouki acoustic properties,granular,chaos modulation,Traditional;Experimental;Expressive,9
+515,Hurdy Gurdy Synth,Models hurdy gurdy behavior using advanced DSP techniques,wavetable,spectral blur,Traditional;Meditative;World,9
+516,Bagpipe Synth,Bagpipe patterns drive oscillator and modulation parameters,sample_based,feedback routing,Traditional;Ambient;Percussive,8
+517,Accordion Synth,Granular processing inspired by accordion textures,hybrid,wavefolding,Traditional;Ambient;World,2
+518,Harmonium Synth,FM synthesis capturing harmonium harmonic relationships,subtractive,feedback routing,World;Ambient;Meditative,5
+519,Throat Singing Processor,Throat Singing-inspired synthesis with unique timbral characteristics,feedback,harmonic series,World;Expressive;Experimental,7
+520,Overtone Oscillator,Feedback network simulating overtone dynamics,noise,sample rate reduction,Percussive;Traditional;Ethnic,6
+521,Bell Synth,Granular processing inspired by bell textures,fm,filter topology,Ethnic;Meditative;Expressive,3
+522,Gong Generator,Wavetable morphing based on gong waveforms,additive,phase distortion,Expressive;Meditative;Percussive,9
+523,Singing Bowl Engine,Hybrid synthesis combining multiple singing bowl characteristics,physical_modeling,pitch shifting,Percussive;Ambient;Traditional,5
+524,Wind Chimes Synth,Physical modeling of wind chimes acoustic properties,granular,harmonic series,Experimental;Meditative;World,2
+525,Music Box Synth,Feedback network simulating music box dynamics,wavetable,stochastic triggering,World;Ambient;Expressive,9
+526,Carillon Synth,Models carillon behavior using advanced DSP techniques,sample_based,spectral freeze,Experimental;Ambient;Meditative,7
+527,Glass Harmonica Synth,Models glass harmonica behavior using advanced DSP techniques,hybrid,wavefolding,Experimental;Ethnic;Expressive,6
+528,Waterphone Synth,Granular processing inspired by waterphone textures,subtractive,fractal generation,Meditative;Ethnic;Expressive,5
+529,Hang Drum Filter,Hybrid synthesis combining multiple hang drum characteristics,feedback,granular freeze,Traditional;Expressive;Ethnic,3
+530,Jaw Harp Sequencer,Feedback network simulating jaw harp dynamics,noise,wavefolding,Percussive;Traditional;Meditative,8
+531,Bullroarer Resonator,Granular processing inspired by bullroarer textures,fm,harmonic series,Ethnic;Traditional;Expressive,5
+532,Daegeum Synth,FM synthesis capturing daegeum harmonic relationships,additive,time stretching,World;Experimental;Percussive,3
+533,Hulusi Synth,FM synthesis capturing hulusi harmonic relationships,physical_modeling,pitch shifting,Expressive;Percussive;Meditative,5
+534,Bowed Psaltery Synth,Granular processing inspired by bowed psaltery textures,granular,sample rate reduction,World;Experimental;Ethnic,8
+535,Steelpan Synth,Additive synthesis recreating steelpan spectra,wavetable,pitch shifting,Experimental;World;Traditional,6
+536,Tar Oscillator,Physical modeling of tar acoustic properties,sample_based,phase distortion,Ambient;World;Experimental,8
+537,Qin Synth,Granular processing inspired by qin textures,hybrid,envelope shaping,Ambient;Traditional;World,9
+538,Saz Resonator,FM synthesis capturing saz harmonic relationships,subtractive,granular density,Traditional;Expressive;Meditative,8
+539,Ney Synth,Physical modeling of ney acoustic properties,feedback,harmonic mapping,Expressive;Percussive;World,5
+540,Nai Processor,Additive synthesis recreating nai spectra,noise,harmonic series,Traditional;Ethnic;Expressive,9
+541,Berimbau Generator,Granular processing inspired by berimbau textures,fm,allpass diffusion,Traditional;Expressive;Ambient,6
+542,Riq Generator,Feedback network simulating riq dynamics,additive,envelope shaping,Expressive;Ethnic;Percussive,9
+543,Doumbek Synth,Additive synthesis recreating doumbek spectra,physical_modeling,fractal generation,Experimental;Expressive;Traditional,8
+544,Ud Synth,Hybrid synthesis combining multiple ud characteristics,granular,harmonic series,World;Expressive;Traditional,7
+545,Kemençe Synth,Wavetable morphing based on kemençe waveforms,wavetable,chaos modulation,Ambient;Meditative;Percussive,8
+546,Suling Filter,Physical modeling of suling acoustic properties,sample_based,spectral freeze,Ethnic;Traditional;Expressive,7
+547,Bamboo Oscillator,FM synthesis capturing bamboo harmonic relationships,hybrid,chaos modulation,Ambient;Ethnic;Traditional,4
+548,Rebab Generator,Physical modeling of rebab acoustic properties,subtractive,physical resonance,Experimental;World;Expressive,6
+549,Cimbalom Synth,FM synthesis capturing cimbalom harmonic relationships,feedback,frequency shifting,Ambient;Percussive;Expressive,5
+550,Zither Synth,Feedback network simulating zither dynamics,noise,filter topology,World;Expressive;Meditative,4
+551,Dulcimer Generator,Dulcimer-inspired synthesis with unique timbral characteristics,fm,spectral morphing,Experimental;Expressive;Meditative,3
+552,Autoharp Processor,Autoharp-inspired synthesis with unique timbral characteristics,additive,formant filtering,Ambient;Percussive;Ethnic,2
+553,Lyre Engine,Physical modeling of lyre acoustic properties,physical_modeling,oscillator coupling,Experimental;Ethnic;Traditional,7
+554,Harp Sequencer,Granular processing inspired by harp textures,granular,oscillator coupling,Traditional;Ethnic;Percussive,5
+555,Kantele Synth,Models kantele behavior using advanced DSP techniques,wavetable,spectral morphing,Experimental;Percussive;World,6
+556,Bandura Synth,Feedback network simulating bandura dynamics,sample_based,granular density,World;Expressive;Percussive,3
+557,Gusli Synth,Physical modeling of gusli acoustic properties,hybrid,wavetable scanning,Percussive;Experimental;Meditative,4
+558,Kokle Synth,Granular processing inspired by kokle textures,subtractive,phase distortion,Traditional;Percussive;Ethnic,2
+559,Jouhikko Synth,Additive synthesis recreating jouhikko spectra,feedback,stochastic triggering,World;Traditional;Meditative,3
+560,Talharpa Synth,Models talharpa behavior using advanced DSP techniques,noise,feedback routing,Percussive;Experimental;Traditional,7
+561,Langspil Synth,Granular processing inspired by langspil textures,fm,phase distortion,Meditative;Ambient;Traditional,6
+562,Hardingfele Synth,Feedback network simulating hardingfele dynamics,additive,pattern sequencing,Ethnic;Experimental;World,8
+563,Nyckelharpa Synth,Feedback network simulating nyckelharpa dynamics,physical_modeling,sample rate reduction,Experimental;Ambient;Ethnic,7
+564,Säckpipa Synth,Physical modeling of säckpipa acoustic properties,granular,recursive feedback,Meditative;Expressive;Traditional,2
+565,Seljefløyte Processor,Wavetable morphing based on seljefløyte waveforms,wavetable,feedback routing,Percussive;Meditative;Ethnic,5
+566,Bukkehorn Filter,Bukkehorn patterns drive oscillator and modulation parameters,sample_based,granular density,Traditional;Ethnic;Percussive,5
+567,Lur Synth,Lur-inspired synthesis with unique timbral characteristics,hybrid,ring modulation,Traditional;Ambient;Expressive,6
+568,Birch Trumpet Resonator,Physical modeling of birch trumpet acoustic properties,subtractive,spectral morphing,Expressive;Ethnic;Ambient,7
+569,Willow Flute Synth,Willow Flute-inspired synthesis with unique timbral characteristics,feedback,granular density,Meditative;Experimental;World,2
+570,Jew's Harp Synth,Models jew's harp behavior using advanced DSP techniques,noise,fractal generation,Meditative;Ambient;World,8
+571,Langspil Oscillator,Additive synthesis recreating langspil spectra,fm,ring modulation,Ethnic;Experimental;Expressive,6
+572,Fidla Synth,Feedback network simulating fidla dynamics,additive,fractal generation,Experimental;Meditative;Percussive,9
+573,Þjóðhátíð Synth,Feedback network simulating þjóðhátíð dynamics,physical_modeling,harmonic mapping,Ethnic;Experimental;Percussive,6
+574,Bumbulum Generator,Feedback network simulating bumbulum dynamics,granular,stochastic triggering,Ambient;Meditative;Ethnic,8
+575,Cuíca Processor,Hybrid synthesis combining multiple cuíca characteristics,wavetable,filter topology,World;Percussive;Traditional,7
+576,Pandeiro Synth,Hybrid synthesis combining multiple pandeiro characteristics,sample_based,sample rate reduction,World;Ethnic;Expressive,2
+577,Surdo Processor,FM synthesis capturing surdo harmonic relationships,hybrid,spectral freeze,World;Traditional;Experimental,4
+578,Repique Synth,Physical modeling of repique acoustic properties,subtractive,harmonic excitation,World;Ethnic;Ambient,2
+579,Tamborim Resonator,Tamborim-inspired synthesis with unique timbral characteristics,feedback,spectral morphing,Experimental;Ethnic;Percussive,9
+580,Agogô Generator,Agogô patterns drive oscillator and modulation parameters,noise,harmonic mapping,Experimental;Ambient;World,8
+581,Ganzá Engine,Physical modeling of ganzá acoustic properties,fm,spectral blur,Expressive;Percussive;Ambient,5
+582,Reco-Reco Synth,Feedback network simulating reco-reco dynamics,additive,physical resonance,Traditional;Ethnic;Percussive,5
+583,Chocalho Synth,Granular processing inspired by chocalho textures,physical_modeling,spectral morphing,World;Ambient;Meditative,6
+584,Xequerê Engine,Xequerê-inspired synthesis with unique timbral characteristics,granular,granular density,Experimental;Expressive;Ambient,5
+585,Caxixi Generator,FM synthesis capturing caxixi harmonic relationships,wavetable,sample rate reduction,Expressive;Percussive;Traditional,4
+586,Afoxé Synth,Afoxé-inspired synthesis with unique timbral characteristics,sample_based,filter topology,Traditional;World;Experimental,8
+587,Atabaque Processor,Physical modeling of atabaque acoustic properties,hybrid,filter topology,Expressive;Experimental;Traditional,2
+588,Alfaia Engine,Models alfaia behavior using advanced DSP techniques,subtractive,pitch shifting,Percussive;World;Experimental,7
+589,Zabumba Engine,Wavetable morphing based on zabumba waveforms,feedback,modulation matrix,Expressive;World;Experimental,3
+590,Triângulo Synth,Additive synthesis recreating triângulo spectra,noise,recursive feedback,Expressive;Percussive;Meditative,2
+591,Maracatu Synth,Hybrid synthesis combining multiple maracatu characteristics,fm,filter topology,Experimental;Percussive;Expressive,7
+592,Berimbau Synth,Feedback network simulating berimbau dynamics,additive,sample rate reduction,Ethnic;Expressive;Ambient,8
+593,Conga Synth,Feedback network simulating conga dynamics,physical_modeling,ring modulation,World;Ethnic;Traditional,8
+594,Bongo Synth,Wavetable morphing based on bongo waveforms,granular,wavetable scanning,Traditional;World;Percussive,5
+595,Timbales Oscillator,Physical modeling of timbales acoustic properties,wavetable,physical resonance,Ethnic;Traditional;World,3
+596,Güiro Modulator,Güiro-inspired synthesis with unique timbral characteristics,sample_based,chaos modulation,Traditional;Ethnic;World,7
+597,Maracas Oscillator,Physical modeling of maracas acoustic properties,hybrid,frequency shifting,Meditative;World;Percussive,3
+598,Claves Synth,Hybrid synthesis combining multiple claves characteristics,subtractive,harmonic excitation,Meditative;Ambient;World,3
+599,Gamelan Synth,Granular processing inspired by gamelan textures,feedback,convolution,Ethnic;Ambient;Expressive,6
+600,Sitar Processor,Physical modeling of sitar acoustic properties,noise,bit crushing,Ambient;Experimental;Meditative,2
+601,Pulsar Synth,Granular processing inspired by pulsar textures,fm,pitch shifting,Ambient;Ethereal;Generative,8
+602,Magnetar Synth,Granular processing inspired by magnetar textures,wavetable,granular freeze,Sci-Fi;Dark;Generative,4
+603,Neutron Modulator,FM synthesis capturing neutron harmonic relationships,additive,wavefolding,Cinematic;Sci-Fi;Experimental,6
+604,Quasar Resonator,FM synthesis capturing quasar harmonic relationships,granular,sample rate reduction,Ambient;Cinematic;Ethereal,5
+605,Black Hole Synth,Models black hole behavior using advanced DSP techniques,subtractive,bit crushing,Cinematic;Ambient;Drone,5
+606,Event Horizon Synth,Granular processing inspired by event horizon textures,noise,formant filtering,Experimental;Sci-Fi;Ambient,7
+607,Accretion Synth,Granular processing inspired by accretion textures,feedback,fractal generation,Dark;Drone;Sci-Fi,3
+608,Relativistic Modulator,Relativistic-inspired synthesis with unique timbral characteristics,hybrid,time stretching,Drone;Generative;Cinematic,8
+609,Hawking Processor,FM synthesis capturing hawking harmonic relationships,sample_based,sample rate reduction,Ambient;Dark;Generative,3
+610,Supernova Synth,Wavetable morphing based on supernova waveforms,physical_modeling,ring modulation,Experimental;Drone;Ambient,4
+611,Stellar Synth,Wavetable morphing based on stellar waveforms,fm,convolution,Drone;Dark;Cinematic,8
+612,Cosmic Synth,FM synthesis capturing cosmic harmonic relationships,wavetable,harmonic excitation,Sci-Fi;Cinematic;Dark,7
+613,Solar Wind Synth,Feedback network simulating solar wind dynamics,additive,harmonic excitation,Ambient;Generative;Cinematic,4
+614,Nebula Engine,Feedback network simulating nebula dynamics,granular,time stretching,Ethereal;Generative;Ambient,6
+615,Dust Cloud Synth,Additive synthesis recreating dust cloud spectra,subtractive,recursive feedback,Sci-Fi;Dark;Experimental,3
+616,Emission Synth,Additive synthesis recreating emission spectra,noise,sample rate reduction,Drone;Sci-Fi;Ambient,2
+617,Reflection Oscillator,FM synthesis capturing reflection harmonic relationships,feedback,spectral freeze,Ethereal;Ambient;Drone,7
+618,Planetary Resonator,Granular processing inspired by planetary textures,hybrid,wavefolding,Ambient;Drone;Cinematic,6
+619,Pillars Synth,Physical modeling of pillars acoustic properties,sample_based,comb filtering,Cinematic;Dark;Experimental,6
+620,Dark Nebula Generator,Feedback network simulating dark nebula dynamics,physical_modeling,frequency shifting,Drone;Ambient;Cinematic,4
+621,Solar Flare Processor,Hybrid synthesis combining multiple solar flare characteristics,fm,harmonic series,Sci-Fi;Cinematic;Ethereal,4
+622,Coronal Modulator,Hybrid synthesis combining multiple coronal characteristics,wavetable,modulation matrix,Ambient;Dark;Ethereal,4
+623,Prominence Synth,Wavetable morphing based on prominence waveforms,additive,wavetable scanning,Cinematic;Dark;Generative,5
+624,Heliosphere Synth,Heliosphere patterns drive oscillator and modulation parameters,granular,spectral blur,Dark;Ambient;Cinematic,5
+625,Photosphere Sequencer,Feedback network simulating photosphere dynamics,subtractive,frequency shifting,Dark;Ethereal;Ambient,8
+626,Magnetosphere Modulator,Additive synthesis recreating magnetosphere spectra,noise,feedback routing,Drone;Sci-Fi;Ambient,3
+627,Ionosphere Processor,Models ionosphere behavior using advanced DSP techniques,feedback,convolution,Drone;Ambient;Ethereal,2
+628,Radiation Belt Synth,Models radiation belt behavior using advanced DSP techniques,hybrid,spectral freeze,Experimental;Cinematic;Sci-Fi,9
+629,Solar Cycle Filter,Solar Cycle patterns drive oscillator and modulation parameters,sample_based,phase distortion,Cinematic;Ambient;Drone,8
+630,Aurora Synth,Granular processing inspired by aurora textures,physical_modeling,envelope shaping,Dark;Sci-Fi;Ambient,2
+631,Green Glow Generator,Models green glow behavior using advanced DSP techniques,fm,allpass diffusion,Ethereal;Experimental;Sci-Fi,8
+632,Van Allen Synth,Physical modeling of van allen acoustic properties,wavetable,modulation matrix,Generative;Ambient;Experimental,4
+633,Proton Event Oscillator,Proton Event patterns drive oscillator and modulation parameters,additive,granular density,Experimental;Generative;Ethereal,7
+634,Ray Shower Synth,Physical modeling of ray shower acoustic properties,granular,physical resonance,Dark;Cinematic;Experimental,2
+635,Cherenkov Sequencer,Wavetable morphing based on cherenkov waveforms,subtractive,granular density,Drone;Dark;Cinematic,7
+636,Bremsstrahlung Synth,Wavetable morphing based on bremsstrahlung waveforms,noise,modulation matrix,Sci-Fi;Ambient;Dark,2
+637,Cascade Engine,Hybrid synthesis combining multiple cascade characteristics,feedback,formant filtering,Dark;Ambient;Experimental,3
+638,Muon Decay Synth,Physical modeling of muon decay acoustic properties,hybrid,recursive feedback,Ethereal;Experimental;Cinematic,6
+639,Saturn Rings Modulator,Wavetable morphing based on saturn rings waveforms,sample_based,spectral blur,Ethereal;Drone;Cinematic,9
+640,Cassini Synth,Physical modeling of cassini acoustic properties,physical_modeling,bit crushing,Generative;Ambient;Sci-Fi,3
+641,Shepherd Synth,Wavetable morphing based on shepherd waveforms,fm,sample rate reduction,Drone;Ethereal;Ambient,2
+642,Ice Particle Resonator,Granular processing inspired by ice particle textures,wavetable,spectral blur,Generative;Dark;Cinematic,8
+643,Dust Ring Engine,Models dust ring behavior using advanced DSP techniques,additive,allpass diffusion,Drone;Dark;Ambient,8
+644,Ring Resonance Synth,Additive synthesis recreating ring resonance spectra,granular,spectral morphing,Ambient;Dark;Generative,2
+645,Orbital Synth,Feedback network simulating orbital dynamics,subtractive,harmonic excitation,Generative;Experimental;Cinematic,2
+646,Asteroid Synth,Physical modeling of asteroid acoustic properties,noise,sample rate reduction,Cinematic;Sci-Fi;Generative,4
+647,Meteor Synth,Feedback network simulating meteor dynamics,feedback,bit crushing,Experimental;Sci-Fi;Generative,8
+648,Meteorite Oscillator,Feedback network simulating meteorite dynamics,hybrid,stochastic triggering,Dark;Experimental;Generative,2
+649,Ablation Resonator,Ablation patterns drive oscillator and modulation parameters,sample_based,allpass diffusion,Sci-Fi;Experimental;Drone,4
+650,Atmospheric Synth,Models atmospheric behavior using advanced DSP techniques,physical_modeling,frequency shifting,Drone;Experimental;Generative,8
+651,Comet Synth,Feedback network simulating comet dynamics,fm,pitch shifting,Sci-Fi;Ethereal;Cinematic,7
+652,Nucleus Oscillator,Wavetable morphing based on nucleus waveforms,wavetable,feedback routing,Ambient;Generative;Dark,5
+653,Tail Sequencer,Tail patterns drive oscillator and modulation parameters,additive,chaos modulation,Ambient;Drone;Generative,8
+654,Sublimation Synth,Hybrid synthesis combining multiple sublimation characteristics,granular,fractal generation,Dark;Drone;Generative,8
+655,Coma Engine,Models coma behavior using advanced DSP techniques,subtractive,time stretching,Dark;Cinematic;Generative,9
+656,Radio Pulsar Processor,Radio Pulsar-inspired synthesis with unique timbral characteristics,noise,sample rate reduction,Experimental;Ethereal;Generative,8
+657,Radio Quiet Synth,Radio Quiet patterns drive oscillator and modulation parameters,feedback,spectral morphing,Sci-Fi;Drone;Experimental,9
+658,Pulsar Wind Oscillator,Granular processing inspired by pulsar wind textures,hybrid,spectral freeze,Ambient;Sci-Fi;Cinematic,5
+659,Fast Radio Synth,Fast Radio-inspired synthesis with unique timbral characteristics,sample_based,wavetable scanning,Ethereal;Sci-Fi;Drone,7
+660,Repeating FRB Synth,Wavetable morphing based on repeating frb waveforms,physical_modeling,spectral freeze,Generative;Ethereal;Experimental,3
+661,Dispersion Synth,Wavetable morphing based on dispersion waveforms,fm,fractal generation,Ambient;Ethereal;Dark,2
+662,Pulse Profile Synth,Granular processing inspired by pulse profile textures,wavetable,harmonic series,Ambient;Dark;Sci-Fi,7
+663,Radio Morphology Synth,Physical modeling of radio morphology acoustic properties,additive,convolution,Sci-Fi;Cinematic;Generative,2
+664,Synchrotron Synth,Physical modeling of synchrotron acoustic properties,granular,convolution,Ambient;Cinematic;Generative,6
+665,Betatron Synth,Hybrid synthesis combining multiple betatron characteristics,subtractive,granular freeze,Ambient;Cinematic;Dark,5
+666,Cyclotron Generator,Models cyclotron behavior using advanced DSP techniques,noise,convolution,Drone;Experimental;Generative,2
+667,Plasma Engine,Plasma-inspired synthesis with unique timbral characteristics,feedback,bit crushing,Drone;Ambient;Sci-Fi,2
+668,Birkeland Synth,Models birkeland behavior using advanced DSP techniques,hybrid,wavetable scanning,Dark;Sci-Fi;Ethereal,8
+669,Alfven Processor,Wavetable morphing based on alfven waveforms,sample_based,oscillator coupling,Generative;Ethereal;Ambient,4
+670,Radio Telescope Synth,Hybrid synthesis combining multiple radio telescope characteristics,physical_modeling,feedback routing,Drone;Sci-Fi;Cinematic,3
+671,Antenna Synth,Hybrid synthesis combining multiple antenna characteristics,fm,spectral morphing,Generative;Drone;Experimental,7
+672,Signal Synth,FM synthesis capturing signal harmonic relationships,wavetable,spectral blur,Sci-Fi;Generative;Drone,7
+673,Noise Floor Modulator,FM synthesis capturing noise floor harmonic relationships,additive,spectral freeze,Cinematic;Experimental;Dark,5
+674,Interference Synth,Hybrid synthesis combining multiple interference characteristics,granular,ring modulation,Experimental;Ambient;Generative,9
+675,Microwave Background Synth,Microwave Background-inspired synthesis with unique timbral characteristics,subtractive,modulation matrix,Dark;Sci-Fi;Ambient,9
+676,Temperature Synth,Additive synthesis recreating temperature spectra,noise,oscillator coupling,Dark;Generative;Drone,4
+677,Acoustic Peaks Engine,Physical modeling of acoustic peaks acoustic properties,feedback,wavefolding,Ethereal;Drone;Sci-Fi,2
+678,Gravitational Wave Filter,Additive synthesis recreating gravitational wave spectra,hybrid,bit crushing,Drone;Experimental;Ethereal,7
+679,Merger Oscillator,FM synthesis capturing merger harmonic relationships,sample_based,wavetable scanning,Drone;Ethereal;Cinematic,6
+680,LIGO Synth,FM synthesis capturing ligo harmonic relationships,physical_modeling,spectral blur,Generative;Ambient;Sci-Fi,2
+681,Ringdown Sequencer,Wavetable morphing based on ringdown waveforms,fm,time stretching,Ethereal;Sci-Fi;Experimental,9
+682,Binary Synth,Hybrid synthesis combining multiple binary characteristics,wavetable,harmonic mapping,Ethereal;Sci-Fi;Generative,5
+683,Dark Matter Synth,Models dark matter behavior using advanced DSP techniques,additive,allpass diffusion,Drone;Experimental;Ethereal,5
+684,Halo Synth,Wavetable morphing based on halo waveforms,granular,spectral freeze,Drone;Generative;Ethereal,3
+685,WIMP Resonator,WIMP patterns drive oscillator and modulation parameters,subtractive,ring modulation,Generative;Cinematic;Drone,2
+686,Axion Synth,Additive synthesis recreating axion spectra,noise,wavetable scanning,Ethereal;Ambient;Drone,8
+687,Spaghettification Oscillator,Models spaghettification behavior using advanced DSP techniques,feedback,convolution,Experimental;Generative;Sci-Fi,6
+688,Photon Sphere Modulator,Additive synthesis recreating photon sphere spectra,hybrid,convolution,Cinematic;Generative;Experimental,2
+689,Naked Singularity Synth,Naked Singularity patterns drive oscillator and modulation parameters,sample_based,modulation matrix,Sci-Fi;Ambient;Cinematic,9
+690,White Hole Engine,FM synthesis capturing white hole harmonic relationships,physical_modeling,spectral freeze,Drone;Ethereal;Experimental,3
+691,Wormhole Oscillator,Wormhole patterns drive oscillator and modulation parameters,fm,comb filtering,Generative;Dark;Drone,4
+692,Kerr Synth,Kerr patterns drive oscillator and modulation parameters,wavetable,spectral blur,Sci-Fi;Ethereal;Experimental,6
+693,Reissner Synth,Additive synthesis recreating reissner spectra,additive,filter topology,Ethereal;Sci-Fi;Generative,8
+694,Tensor Synth,Wavetable morphing based on tensor waveforms,granular,spectral blur,Drone;Ambient;Sci-Fi,3
+695,Metric Filter,FM synthesis capturing metric harmonic relationships,subtractive,phase distortion,Sci-Fi;Generative;Experimental,6
+696,Christoffel Synth,Granular processing inspired by christoffel textures,noise,time stretching,Drone;Cinematic;Ethereal,3
+697,Ricci Processor,Ricci-inspired synthesis with unique timbral characteristics,feedback,pitch shifting,Ambient;Dark;Cinematic,6
+698,Einstein Resonator,Hybrid synthesis combining multiple einstein characteristics,hybrid,harmonic mapping,Sci-Fi;Ethereal;Experimental,7
+699,Pulsar Oscillator,Physical modeling of pulsar acoustic properties,sample_based,wavefolding,Dark;Cinematic;Sci-Fi,3
+700,Magnetar Filter,FM synthesis capturing magnetar harmonic relationships,physical_modeling,spectral blur,Cinematic;Generative;Dark,5
+701,Helix Generator,FM synthesis capturing helix harmonic relationships,fm,wavefolding,Organic;Experimental;Psychoacoustic,4
+702,Ribosome Synth,Hybrid synthesis combining multiple ribosome characteristics,feedback,wavetable scanning,Psychoacoustic;Generative;Meditative,7
+703,Mitochondria Sequencer,FM synthesis capturing mitochondria harmonic relationships,granular,convolution,Dark;Ambient;Organic,9
+704,Synapse Processor,Feedback network simulating synapse dynamics,wavetable,frequency shifting,Generative;Ambient;Dark,4
+705,Heartbeat Synth,Additive synthesis recreating heartbeat spectra,additive,harmonic series,Ambient;Generative;Dark,8
+706,Breathing Synth,Feedback network simulating breathing dynamics,subtractive,phase distortion,Dark;Meditative;Generative,3
+707,Digestion Sequencer,Models digestion behavior using advanced DSP techniques,hybrid,fractal generation,Psychoacoustic;Organic;Dark,5
+708,Blood Resonator,Blood-inspired synthesis with unique timbral characteristics,noise,time stretching,Electronic;Dark;Organic,9
+709,Muscle Synth,Models muscle behavior using advanced DSP techniques,sample_based,bit crushing,Ambient;Electronic;Generative,9
+710,Bone Synth,Physical modeling of bone acoustic properties,physical_modeling,pitch shifting,Psychoacoustic;Generative;Electronic,4
+711,Skin Synth,Models skin behavior using advanced DSP techniques,fm,wavetable scanning,Meditative;Ambient;Generative,2
+712,Hair Resonator,Hybrid synthesis combining multiple hair characteristics,feedback,recursive feedback,Generative;Electronic;Ambient,3
+713,Root Oscillator,Root patterns drive oscillator and modulation parameters,granular,time stretching,Psychoacoustic;Ambient;Experimental,9
+714,Photon Engine,FM synthesis capturing photon harmonic relationships,wavetable,bit crushing,Dark;Generative;Organic,3
+715,Mycelium Synth,Wavetable morphing based on mycelium waveforms,additive,harmonic series,Electronic;Generative;Organic,9
+716,Spore Synth,Models spore behavior using advanced DSP techniques,subtractive,feedback routing,Generative;Psychoacoustic;Experimental,6
+717,Bacterial Processor,Bacterial patterns drive oscillator and modulation parameters,hybrid,spectral morphing,Generative;Experimental;Psychoacoustic,6
+718,Viral Synth,Feedback network simulating viral dynamics,noise,stochastic triggering,Ambient;Dark;Organic,7
+719,Parasite Filter,Physical modeling of parasite acoustic properties,sample_based,fractal generation,Dark;Organic;Ambient,8
+720,Symbiosis Synth,Hybrid synthesis combining multiple symbiosis characteristics,physical_modeling,envelope shaping,Ambient;Organic;Electronic,9
+721,Metamorphosis Modulator,Physical modeling of metamorphosis acoustic properties,fm,fractal generation,Electronic;Generative;Meditative,2
+722,Cocoon Synth,Additive synthesis recreating cocoon spectra,feedback,convolution,Dark;Experimental;Electronic,3
+723,Egg Synth,Additive synthesis recreating egg spectra,granular,bit crushing,Ambient;Experimental;Electronic,7
+724,Birth Synth,Birth-inspired synthesis with unique timbral characteristics,wavetable,time stretching,Dark;Psychoacoustic;Meditative,8
+725,Decay Oscillator,Models decay behavior using advanced DSP techniques,additive,fractal generation,Dark;Psychoacoustic;Organic,3
+726,Decomposition Filter,Decomposition-inspired synthesis with unique timbral characteristics,subtractive,phase distortion,Generative;Dark;Ambient,5
+727,Fossil Synth,Feedback network simulating fossil dynamics,hybrid,convolution,Meditative;Ambient;Electronic,3
+728,Evolution Synth,Evolution-inspired synthesis with unique timbral characteristics,noise,fractal generation,Electronic;Experimental;Psychoacoustic,2
+729,Mutation Synth,Wavetable morphing based on mutation waveforms,sample_based,convolution,Organic;Ambient;Dark,2
+730,Adaptation Processor,Hybrid synthesis combining multiple adaptation characteristics,physical_modeling,harmonic excitation,Generative;Dark;Electronic,2
+731,Axon Generator,Physical modeling of axon acoustic properties,fm,ring modulation,Generative;Ambient;Psychoacoustic,6
+732,Dendrite Synth,FM synthesis capturing dendrite harmonic relationships,feedback,oscillator coupling,Meditative;Organic;Dark,8
+733,Ganglion Synth,Physical modeling of ganglion acoustic properties,granular,oscillator coupling,Generative;Ambient;Meditative,2
+734,Glial Filter,Hybrid synthesis combining multiple glial characteristics,wavetable,wavetable scanning,Generative;Dark;Experimental,8
+735,Vesicle Synth,Hybrid synthesis combining multiple vesicle characteristics,additive,modulation matrix,Ambient;Dark;Organic,2
+736,Receptor Engine,Feedback network simulating receptor dynamics,subtractive,wavefolding,Experimental;Psychoacoustic;Generative,3
+737,Neurotransmitter Processor,Models neurotransmitter behavior using advanced DSP techniques,hybrid,recursive feedback,Organic;Ambient;Psychoacoustic,8
+738,Soma Synth,Hybrid synthesis combining multiple soma characteristics,noise,phase distortion,Electronic;Generative;Organic,9
+739,Neuropeptide Synth,Additive synthesis recreating neuropeptide spectra,sample_based,spectral morphing,Experimental;Ambient;Meditative,2
+740,Potassium Synth,Wavetable morphing based on potassium waveforms,physical_modeling,envelope shaping,Organic;Electronic;Experimental,6
+741,Calcium Synth,Wavetable morphing based on calcium waveforms,fm,modulation matrix,Organic;Ambient;Meditative,5
+742,GABA Synth,Granular processing inspired by gaba textures,feedback,pattern sequencing,Generative;Organic;Dark,5
+743,Glutamate Synth,Glutamate patterns drive oscillator and modulation parameters,granular,spectral blur,Organic;Dark;Electronic,3
+744,Dopamine Processor,Hybrid synthesis combining multiple dopamine characteristics,wavetable,formant filtering,Organic;Ambient;Psychoacoustic,5
+745,Serotonin Modulator,Wavetable morphing based on serotonin waveforms,additive,harmonic series,Generative;Meditative;Electronic,3
+746,Cortisol Engine,Hybrid synthesis combining multiple cortisol characteristics,subtractive,harmonic series,Psychoacoustic;Organic;Ambient,6
+747,Adrenaline Sequencer,Hybrid synthesis combining multiple adrenaline characteristics,hybrid,wavefolding,Ambient;Organic;Experimental,7
+748,Melatonin Modulator,Granular processing inspired by melatonin textures,noise,harmonic series,Meditative;Experimental;Organic,4
+749,Endorphin Processor,Granular processing inspired by endorphin textures,sample_based,pattern sequencing,Ambient;Psychoacoustic;Experimental,3
+750,Oxytocin Processor,Oxytocin patterns drive oscillator and modulation parameters,physical_modeling,spectral blur,Experimental;Generative;Psychoacoustic,5
+751,Insulin Engine,Feedback network simulating insulin dynamics,fm,pattern sequencing,Experimental;Psychoacoustic;Dark,8
+752,Cortex Resonator,Feedback network simulating cortex dynamics,feedback,formant filtering,Psychoacoustic;Meditative;Electronic,7
+753,Cerebellum Filter,Cerebellum-inspired synthesis with unique timbral characteristics,granular,formant filtering,Meditative;Organic;Dark,3
+754,Hippocampus Synth,Physical modeling of hippocampus acoustic properties,wavetable,pattern sequencing,Experimental;Electronic;Psychoacoustic,5
+755,Amygdala Synth,Hybrid synthesis combining multiple amygdala characteristics,additive,time stretching,Generative;Meditative;Electronic,7
+756,Thalamus Filter,Wavetable morphing based on thalamus waveforms,subtractive,sample rate reduction,Experimental;Meditative;Organic,9
+757,Pineal Sequencer,Hybrid synthesis combining multiple pineal characteristics,hybrid,spectral morphing,Experimental;Ambient;Generative,9
+758,Pituitary Processor,FM synthesis capturing pituitary harmonic relationships,noise,pitch shifting,Electronic;Experimental;Organic,7
+759,Hypothalamus Synth,Additive synthesis recreating hypothalamus spectra,sample_based,harmonic excitation,Meditative;Dark;Experimental,6
+760,Cerebral Synth,Hybrid synthesis combining multiple cerebral characteristics,physical_modeling,convolution,Ambient;Psychoacoustic;Experimental,7
+761,Nerve Synth,Feedback network simulating nerve dynamics,fm,time stretching,Electronic;Organic;Generative,3
+762,Glial Scar Generator,Glial Scar-inspired synthesis with unique timbral characteristics,feedback,formant filtering,Organic;Experimental;Psychoacoustic,8
+763,White Matter Processor,FM synthesis capturing white matter harmonic relationships,granular,modulation matrix,Experimental;Dark;Psychoacoustic,2
+764,Gray Matter Processor,Additive synthesis recreating gray matter spectra,wavetable,stochastic triggering,Electronic;Organic;Dark,8
+765,Synaptogenesis Synth,Additive synthesis recreating synaptogenesis spectra,additive,time stretching,Organic;Generative;Meditative,5
+766,Myelin Resonator,FM synthesis capturing myelin harmonic relationships,subtractive,harmonic series,Generative;Dark;Meditative,6
+767,Membrane Synth,FM synthesis capturing membrane harmonic relationships,hybrid,oscillator coupling,Meditative;Dark;Electronic,8
+768,Vesicular Oscillator,Additive synthesis recreating vesicular spectra,noise,formant filtering,Dark;Experimental;Ambient,2
+769,Retrograde Synth,Physical modeling of retrograde acoustic properties,sample_based,convolution,Electronic;Organic;Psychoacoustic,9
+770,Presynaptic Synth,Presynaptic-inspired synthesis with unique timbral characteristics,physical_modeling,fractal generation,Organic;Meditative;Psychoacoustic,7
+771,Postsynaptic Modulator,Granular processing inspired by postsynaptic textures,fm,wavefolding,Psychoacoustic;Meditative;Generative,8
+772,Heterosynaptic Generator,Physical modeling of heterosynaptic acoustic properties,feedback,frequency shifting,Psychoacoustic;Organic;Ambient,2
+773,Homosynaptic Synth,FM synthesis capturing homosynaptic harmonic relationships,granular,fractal generation,Dark;Generative;Ambient,7
+774,Neuromuscular Engine,Feedback network simulating neuromuscular dynamics,wavetable,harmonic mapping,Organic;Ambient;Meditative,3
+775,Motor Neuron Synth,Models motor neuron behavior using advanced DSP techniques,additive,harmonic excitation,Dark;Electronic;Psychoacoustic,6
+776,Proprioception Synth,Physical modeling of proprioception acoustic properties,subtractive,envelope shaping,Organic;Ambient;Dark,4
+777,Cutaneous Sequencer,Additive synthesis recreating cutaneous spectra,hybrid,physical resonance,Generative;Organic;Ambient,2
+778,Nociception Modulator,Feedback network simulating nociception dynamics,noise,wavetable scanning,Psychoacoustic;Meditative;Experimental,8
+779,Thermoreception Sequencer,Thermoreception-inspired synthesis with unique timbral characteristics,sample_based,recursive feedback,Electronic;Ambient;Dark,5
+780,Chemoreception Synth,Hybrid synthesis combining multiple chemoreception characteristics,physical_modeling,wavetable scanning,Experimental;Psychoacoustic;Dark,7
+781,Photoreception Resonator,Granular processing inspired by photoreception textures,fm,pitch shifting,Organic;Experimental;Electronic,7
+782,Equilibrium Generator,Feedback network simulating equilibrium dynamics,feedback,filter topology,Generative;Ambient;Electronic,5
+783,Temporal Bone Synth,Physical modeling of temporal bone acoustic properties,granular,harmonic mapping,Generative;Ambient;Psychoacoustic,8
+784,Cochlear Synth,FM synthesis capturing cochlear harmonic relationships,wavetable,fractal generation,Ambient;Psychoacoustic;Generative,8
+785,Hair Cell Synth,FM synthesis capturing hair cell harmonic relationships,additive,convolution,Experimental;Generative;Meditative,2
+786,Vestibular Generator,Physical modeling of vestibular acoustic properties,subtractive,harmonic mapping,Generative;Dark;Ambient,4
+787,Organ of Corti Synth,Hybrid synthesis combining multiple organ of corti characteristics,hybrid,phase distortion,Generative;Ambient;Dark,4
+788,Endolymph Resonator,Endolymph-inspired synthesis with unique timbral characteristics,noise,harmonic mapping,Dark;Organic;Meditative,7
+789,Perilymph Modulator,Granular processing inspired by perilymph textures,sample_based,phase distortion,Organic;Psychoacoustic;Experimental,2
+790,Stapes Processor,Wavetable morphing based on stapes waveforms,physical_modeling,spectral blur,Electronic;Experimental;Dark,9
+791,Ossicle Synth,Models ossicle behavior using advanced DSP techniques,fm,physical resonance,Generative;Dark;Ambient,8
+792,Ear Canal Synth,Ear Canal patterns drive oscillator and modulation parameters,feedback,chaos modulation,Meditative;Experimental;Electronic,8
+793,Tympanum Sequencer,Models tympanum behavior using advanced DSP techniques,granular,phase distortion,Ambient;Dark;Experimental,4
+794,Auditory Cortex Synth,FM synthesis capturing auditory cortex harmonic relationships,wavetable,sample rate reduction,Experimental;Dark;Ambient,3
+795,Helix Modulator,Physical modeling of helix acoustic properties,additive,wavetable scanning,Meditative;Organic;Electronic,3
+796,Ribosome Generator,Wavetable morphing based on ribosome waveforms,subtractive,comb filtering,Meditative;Psychoacoustic;Dark,7
+797,Mitochondria Oscillator,Granular processing inspired by mitochondria textures,hybrid,convolution,Ambient;Meditative;Generative,7
+798,Synapse Synth,Physical modeling of synapse acoustic properties,noise,bit crushing,Experimental;Meditative;Electronic,3
+799,Heartbeat Synth,Physical modeling of heartbeat acoustic properties,sample_based,chaos modulation,Experimental;Generative;Electronic,5
+800,Breathing Sequencer,Granular processing inspired by breathing textures,physical_modeling,time stretching,Generative;Psychoacoustic;Ambient,3
+801,Escher Synth,Additive synthesis recreating escher spectra,fm,envelope shaping,Surreal;Glitch;Weird,10
+802,Paradox Synth,Feedback network simulating paradox dynamics,granular,filter topology,Ambient;Abstract;Glitch,7
+803,Hypnagogic Synth,FM synthesis capturing hypnagogic harmonic relationships,hybrid,harmonic mapping,Unsettling;Abstract;Surreal,9
+804,Hallucination Resonator,Additive synthesis recreating hallucination spectra,additive,pattern sequencing,Weird;Ambient;Psychoacoustic,7
+805,Synesthetic Synth,Feedback network simulating synesthetic dynamics,noise,recursive feedback,Abstract;Ambient;Experimental,6
+806,Temporal Synth,Additive synthesis recreating temporal spectra,feedback,stochastic triggering,Glitch;Ambient;Abstract,7
+807,Parallel Filter,FM synthesis capturing parallel harmonic relationships,wavetable,harmonic series,Unsettling;Ambient;Experimental,6
+808,Glitch Reality Filter,Glitch Reality-inspired synthesis with unique timbral characteristics,subtractive,formant filtering,Psychoacoustic;Ambient;Glitch,8
+809,Inverted Synth,Models inverted behavior using advanced DSP techniques,physical_modeling,phase distortion,Abstract;Psychoacoustic;Unsettling,7
+810,Recursive Generator,Hybrid synthesis combining multiple recursive characteristics,sample_based,pattern sequencing,Psychoacoustic;Experimental;Ambient,6
+811,Impossible Synth,Hybrid synthesis combining multiple impossible characteristics,fm,harmonic mapping,Abstract;Ambient;Psychoacoustic,6
+812,Ego Death Synth,Granular processing inspired by ego death textures,granular,harmonic mapping,Surreal;Abstract;Glitch,6
+813,Consciousness Synth,Physical modeling of consciousness acoustic properties,hybrid,chaos modulation,Abstract;Surreal;Unsettling,9
+814,Rebirth Synth,Rebirth-inspired synthesis with unique timbral characteristics,additive,chaos modulation,Surreal;Glitch;Unsettling,7
+815,Memory Decay Filter,Additive synthesis recreating memory decay spectra,noise,phase distortion,Abstract;Unsettling;Experimental,7
+816,Uncanny Valley Synth,Additive synthesis recreating uncanny valley spectra,feedback,feedback routing,Weird;Glitch;Unsettling,6
+817,Liminal Synth,Feedback network simulating liminal dynamics,wavetable,harmonic series,Ambient;Glitch;Unsettling,8
+818,Cosmic Horror Synth,Hybrid synthesis combining multiple cosmic horror characteristics,subtractive,harmonic mapping,Abstract;Unsettling;Surreal,9
+819,Abstract Synth,Physical modeling of abstract acoustic properties,physical_modeling,sample rate reduction,Psychoacoustic;Surreal;Unsettling,7
+820,Color-Sound Synth,Additive synthesis recreating color-sound spectra,sample_based,time stretching,Abstract;Ambient;Experimental,10
+821,Taste-Timbre Processor,FM synthesis capturing taste-timbre harmonic relationships,fm,spectral freeze,Weird;Unsettling;Glitch,10
+822,Thought Filter,Additive synthesis recreating thought spectra,granular,pattern sequencing,Experimental;Surreal;Glitch,8
+823,Memetic Filter,Additive synthesis recreating memetic spectra,hybrid,chaos modulation,Unsettling;Weird;Experimental,7
+824,Infinite Regression Engine,Physical modeling of infinite regression acoustic properties,additive,harmonic excitation,Weird;Surreal;Unsettling,7
+825,Broken Physics Synth,Broken Physics patterns drive oscillator and modulation parameters,noise,bit crushing,Weird;Unsettling;Experimental,8
+826,Quantum Superposition Synth,Additive synthesis recreating quantum superposition spectra,feedback,comb filtering,Abstract;Psychoacoustic;Experimental,8
+827,Time Loop Synth,Additive synthesis recreating time loop spectra,wavetable,frequency shifting,Experimental;Unsettling;Abstract,8
+828,Alternate Dimension Synth,Models alternate dimension behavior using advanced DSP techniques,subtractive,spectral morphing,Ambient;Unsettling;Weird,6
+829,Synapse Misfire Modulator,Wavetable morphing based on synapse misfire waveforms,physical_modeling,formant filtering,Surreal;Experimental;Psychoacoustic,7
+830,Void Oscillator,Models void behavior using advanced DSP techniques,sample_based,stochastic triggering,Unsettling;Abstract;Experimental,8
+831,Möbius Oscillator,Hybrid synthesis combining multiple möbius characteristics,fm,comb filtering,Abstract;Surreal;Unsettling,8
+832,Dream Synth,Models dream behavior using advanced DSP techniques,granular,frequency shifting,Ambient;Weird;Glitch,6
+833,Perception Synth,Feedback network simulating perception dynamics,hybrid,convolution,Abstract;Unsettling;Psychoacoustic,9
+834,Entropy Resonator,Entropy-inspired synthesis with unique timbral characteristics,additive,comb filtering,Ambient;Experimental;Surreal,6
+835,Echo Nowhere Filter,Physical modeling of echo nowhere acoustic properties,noise,stochastic triggering,Abstract;Surreal;Unsettling,8
+836,Consciousness Download Synth,Feedback network simulating consciousness download dynamics,feedback,oscillator coupling,Glitch;Unsettling;Ambient,8
+837,Backwards Evolution Synth,Additive synthesis recreating backwards evolution spectra,wavetable,allpass diffusion,Unsettling;Ambient;Abstract,7
+838,Probability Cloud Resonator,Hybrid synthesis combining multiple probability cloud characteristics,subtractive,spectral freeze,Glitch;Psychoacoustic;Unsettling,6
+839,Inverse Mirror Resonator,Inverse Mirror-inspired synthesis with unique timbral characteristics,physical_modeling,envelope shaping,Weird;Psychoacoustic;Glitch,9
+840,Nested Consciousness Synth,FM synthesis capturing nested consciousness harmonic relationships,sample_based,harmonic mapping,Surreal;Experimental;Ambient,10
+841,Artifact Synth,Additive synthesis recreating artifact spectra,fm,comb filtering,Psychoacoustic;Experimental;Unsettling,6
+842,Reality Seam Generator,Reality Seam-inspired synthesis with unique timbral characteristics,granular,ring modulation,Unsettling;Ambient;Experimental,9
+843,Dreamcatcher Resonator,FM synthesis capturing dreamcatcher harmonic relationships,hybrid,wavefolding,Psychoacoustic;Unsettling;Ambient,6
+844,Letter Frequencies Synth,Feedback network simulating letter frequencies dynamics,additive,comb filtering,Abstract;Psychoacoustic;Surreal,9
+845,Ego Fragment Oscillator,Models ego fragment behavior using advanced DSP techniques,noise,chaos modulation,Experimental;Weird;Abstract,8
+846,Entropy Crystal Filter,FM synthesis capturing entropy crystal harmonic relationships,feedback,convolution,Surreal;Unsettling;Abstract,8
+847,Hyperbolic Engine,Feedback network simulating hyperbolic dynamics,wavetable,harmonic series,Unsettling;Experimental;Abstract,6
+848,Threshold Generator,Threshold patterns drive oscillator and modulation parameters,subtractive,time stretching,Surreal;Glitch;Experimental,7
+849,Memetic Infection Oscillator,Physical modeling of memetic infection acoustic properties,physical_modeling,harmonic mapping,Abstract;Ambient;Psychoacoustic,6
+850,Broken Causality Engine,Hybrid synthesis combining multiple broken causality characteristics,sample_based,recursive feedback,Unsettling;Psychoacoustic;Experimental,8
+851,Alternate Timeline Synth,FM synthesis capturing alternate timeline harmonic relationships,fm,stochastic triggering,Psychoacoustic;Abstract;Surreal,6
+852,Emotion Mapping Synth,FM synthesis capturing emotion mapping harmonic relationships,granular,time stretching,Experimental;Unsettling;Weird,9
+853,Identity Processor Engine,Hybrid synthesis combining multiple identity processor characteristics,hybrid,harmonic excitation,Ambient;Experimental;Glitch,8
+854,Probability Synth,FM synthesis capturing probability harmonic relationships,additive,spectral blur,Abstract;Ambient;Weird,9
+855,Void Resonance Synth,Feedback network simulating void resonance dynamics,noise,harmonic excitation,Weird;Surreal;Psychoacoustic,9
+856,Decay Memory Filter,Wavetable morphing based on decay memory waveforms,feedback,bit crushing,Ambient;Experimental;Weird,9
+857,Shape Tones Resonator,Additive synthesis recreating shape tones spectra,wavetable,spectral morphing,Abstract;Weird;Unsettling,8
+858,Inverted Envelope Synth,Physical modeling of inverted envelope acoustic properties,subtractive,fractal generation,Glitch;Unsettling;Weird,9
+859,Eternal Moment Synth,Granular processing inspired by eternal moment textures,physical_modeling,feedback routing,Psychoacoustic;Glitch;Abstract,7
+860,Parallel Perception Sequencer,FM synthesis capturing parallel perception harmonic relationships,sample_based,granular density,Glitch;Abstract;Psychoacoustic,9
+861,Thought-Space Synth,Wavetable morphing based on thought-space waveforms,fm,feedback routing,Psychoacoustic;Abstract;Weird,8
+862,Glitch Consciousness Synth,Additive synthesis recreating glitch consciousness spectra,granular,wavefolding,Unsettling;Glitch;Surreal,10
+863,Backwards Speech Generator,Backwards Speech-inspired synthesis with unique timbral characteristics,hybrid,oscillator coupling,Ambient;Glitch;Psychoacoustic,9
+864,Membrane Engine,Hybrid synthesis combining multiple membrane characteristics,additive,convolution,Experimental;Surreal;Abstract,8
+865,Echo Chamber Synth,Granular processing inspired by echo chamber textures,noise,comb filtering,Weird;Experimental;Psychoacoustic,7
+866,Kaleidoscope Sequencer,Additive synthesis recreating kaleidoscope spectra,feedback,spectral morphing,Unsettling;Ambient;Abstract,7
+867,Void Creature Resonator,FM synthesis capturing void creature harmonic relationships,wavetable,allpass diffusion,Surreal;Ambient;Glitch,10
+868,Consciousness Cascade Synth,Feedback network simulating consciousness cascade dynamics,subtractive,stochastic triggering,Abstract;Psychoacoustic;Unsettling,8
+869,Scent-Sound Sequencer,Scent-Sound patterns drive oscillator and modulation parameters,physical_modeling,frequency shifting,Weird;Surreal;Psychoacoustic,8
+870,Entropy Reversal Synth,Granular processing inspired by entropy reversal textures,sample_based,physical resonance,Surreal;Experimental;Ambient,7
+871,Impossible Interval Synth,FM synthesis capturing impossible interval harmonic relationships,fm,envelope shaping,Glitch;Abstract;Experimental,8
+872,Dream Logic Synth,Feedback network simulating dream logic dynamics,granular,wavefolding,Weird;Unsettling;Ambient,7
+873,Membrane Between Modulator,Membrane Between patterns drive oscillator and modulation parameters,hybrid,oscillator coupling,Weird;Abstract;Experimental,8
+874,Ego Death Progression Synth,Ego Death Progression-inspired synthesis with unique timbral characteristics,additive,bit crushing,Surreal;Ambient;Unsettling,6
+875,Recursive Dream Oscillator,FM synthesis capturing recursive dream harmonic relationships,noise,recursive feedback,Unsettling;Glitch;Experimental,9
+876,Motion-Sound Synth,Granular processing inspired by motion-sound textures,feedback,modulation matrix,Psychoacoustic;Unsettling;Ambient,6
+877,Quantum Foam Synth,Quantum Foam-inspired synthesis with unique timbral characteristics,wavetable,envelope shaping,Ambient;Unsettling;Abstract,6
+878,Alternate Logic Synth,Wavetable morphing based on alternate logic waveforms,subtractive,bit crushing,Ambient;Weird;Abstract,10
+879,Conscious Feedback Resonator,Granular processing inspired by conscious feedback textures,physical_modeling,recursive feedback,Surreal;Experimental;Weird,9
+880,Taste-Color-Sound Engine,Physical modeling of taste-color-sound acoustic properties,sample_based,envelope shaping,Surreal;Ambient;Unsettling,7
+881,Liminal Dream Synth,Feedback network simulating liminal dream dynamics,fm,harmonic excitation,Unsettling;Experimental;Psychoacoustic,9
+882,Thought Crystal Resonator,Models thought crystal behavior using advanced DSP techniques,granular,granular density,Surreal;Ambient;Unsettling,7
+883,Broken Mirror Engine,Hybrid synthesis combining multiple broken mirror characteristics,hybrid,wavetable scanning,Experimental;Glitch;Unsettling,6
+884,Parallel Leak Synth,Parallel Leak-inspired synthesis with unique timbral characteristics,additive,modulation matrix,Abstract;Experimental;Glitch,10
+885,Pain-Sound Synth,Additive synthesis recreating pain-sound spectra,noise,spectral morphing,Glitch;Abstract;Experimental,7
+886,Void Echo Sequencer,Feedback network simulating void echo dynamics,feedback,formant filtering,Unsettling;Psychoacoustic;Abstract,6
+887,Impossible Object Synth,Physical modeling of impossible object acoustic properties,wavetable,convolution,Unsettling;Weird;Experimental,10
+888,Consciousness Threshold Processor,Feedback network simulating consciousness threshold dynamics,subtractive,allpass diffusion,Experimental;Weird;Ambient,6
+889,Recursive Nest Synth,FM synthesis capturing recursive nest harmonic relationships,physical_modeling,pitch shifting,Unsettling;Surreal;Ambient,6
+890,Dream-Logic Synth,Feedback network simulating dream-logic dynamics,sample_based,pitch shifting,Surreal;Weird;Abstract,8
+891,Electromagnetic Generator,Electromagnetic-inspired synthesis with unique timbral characteristics,fm,formant filtering,Psychoacoustic;Glitch;Unsettling,9
+892,Entropy-Driven Sequencer,Hybrid synthesis combining multiple entropy-driven characteristics,granular,sample rate reduction,Weird;Ambient;Abstract,10
+893,Perceptual Filter,Perceptual-inspired synthesis with unique timbral characteristics,hybrid,phase distortion,Glitch;Surreal;Weird,10
+894,Time-Reversed Generator,Additive synthesis recreating time-reversed spectra,additive,harmonic mapping,Psychoacoustic;Glitch;Ambient,10
+895,Paradox Resonator Synth,Physical modeling of paradox resonator acoustic properties,noise,filter topology,Glitch;Weird;Unsettling,6
+896,Gravity-Sound Synth,Physical modeling of gravity-sound acoustic properties,feedback,formant filtering,Glitch;Ambient;Weird,7
+897,Void Between Synth,Hybrid synthesis combining multiple void between characteristics,wavetable,feedback routing,Ambient;Abstract;Experimental,10
+898,Escher Synth,FM synthesis capturing escher harmonic relationships,subtractive,ring modulation,Experimental;Ambient;Glitch,6
+899,Paradox Synth,Wavetable morphing based on paradox waveforms,physical_modeling,wavetable scanning,Abstract;Unsettling;Weird,8
+900,Hypnagogic Filter,FM synthesis capturing hypnagogic harmonic relationships,sample_based,spectral morphing,Experimental;Surreal;Abstract,9
+901,Conway Life Synth,Feedback network simulating conway life dynamics,hybrid,oscillator coupling,Ambient;Self-Organizing;Generative,3
+902,Wolfram Sequencer,Models wolfram behavior using advanced DSP techniques,wavetable,pitch shifting,Ambient;Glitch;Chaotic,9
+903,L-System Synth,Models l-system behavior using advanced DSP techniques,additive,stochastic triggering,Self-Organizing;Algorithmic;Emergent,8
+904,Genetic Algorithm Synth,Wavetable morphing based on genetic algorithm waveforms,granular,envelope shaping,Glitch;Experimental;Generative,4
+905,Markov Chain Synth,Markov Chain patterns drive oscillator and modulation parameters,feedback,oscillator coupling,Ambient;Chaotic;Algorithmic,2
+906,Perlin Noise Filter,Physical modeling of perlin noise acoustic properties,noise,phase distortion,Generative;Ambient;Chaotic,4
+907,Flocking Synth,Wavetable morphing based on flocking waveforms,fm,stochastic triggering,Emergent;Chaotic;Algorithmic,6
+908,Ant Colony Synth,Ant Colony-inspired synthesis with unique timbral characteristics,subtractive,bit crushing,Chaotic;Ambient;Generative,2
+909,Lorenz Synth,Lorenz patterns drive oscillator and modulation parameters,sample_based,comb filtering,Generative;Glitch;Ambient,6
+910,Turing Pattern Engine,Models turing pattern behavior using advanced DSP techniques,physical_modeling,sample rate reduction,Experimental;Emergent;Algorithmic,2
+911,Rossler Synth,Additive synthesis recreating rossler spectra,hybrid,frequency shifting,Algorithmic;Self-Organizing;Glitch,6
+912,Henon Modulator,Models henon behavior using advanced DSP techniques,wavetable,pitch shifting,Ambient;Algorithmic;Glitch,4
+913,Chua Processor,FM synthesis capturing chua harmonic relationships,additive,wavetable scanning,Algorithmic;Glitch;Emergent,2
+914,Ikeda Oscillator,Models ikeda behavior using advanced DSP techniques,granular,envelope shaping,Self-Organizing;Ambient;Emergent,2
+915,Tent Map Synth,Tent Map patterns drive oscillator and modulation parameters,feedback,spectral freeze,Generative;Glitch;Algorithmic,6
+916,Baker Map Synth,Feedback network simulating baker map dynamics,noise,granular freeze,Generative;Experimental;Ambient,4
+917,Horseshoe Synth,Horseshoe patterns drive oscillator and modulation parameters,fm,ring modulation,Emergent;Self-Organizing;Glitch,3
+918,Arnold Synth,Wavetable morphing based on arnold waveforms,subtractive,harmonic mapping,Experimental;Generative;Ambient,2
+919,Standard Map Synth,Standard Map patterns drive oscillator and modulation parameters,sample_based,comb filtering,Ambient;Emergent;Chaotic,5
+920,Chirikov Modulator,Chirikov-inspired synthesis with unique timbral characteristics,physical_modeling,phase distortion,Emergent;Glitch;Experimental,7
+921,Logistic Engine,Logistic-inspired synthesis with unique timbral characteristics,hybrid,pitch shifting,Ambient;Chaotic;Algorithmic,8
+922,Mandelbrot Engine,FM synthesis capturing mandelbrot harmonic relationships,wavetable,stochastic triggering,Emergent;Ambient;Experimental,2
+923,Julia Engine,Hybrid synthesis combining multiple julia characteristics,additive,spectral blur,Chaotic;Algorithmic;Generative,5
+924,Newton Synth,Additive synthesis recreating newton spectra,granular,phase distortion,Chaotic;Algorithmic;Glitch,8
+925,Halley Engine,Models halley behavior using advanced DSP techniques,feedback,spectral blur,Chaotic;Emergent;Glitch,7
+926,Householder Synth,Householder patterns drive oscillator and modulation parameters,noise,envelope shaping,Chaotic;Self-Organizing;Glitch,9
+927,Secant Synth,Additive synthesis recreating secant spectra,fm,frequency shifting,Glitch;Chaotic;Generative,8
+928,Bisection Synth,Physical modeling of bisection acoustic properties,subtractive,filter topology,Ambient;Emergent;Glitch,3
+929,False Position Synth,FM synthesis capturing false position harmonic relationships,sample_based,wavefolding,Ambient;Experimental;Generative,2
+930,Fixed Point Sequencer,FM synthesis capturing fixed point harmonic relationships,physical_modeling,frequency shifting,Generative;Chaotic;Algorithmic,3
+931,Picard Synth,Feedback network simulating picard dynamics,hybrid,stochastic triggering,Ambient;Self-Organizing;Generative,8
+932,Banach Synth,Granular processing inspired by banach textures,wavetable,allpass diffusion,Experimental;Glitch;Self-Organizing,4
+933,Contraction Synth,Feedback network simulating contraction dynamics,additive,comb filtering,Algorithmic;Ambient;Self-Organizing,7
+934,Lipschitz Synth,Models lipschitz behavior using advanced DSP techniques,granular,comb filtering,Experimental;Glitch;Emergent,8
+935,Cauchy Synth,Cauchy patterns drive oscillator and modulation parameters,feedback,pitch shifting,Emergent;Self-Organizing;Glitch,8
+936,Euler Oscillator,Granular processing inspired by euler textures,noise,phase distortion,Algorithmic;Generative;Glitch,2
+937,Runge-Kutta Synth,Models runge-kutta behavior using advanced DSP techniques,fm,time stretching,Generative;Algorithmic;Glitch,6
+938,Adams Filter,Physical modeling of adams acoustic properties,subtractive,allpass diffusion,Generative;Ambient;Self-Organizing,8
+939,Milne Synth,Hybrid synthesis combining multiple milne characteristics,sample_based,pattern sequencing,Experimental;Generative;Algorithmic,7
+940,Hamming Synth,Hybrid synthesis combining multiple hamming characteristics,physical_modeling,harmonic excitation,Self-Organizing;Glitch;Ambient,6
+941,Predictor Synth,Predictor-inspired synthesis with unique timbral characteristics,hybrid,wavetable scanning,Emergent;Experimental;Algorithmic,2
+942,Corrector Processor,Wavetable morphing based on corrector waveforms,wavetable,feedback routing,Experimental;Glitch;Emergent,4
+943,Multistep Synth,Physical modeling of multistep acoustic properties,additive,pitch shifting,Experimental;Self-Organizing;Emergent,3
+944,Linear Multistep Sequencer,Additive synthesis recreating linear multistep spectra,granular,modulation matrix,Emergent;Self-Organizing;Glitch,9
+945,Backward Difference Synth,FM synthesis capturing backward difference harmonic relationships,feedback,physical resonance,Ambient;Generative;Chaotic,7
+946,Gear Synth,Additive synthesis recreating gear spectra,noise,wavefolding,Experimental;Chaotic;Generative,2
+947,BDF Synth,FM synthesis capturing bdf harmonic relationships,fm,pitch shifting,Experimental;Algorithmic;Chaotic,7
+948,Trapezoidal Oscillator,Wavetable morphing based on trapezoidal waveforms,subtractive,harmonic excitation,Algorithmic;Generative;Emergent,7
+949,Midpoint Processor,Midpoint-inspired synthesis with unique timbral characteristics,sample_based,filter topology,Ambient;Emergent;Self-Organizing,8
+950,Heun Generator,Physical modeling of heun acoustic properties,physical_modeling,recursive feedback,Ambient;Experimental;Generative,7
+951,RK2 Generator,Additive synthesis recreating rk2 spectra,hybrid,harmonic mapping,Experimental;Generative;Self-Organizing,4
+952,RK4 Processor,RK4-inspired synthesis with unique timbral characteristics,wavetable,ring modulation,Emergent;Self-Organizing;Generative,7
+953,RKF45 Filter,FM synthesis capturing rkf45 harmonic relationships,additive,sample rate reduction,Experimental;Emergent;Algorithmic,7
+954,Dormand Synth,FM synthesis capturing dormand harmonic relationships,granular,fractal generation,Experimental;Emergent;Algorithmic,2
+955,Prince Oscillator,Hybrid synthesis combining multiple prince characteristics,feedback,chaos modulation,Glitch;Experimental;Emergent,4
+956,Cash-Karp Processor,Cash-Karp patterns drive oscillator and modulation parameters,noise,envelope shaping,Chaotic;Ambient;Algorithmic,5
+957,Bogacki Synth,Models bogacki behavior using advanced DSP techniques,fm,harmonic series,Generative;Emergent;Glitch,5
+958,Shampine Synth,Physical modeling of shampine acoustic properties,subtractive,pattern sequencing,Experimental;Glitch;Generative,6
+959,Fehlberg Synth,FM synthesis capturing fehlberg harmonic relationships,sample_based,ring modulation,Experimental;Emergent;Ambient,2
+960,Verner Synth,Feedback network simulating verner dynamics,physical_modeling,frequency shifting,Self-Organizing;Glitch;Ambient,3
+961,Butcher Resonator,Granular processing inspired by butcher textures,hybrid,fractal generation,Glitch;Generative;Emergent,6
+962,Singly Diagonal Modulator,Singly Diagonal-inspired synthesis with unique timbral characteristics,wavetable,phase distortion,Experimental;Generative;Glitch,8
+963,Embedded Sequencer,Additive synthesis recreating embedded spectra,additive,modulation matrix,Glitch;Generative;Emergent,8
+964,Adaptive Synth,Adaptive-inspired synthesis with unique timbral characteristics,granular,envelope shaping,Generative;Chaotic;Experimental,7
+965,Variable Step Synth,FM synthesis capturing variable step harmonic relationships,feedback,chaos modulation,Experimental;Chaotic;Emergent,5
+966,Dense Output Sequencer,Additive synthesis recreating dense output spectra,noise,chaos modulation,Self-Organizing;Generative;Emergent,4
+967,Continuous Sequencer,Continuous-inspired synthesis with unique timbral characteristics,fm,oscillator coupling,Emergent;Chaotic;Experimental,8
+968,Interpolating Synth,FM synthesis capturing interpolating harmonic relationships,subtractive,fractal generation,Ambient;Experimental;Algorithmic,3
+969,Collocation Synth,Physical modeling of collocation acoustic properties,sample_based,modulation matrix,Ambient;Emergent;Self-Organizing,2
+970,Galerkin Synth,Physical modeling of galerkin acoustic properties,physical_modeling,comb filtering,Algorithmic;Emergent;Experimental,5
+971,Petrov Synth,Models petrov behavior using advanced DSP techniques,hybrid,recursive feedback,Generative;Glitch;Ambient,2
+972,Spectral Synth,Spectral-inspired synthesis with unique timbral characteristics,wavetable,chaos modulation,Emergent;Glitch;Self-Organizing,5
+973,Finite Element Synth,Hybrid synthesis combining multiple finite element characteristics,additive,chaos modulation,Algorithmic;Generative;Chaotic,7
+974,Boundary Element Synth,Feedback network simulating boundary element dynamics,granular,phase distortion,Chaotic;Emergent;Experimental,2
+975,Finite Volume Modulator,Finite Volume-inspired synthesis with unique timbral characteristics,feedback,spectral freeze,Ambient;Emergent;Chaotic,9
+976,Finite Difference Modulator,Wavetable morphing based on finite difference waveforms,noise,envelope shaping,Generative;Chaotic;Ambient,5
+977,Pseudospectral Synth,Wavetable morphing based on pseudospectral waveforms,fm,physical resonance,Self-Organizing;Glitch;Ambient,3
+978,Chebyshev Synth,Feedback network simulating chebyshev dynamics,subtractive,fractal generation,Generative;Ambient;Algorithmic,7
+979,Legendre Generator,Legendre-inspired synthesis with unique timbral characteristics,sample_based,frequency shifting,Emergent;Self-Organizing;Ambient,5
+980,Hermite Synth,Feedback network simulating hermite dynamics,physical_modeling,envelope shaping,Chaotic;Self-Organizing;Ambient,8
+981,Laguerre Modulator,Models laguerre behavior using advanced DSP techniques,hybrid,harmonic excitation,Chaotic;Algorithmic;Ambient,4
+982,Jacobi Synth,Physical modeling of jacobi acoustic properties,wavetable,granular density,Chaotic;Ambient;Self-Organizing,4
+983,Gegenbauer Resonator,Additive synthesis recreating gegenbauer spectra,additive,convolution,Algorithmic;Ambient;Experimental,4
+984,Ultraspherical Modulator,Wavetable morphing based on ultraspherical waveforms,granular,filter topology,Emergent;Algorithmic;Generative,5
+985,Associated Legendre Synth,Additive synthesis recreating associated legendre spectra,feedback,stochastic triggering,Chaotic;Algorithmic;Glitch,3
+986,Spherical Harmonic Filter,Spherical Harmonic-inspired synthesis with unique timbral characteristics,noise,allpass diffusion,Chaotic;Ambient;Self-Organizing,6
+987,Zernike Synth,Wavetable morphing based on zernike waveforms,fm,spectral blur,Experimental;Generative;Ambient,4
+988,Bessel Oscillator,Models bessel behavior using advanced DSP techniques,subtractive,convolution,Generative;Experimental;Ambient,5
+989,Hankel Synth,Granular processing inspired by hankel textures,sample_based,frequency shifting,Self-Organizing;Chaotic;Algorithmic,9
+990,Neumann Synth,Hybrid synthesis combining multiple neumann characteristics,physical_modeling,wavetable scanning,Emergent;Chaotic;Experimental,4
+991,Struve Synth,Granular processing inspired by struve textures,hybrid,oscillator coupling,Glitch;Chaotic;Emergent,2
+992,Airy Generator,Physical modeling of airy acoustic properties,wavetable,sample rate reduction,Glitch;Self-Organizing;Generative,3
+993,Scorer Synth,Wavetable morphing based on scorer waveforms,additive,phase distortion,Experimental;Chaotic;Glitch,8
+994,Kelvin Processor,Physical modeling of kelvin acoustic properties,granular,granular freeze,Algorithmic;Generative;Chaotic,3
+995,Lommel Engine,Hybrid synthesis combining multiple lommel characteristics,feedback,spectral morphing,Chaotic;Emergent;Algorithmic,6
+996,Anger Generator,Physical modeling of anger acoustic properties,noise,spectral morphing,Experimental;Generative;Algorithmic,4
+997,Weber Modulator,Hybrid synthesis combining multiple weber characteristics,fm,chaos modulation,Ambient;Self-Organizing;Experimental,4
+998,Conway Life Synth,Additive synthesis recreating conway life spectra,subtractive,granular freeze,Experimental;Generative;Glitch,5
+999,Wolfram Synth,Wolfram patterns drive oscillator and modulation parameters,sample_based,harmonic series,Chaotic;Self-Organizing;Algorithmic,9
+1000,L-System Synth,Models l-system behavior using advanced DSP techniques,physical_modeling,harmonic excitation,Chaotic;Glitch;Ambient,9
