@@ -652,6 +652,176 @@ if (options && options.length > 0) {
 
 This ensures octave values like [-2, -1, 0, 1, 2] map correctly to labels ["32'", "16'", "8'", "4'", "2'"].
 
+### Preventing Clicks at Note Attack
+
+Clicks at note onset come from three sources. Fix all three:
+
+**1. Oscillator Phase Reset**
+Reset oscillator phase to 0 when triggered so waveforms start at a known point:
+
+```cpp
+void trigger(float vel = 1.0f)
+{
+    vco1.resetPhase();  // Start at zero-crossing
+    vco2.resetPhase();
+    // ... trigger envelopes
+}
+```
+
+**2. Exponential Envelope Attack (not linear)**
+Linear attack ramps create clicks because the derivative is discontinuous at the start. Use exponential:
+
+```cpp
+// BAD - linear attack creates click
+value += attackRate;
+
+// GOOD - exponential approach (smooth start)
+value += attackCoef * (1.0f - value);
+```
+
+Full exponential AD envelope:
+```cpp
+void updateCoefficients()
+{
+    float attackSamples = attackTime * sampleRate;
+    attackCoef = 1.0f - std::exp(-4.0f / attackSamples);
+
+    float decaySamples = decayTime * sampleRate;
+    decayCoef = std::exp(-4.0f / decaySamples);
+}
+
+float process()
+{
+    switch (stage) {
+        case ATTACK:
+            value += attackCoef * (1.0f - value);  // Exponential rise
+            if (value >= 0.999f) { value = 1.0f; stage = DECAY; }
+            break;
+        case DECAY:
+            value *= decayCoef;  // Exponential fall
+            if (value <= 0.001f) { value = 0.0f; stage = IDLE; }
+            break;
+    }
+    return value;
+}
+```
+
+**3. Anti-Click Ramp (~2ms fade-in)**
+As a safety net, apply a short linear ramp at note onset:
+
+```cpp
+// In trigger():
+antiClickRamp = 0.0f;
+antiClickActive = true;
+
+// In render():
+if (antiClickActive) {
+    antiClickRamp += 1.0f / 88.0f;  // ~2ms at 44.1kHz
+    if (antiClickRamp >= 1.0f) {
+        antiClickRamp = 1.0f;
+        antiClickActive = false;
+    }
+    output *= antiClickRamp;
+}
+```
+
+### Clock-Synced LFOs and Delays
+
+For tempo-synced modulation, use musical clock dividers instead of Hz:
+
+```cpp
+// Clock divider values (musical divisions)
+static const float clockDividerValues[] = {
+    0.0625f,    // 1/16 (4 bars)
+    0.0833333f, // 1/12 (3 bars) - triplet
+    0.125f,     // 1/8 (2 bars)
+    0.1666667f, // 1/6 - triplet
+    0.2f,       // 1/5 - quintuplet
+    0.25f,      // 1/4 (1 bar)
+    0.3333333f, // 1/3 - triplet
+    0.5f,       // 1/2 (half note)
+    1.0f,       // 1x (quarter note)
+    1.5f,       // 3/2 (dotted quarter)
+    2.0f,       // 2x (8th note)
+    3.0f,       // 3x (8th triplet)
+    4.0f,       // 4x (16th note)
+    6.0f,       // 6x (16th triplet)
+    8.0f,       // 8x (32nd note)
+};
+
+// LFO rate from tempo
+void setClockSyncRate(float bpm, float divider)
+{
+    float beatsPerSecond = bpm / 60.0f;
+    float cyclesPerSecond = beatsPerSecond * divider;
+    phaseIncrement = cyclesPerSecond / sampleRate;
+}
+
+// Delay time from tempo
+void setClockSyncTime(float bpm, float divider)
+{
+    float secondsPerBeat = 60.0f / bpm;
+    float syncedTime = secondsPerBeat / divider;
+    delaySamples = syncedTime * sampleRate;
+}
+```
+
+Use `AudioParameterChoice` for the UI:
+```cpp
+params.push_back(std::make_unique<juce::AudioParameterChoice>(
+    juce::ParameterID{"lfo_rate", 1},
+    "LFO Rate",
+    juce::StringArray{"1/16", "1/12", "1/8", "1/6", "1/5", "1/4", "1/3", "1/2",
+                      "1x", "3/2", "2x", "3x", "4x", "5x", "6x", "8x"},
+    8  // default to 1x
+));
+```
+
+### Gradual Effect Mix Curves
+
+For effects like reverb where subtle amounts matter most, use power curves:
+
+```cpp
+void setMix(float m)
+{
+    float linear = std::clamp(m, 0.0f, 1.0f);
+    // 4th power: 50% knob = 6.25% actual mix
+    mix = linear * linear * linear * linear;
+}
+```
+
+This gives much more control in the low range where you want subtle room ambience.
+
+### Sending Sequencer State to WebView
+
+For step sequencers, send state via timer callback:
+
+```cpp
+// In PluginEditor::timerCallback()
+void sendSequencerStateToWebView()
+{
+    auto state = processorRef.getSequencerState();
+
+    juce::DynamicObject::Ptr stateObj = new juce::DynamicObject();
+    stateObj->setProperty("currentStep", state.currentStep);
+    stateObj->setProperty("running", state.running);
+
+    juce::String json = juce::JSON::toString(juce::var(stateObj.get()));
+    juce::String script = "if (window.onSequencerState) window.onSequencerState(" + json + ");";
+    webView->evaluateJavascript(script, nullptr);
+}
+```
+
+React side:
+```typescript
+useEffect(() => {
+    window.onSequencerState = (state: { currentStep: number; running: boolean }) => {
+        setCurrentStep(state.currentStep);
+    };
+    return () => { window.onSequencerState = null; };
+}, []);
+```
+
 ## Development Workflow
 
 ### 0. Scaffold Phase

@@ -158,6 +158,24 @@ void PluginEditor::resized()
 void PluginEditor::timerCallback()
 {
     sendAudioDataToWebView();
+    sendSequencerStateToWebView();
+}
+
+void PluginEditor::sendSequencerStateToWebView()
+{
+    if (!webView)
+        return;
+
+    auto state = processorRef.getSequencerState();
+
+    juce::DynamicObject::Ptr stateObj = new juce::DynamicObject();
+    stateObj->setProperty("currentStep", state.currentStep);
+    stateObj->setProperty("running", state.running);
+
+    juce::var stateVar(stateObj.get());
+    juce::String json = juce::JSON::toString(stateVar);
+    juce::String script = "if (window.onSequencerState) window.onSequencerState(" + json + ");";
+    webView->evaluateJavascript(script, nullptr);
 }
 
 void PluginEditor::sendParameterToWebView(const juce::String& paramId, float value)

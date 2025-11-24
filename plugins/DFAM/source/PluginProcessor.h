@@ -66,6 +66,9 @@ public:
     /** Get current audio output for visualization */
     const std::array<float, 512>& getVisualizationBuffer() const { return visualizationBuffer; }
 
+    /** Get current sequencer state for UI */
+    SynthEngine::SequencerState getSequencerState() const { return synthEngine.getSequencerState(); }
+
 private:
     /** Create the parameter layout - called once in constructor */
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();

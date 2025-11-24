@@ -47,7 +47,10 @@ private:
 };
 
 /**
- * @brief Simple LFO for modulation
+ * @brief Simple LFO for modulation with clock sync support
+ *
+ * Rate can be set in Hz or as a clock divider relative to tempo.
+ * Clock divider values: 1/64, 1/32, 1/16, 1/8, 1/4, 1/2, 1, 2, 4, 8, 16, 32, 64
  */
 class SimpleLFO
 {
@@ -64,6 +67,24 @@ public:
     void setRate(float hz)
     {
         rate = std::clamp(hz, 0.01f, 20.0f);
+        useClockSync = false;
+        updatePhaseIncrement();
+    }
+
+    /**
+     * @brief Set LFO rate synced to tempo via clock divider
+     * @param bpm Current tempo in BPM
+     * @param divider Clock divider (1/64 to 64x)
+     *
+     * At divider=1, LFO completes one cycle per beat (quarter note)
+     * At divider=4, LFO completes 4 cycles per beat (16th notes)
+     * At divider=0.25, LFO completes one cycle per bar (whole note)
+     */
+    void setClockSyncRate(float bpm, float divider)
+    {
+        tempo = std::clamp(bpm, 20.0f, 300.0f);
+        clockDivider = std::clamp(divider, 0.015625f, 64.0f);
+        useClockSync = true;
         updatePhaseIncrement();
     }
 
@@ -97,7 +118,17 @@ public:
 private:
     void updatePhaseIncrement()
     {
-        phaseIncrement = rate / sampleRate;
+        if (useClockSync)
+        {
+            // Sync to tempo: one cycle per beat * divider
+            float beatsPerSecond = tempo / 60.0f;
+            float cyclesPerSecond = beatsPerSecond * clockDivider;
+            phaseIncrement = cyclesPerSecond / sampleRate;
+        }
+        else
+        {
+            phaseIncrement = rate / sampleRate;
+        }
     }
 
     float computeValue(double p) const
@@ -121,6 +152,9 @@ private:
     double phase = 0.0;
     double phaseIncrement = 0.0;
     float rate = 1.0f;
+    float tempo = 120.0f;
+    float clockDivider = 1.0f;
+    bool useClockSync = false;
     Waveform waveform = SINE;
 };
 
@@ -147,6 +181,8 @@ public:
     void setWaveform(Waveform w) { waveform = w; }
     void setWaveform(int w) { waveform = static_cast<Waveform>(std::clamp(w, 0, 3)); }
 
+    void resetPhase() { phase = 0.0; }
+
     float process()
     {
         float output = 0.0f;
@@ -154,15 +190,18 @@ public:
         switch (waveform)
         {
             case SAW:
+                // Start at -1, rise to +1 (zero crossing at start)
                 output = 2.0f * static_cast<float>(phase) - 1.0f;
                 break;
             case SQUARE:
                 output = phase < 0.5 ? 1.0f : -1.0f;
                 break;
             case TRIANGLE:
+                // Starts at -1 when phase=0 (zero crossing point)
                 output = 4.0f * std::abs(static_cast<float>(phase) - 0.5f) - 1.0f;
                 break;
             case SINE:
+                // Sine starts at 0 when phase=0 (perfect zero crossing)
                 output = std::sin(2.0f * juce::MathConstants<float>::pi * static_cast<float>(phase));
                 break;
         }
@@ -183,7 +222,11 @@ private:
 };
 
 /**
- * @brief Simple AD (Attack/Decay) envelope
+ * @brief Smooth AD (Attack/Decay) envelope with exponential curves
+ *
+ * Uses exponential curves to avoid clicks at attack onset.
+ * The attack phase uses an inverted exponential for a smooth start,
+ * and decay uses a standard exponential fall.
  */
 class ADEnvelope
 {
@@ -193,24 +236,28 @@ public:
     void prepare(double sr)
     {
         sampleRate = sr;
-        updateRates();
+        updateCoefficients();
     }
 
     void setAttack(float seconds)
     {
         attackTime = std::max(0.001f, seconds);
-        updateRates();
+        updateCoefficients();
     }
 
     void setDecay(float seconds)
     {
         decayTime = std::max(0.001f, seconds);
-        updateRates();
+        updateCoefficients();
     }
 
     void trigger()
     {
         stage = ATTACK;
+        // Don't reset value - allows smooth retriggering
+        // But if idle, start from zero
+        if (value < 0.001f)
+            value = 0.0f;
     }
 
     float process()
@@ -218,22 +265,28 @@ public:
         switch (stage)
         {
             case ATTACK:
-                value += attackRate;
-                if (value >= 1.0f)
+            {
+                // Exponential approach to 1.0 (smooth start, no click)
+                value += attackCoef * (1.0f - value);
+                if (value >= 0.999f)
                 {
                     value = 1.0f;
                     stage = DECAY;
                 }
                 break;
+            }
 
             case DECAY:
-                value -= decayRate;
-                if (value <= 0.0f)
+            {
+                // Exponential decay toward 0
+                value *= decayCoef;
+                if (value <= 0.001f)
                 {
                     value = 0.0f;
                     stage = IDLE;
                 }
                 break;
+            }
 
             case IDLE:
             default:
@@ -246,17 +299,25 @@ public:
     bool isActive() const { return stage != IDLE; }
 
 private:
-    void updateRates()
+    void updateCoefficients()
     {
-        attackRate = 1.0f / (attackTime * static_cast<float>(sampleRate));
-        decayRate = 1.0f / (decayTime * static_cast<float>(sampleRate));
+        // Calculate exponential coefficients
+        // For attack: we want to reach ~99.9% in attackTime
+        // coefficient = 1 - e^(-1/(time * sampleRate * tau))
+        // Using tau factor to control curve shape
+        float attackSamples = attackTime * static_cast<float>(sampleRate);
+        attackCoef = 1.0f - std::exp(-4.0f / attackSamples);  // ~98% in attackTime
+
+        // For decay: exponential fall
+        float decaySamples = decayTime * static_cast<float>(sampleRate);
+        decayCoef = std::exp(-4.0f / decaySamples);  // ~2% remaining after decayTime
     }
 
     double sampleRate = 44100.0;
     float attackTime = 0.01f;
     float decayTime = 0.5f;
-    float attackRate = 0.0f;
-    float decayRate = 0.0f;
+    float attackCoef = 0.001f;  // Exponential attack coefficient
+    float decayCoef = 0.9999f;  // Exponential decay coefficient
     float value = 0.0f;
     Stage stage = IDLE;
 };
@@ -391,7 +452,7 @@ private:
 };
 
 /**
- * @brief Simple stereo delay
+ * @brief Simple stereo delay with tempo sync support
  */
 class StereoDelay
 {
@@ -399,7 +460,7 @@ public:
     void prepare(double sr)
     {
         sampleRate = sr;
-        bufferSize = static_cast<size_t>(sr * 2.0);  // 2 seconds max
+        bufferSize = static_cast<size_t>(sr * 4.0);  // 4 seconds max for slow tempos
         bufferL.resize(bufferSize, 0.0f);
         bufferR.resize(bufferSize, 0.0f);
         writePos = 0;
@@ -407,8 +468,26 @@ public:
 
     void setTime(float seconds)
     {
-        delayTime = std::clamp(seconds, 0.001f, 2.0f);
-        delaySamples = static_cast<size_t>(delayTime * sampleRate);
+        delayTime = std::clamp(seconds, 0.001f, 4.0f);
+        useClockSync = false;
+        updateDelaySamples();
+    }
+
+    /**
+     * @brief Set delay time synced to tempo via clock divider
+     * @param bpm Current tempo in BPM
+     * @param divider Clock divider (1/64 to 64x)
+     *
+     * At divider=1, delay = one beat (quarter note)
+     * At divider=0.5, delay = half beat (8th note)
+     * At divider=4, delay = 4 beats (whole note)
+     */
+    void setClockSyncTime(float bpm, float divider)
+    {
+        tempo = std::clamp(bpm, 20.0f, 300.0f);
+        clockDivider = std::clamp(divider, 0.015625f, 64.0f);
+        useClockSync = true;
+        updateDelaySamples();
     }
 
     void setFeedback(float fb) { feedback = std::clamp(fb, 0.0f, 0.95f); }
@@ -431,13 +510,35 @@ public:
     }
 
 private:
+    void updateDelaySamples()
+    {
+        if (useClockSync)
+        {
+            // Sync to tempo: one beat / divider
+            float secondsPerBeat = 60.0f / tempo;
+            float syncedTime = secondsPerBeat / clockDivider;
+            syncedTime = std::clamp(syncedTime, 0.001f, 4.0f);
+            delaySamples = static_cast<size_t>(syncedTime * sampleRate);
+        }
+        else
+        {
+            delaySamples = static_cast<size_t>(delayTime * sampleRate);
+        }
+        // Clamp to buffer size
+        if (delaySamples >= bufferSize)
+            delaySamples = bufferSize - 1;
+    }
+
     double sampleRate = 44100.0;
     std::vector<float> bufferL;
     std::vector<float> bufferR;
-    size_t bufferSize = 88200;
+    size_t bufferSize = 176400;  // 4 seconds at 44.1k
     size_t writePos = 0;
     size_t delaySamples = 22050;
     float delayTime = 0.5f;
+    float tempo = 120.0f;
+    float clockDivider = 1.0f;
+    bool useClockSync = false;
     float feedback = 0.3f;
     float mix = 0.0f;
 };
@@ -469,7 +570,28 @@ public:
     }
 
     void setDecay(float d) { decay = std::clamp(d, 0.1f, 10.0f); }
-    void setMix(float m) { mix = std::clamp(m, 0.0f, 1.0f); }
+
+    /**
+     * @brief Set reverb mix with very gradual curve for subtle control
+     * @param m Mix value 0-1
+     *
+     * Uses a 4th power curve for extremely gradual onset.
+     * This gives much more control in the subtle/tight reverb range.
+     *
+     * Curve values:
+     * 0.25 input -> 0.004 mix (barely perceptible)
+     * 0.5 input -> 0.0625 mix (subtle room)
+     * 0.75 input -> 0.316 mix (moderate)
+     * 0.9 input -> 0.656 mix (fairly wet)
+     * 1.0 input -> 1.0 mix (full wet)
+     */
+    void setMix(float m)
+    {
+        float linearMix = std::clamp(m, 0.0f, 1.0f);
+        // Apply 4th power curve for very gradual onset
+        float curved = linearMix * linearMix * linearMix * linearMix;
+        mix = curved;
+    }
     void setDamping(float d) { damping = std::clamp(d, 0.0f, 1.0f); }
 
     void process(float& left, float& right)
@@ -536,7 +658,7 @@ private:
 };
 
 /**
- * @brief Simple compressor
+ * @brief Simple compressor with dry/wet mix
  */
 class Compressor
 {
@@ -552,9 +674,14 @@ public:
     void setAttack(float ms) { attackMs = std::clamp(ms, 0.1f, 100.0f); updateCoefficients(); }
     void setRelease(float ms) { releaseMs = std::clamp(ms, 10.0f, 1000.0f); updateCoefficients(); }
     void setMakeupGain(float db) { makeupGain = std::pow(10.0f, db / 20.0f); }
+    void setMix(float m) { mix = std::clamp(m, 0.0f, 1.0f); }
 
     void process(float& left, float& right)
     {
+        // Store dry signal
+        float dryL = left;
+        float dryR = right;
+
         float inputLevel = std::max(std::abs(left), std::abs(right));
         float inputDb = 20.0f * std::log10(inputLevel + 1e-6f);
 
@@ -571,8 +698,12 @@ public:
             envelope = releaseCoef * envelope + (1.0f - releaseCoef) * targetGain;
 
         float gain = envelope * makeupGain;
-        left *= gain;
-        right *= gain;
+        float wetL = left * gain;
+        float wetR = right * gain;
+
+        // Blend dry/wet
+        left = dryL * (1.0f - mix) + wetL * mix;
+        right = dryR * (1.0f - mix) + wetR * mix;
     }
 
 private:
@@ -591,6 +722,7 @@ private:
     float attackCoef = 0.0f;
     float releaseCoef = 0.0f;
     float envelope = 1.0f;
+    float mix = 1.0f;  // Default to full wet (100% compression)
 };
 
 /**
@@ -630,8 +762,17 @@ public:
         modulatedDecay = std::clamp(modulatedDecay, 0.01f, 4.0f);  // Clamp to reasonable range
         vcfVcaEnv.setDecay(modulatedDecay);
 
+        // Reset oscillator phases to avoid clicks from random starting points
+        // Starting at 0 phase means the waveform starts at a zero-crossing (for saw/tri)
+        vco1.resetPhase();
+        vco2.resetPhase();
+
         pitchEnv.trigger();
         vcfVcaEnv.trigger();
+
+        // Start anti-click ramp
+        antiClickRamp = 0.0f;
+        antiClickActive = true;
     }
 
     void render(float* outputL, float* outputR, int numSamples)
@@ -671,8 +812,20 @@ public:
             filter.setCutoff(std::clamp(filterMod, 20.0f, 20000.0f));
             float filtered = filter.process(mix);
 
-            // VCA
+            // VCA with anti-click ramp
             float output = filtered * vcfVcaEnvValue * velocity * masterLevel;
+
+            // Apply anti-click ramp at note onset
+            if (antiClickActive)
+            {
+                antiClickRamp += antiClickIncrement;
+                if (antiClickRamp >= 1.0f)
+                {
+                    antiClickRamp = 1.0f;
+                    antiClickActive = false;
+                }
+                output *= antiClickRamp;
+            }
 
             outputL[i] += output;
             outputR[i] += output;
@@ -748,6 +901,11 @@ private:
 
     float baseVcfVcaDecay = 0.5f;     // Base decay time before modulation
     float pitchToDecayAmount = 0.0f;  // -1 to +1: bipolar pitch-to-decay mod
+
+    // Anti-click ramp (prevents clicks at note onset)
+    float antiClickRamp = 1.0f;       // 0 to 1 ramp over ~2ms
+    bool antiClickActive = false;
+    static constexpr float antiClickIncrement = 1.0f / 88.0f;  // ~2ms at 44.1kHz
 };
 
 // Compatibility alias

@@ -49,6 +49,14 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParam
         false
     ));
 
+    // Clock divider for sequencer - musical divisions including triplets
+    params.push_back(std::make_unique<juce::AudioParameterChoice>(
+        juce::ParameterID{"clock_divider", 1},
+        "Clock Divider",
+        juce::StringArray{"1/16", "1/12", "1/8", "1/6", "1/5", "1/4", "1/3", "1/2", "1x", "3/2", "2x", "3x", "4x", "5x", "6x", "8x", "12x", "16x"},
+        8  // default to 1x
+    ));
+
     // =========================================================================
     // VCO1 PARAMETERS
     // =========================================================================
@@ -241,15 +249,15 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParam
     }
 
     // =========================================================================
-    // PITCH LFO
+    // PITCH LFO (clock synced)
     // =========================================================================
 
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+    // Clock divider for pitch LFO - musical divisions including triplets
+    params.push_back(std::make_unique<juce::AudioParameterChoice>(
         juce::ParameterID{"pitch_lfo_rate", 1},
         "Pitch LFO Rate",
-        juce::NormalisableRange<float>(0.1f, 10.0f, 0.1f),
-        1.0f,
-        juce::AudioParameterFloatAttributes().withLabel("Hz")
+        juce::StringArray{"1/16", "1/12", "1/8", "1/6", "1/5", "1/4", "1/3", "1/2", "1x", "3/2", "2x", "3x", "4x", "5x", "6x", "8x", "12x", "16x"},
+        8  // default to 1x
     ));
 
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
@@ -271,15 +279,15 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParam
     }
 
     // =========================================================================
-    // VELOCITY LFO
+    // VELOCITY LFO (clock synced)
     // =========================================================================
 
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+    // Clock divider for velocity LFO - musical divisions including triplets
+    params.push_back(std::make_unique<juce::AudioParameterChoice>(
         juce::ParameterID{"vel_lfo_rate", 1},
         "Velocity LFO Rate",
-        juce::NormalisableRange<float>(0.1f, 10.0f, 0.1f),
-        1.0f,
-        juce::AudioParameterFloatAttributes().withLabel("Hz")
+        juce::StringArray{"1/16", "1/12", "1/8", "1/6", "1/5", "1/4", "1/3", "1/2", "1x", "3/2", "2x", "3x", "4x", "5x", "6x", "8x", "12x", "16x"},
+        8  // default to 1x
     ));
 
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
@@ -300,15 +308,15 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParam
     }
 
     // =========================================================================
-    // FILTER LFO
+    // FILTER LFO (clock synced)
     // =========================================================================
 
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+    // Clock divider for filter LFO - musical divisions including triplets
+    params.push_back(std::make_unique<juce::AudioParameterChoice>(
         juce::ParameterID{"filter_lfo_rate", 1},
         "Filter LFO Rate",
-        juce::NormalisableRange<float>(0.1f, 10.0f, 0.1f),
-        1.0f,
-        juce::AudioParameterFloatAttributes().withLabel("Hz")
+        juce::StringArray{"1/16", "1/12", "1/8", "1/6", "1/5", "1/4", "1/3", "1/2", "1x", "3/2", "2x", "3x", "4x", "5x", "6x", "8x", "12x", "16x"},
+        8  // default to 1x
     ));
 
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
@@ -348,15 +356,15 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParam
     ));
 
     // =========================================================================
-    // EFFECTS - DELAY
+    // EFFECTS - DELAY (clock synced)
     // =========================================================================
 
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+    // Clock divider for delay time - musical divisions including triplets
+    params.push_back(std::make_unique<juce::AudioParameterChoice>(
         juce::ParameterID{"delay_time", 1},
         "Delay Time",
-        juce::NormalisableRange<float>(0.001f, 2.0f, 0.001f),
-        0.25f,
-        juce::AudioParameterFloatAttributes().withLabel("s")
+        juce::StringArray{"1/16", "1/12", "1/8", "1/6", "1/5", "1/4", "1/3", "1/2", "1x", "3/2", "2x", "3x", "4x", "5x", "6x", "8x", "12x", "16x"},
+        5  // default to 1/4 (one bar)
     ));
 
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
@@ -442,6 +450,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParam
         juce::AudioParameterFloatAttributes().withLabel("dB")
     ));
 
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"comp_mix", 1},
+        "Comp Mix",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        1.0f  // Default to 100% wet (full compression)
+    ));
+
     // =========================================================================
     // MASTER
     // =========================================================================
@@ -491,9 +506,37 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     auto* rightChannel = buffer.getWritePointer(1);
     const int numSamples = buffer.getNumSamples();
 
+    // Helper to convert clock divider index to multiplier value
+    // Musical divisions including triplets, quintuplets, etc.
+    // Slow -> Fast: 1/16, 1/12, 1/8, 1/6, 1/5, 1/4, 1/3, 1/2, 1x, 3/2, 2x, 3x, 4x, 5x, 6x, 8x, 12x, 16x
+    static const float clockDividerValues[] = {
+        0.0625f,    // 1/16 (4 bars)
+        0.0833333f, // 1/12 (3 bars)
+        0.125f,     // 1/8 (2 bars)
+        0.1666667f, // 1/6 (1.5 bars)
+        0.2f,       // 1/5
+        0.25f,      // 1/4 (1 bar)
+        0.3333333f, // 1/3
+        0.5f,       // 1/2 (half note)
+        1.0f,       // 1x (quarter note)
+        1.5f,       // 3/2 (dotted quarter)
+        2.0f,       // 2x (8th note)
+        3.0f,       // 3x (8th triplet)
+        4.0f,       // 4x (16th note)
+        5.0f,       // 5x (16th quintuplet)
+        6.0f,       // 6x (16th triplet)
+        8.0f,       // 8x (32nd note)
+        12.0f,      // 12x (32nd triplet)
+        16.0f       // 16x (64th note)
+    };
+    auto getClockDivider = [&](int index) {
+        return clockDividerValues[std::clamp(index, 0, 17)];
+    };
+
     // Read parameters
     float tempo = *apvts.getRawParameterValue("tempo");
     bool running = *apvts.getRawParameterValue("running") > 0.5f;
+    int clockDividerIdx = static_cast<int>(*apvts.getRawParameterValue("clock_divider"));
 
     float vco1Freq = *apvts.getRawParameterValue("vco1_freq");
     int vco1Wave = static_cast<int>(*apvts.getRawParameterValue("vco1_wave"));
@@ -523,6 +566,7 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
 
     // Update synth engine parameters
     synthEngine.setTempo(tempo);
+    synthEngine.setClockDivider(getClockDivider(clockDividerIdx));
     synthEngine.setRunning(running);
 
     synthEngine.setVCO1Frequency(vco1Freq);
@@ -560,15 +604,15 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
         synthEngine.setStepVelocity(i, velocity);
     }
 
-    // Update LFO parameters
-    float pitchLfoRate = *apvts.getRawParameterValue("pitch_lfo_rate");
+    // Update LFO parameters (clock synced)
+    int pitchLfoRateIdx = static_cast<int>(*apvts.getRawParameterValue("pitch_lfo_rate"));
     float pitchLfoAmount = *apvts.getRawParameterValue("pitch_lfo_amount");
-    float velLfoRate = *apvts.getRawParameterValue("vel_lfo_rate");
+    int velLfoRateIdx = static_cast<int>(*apvts.getRawParameterValue("vel_lfo_rate"));
     float velLfoAmount = *apvts.getRawParameterValue("vel_lfo_amount");
 
-    synthEngine.setPitchLfoRate(pitchLfoRate);
+    synthEngine.setPitchLfoClockSync(getClockDivider(pitchLfoRateIdx));
     synthEngine.setPitchLfoAmount(pitchLfoAmount);
-    synthEngine.setVelocityLfoRate(velLfoRate);
+    synthEngine.setVelocityLfoClockSync(getClockDivider(velLfoRateIdx));
     synthEngine.setVelocityLfoAmount(velLfoAmount);
 
     // Update per-step LFO enables
@@ -580,10 +624,10 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
         synthEngine.setStepVelocityLfoEnabled(i, velLfoEn);
     }
 
-    // Update filter LFO
-    float filterLfoRate = *apvts.getRawParameterValue("filter_lfo_rate");
+    // Update filter LFO (clock synced)
+    int filterLfoRateIdx = static_cast<int>(*apvts.getRawParameterValue("filter_lfo_rate"));
     float filterLfoAmount = *apvts.getRawParameterValue("filter_lfo_amount");
-    synthEngine.setFilterLfoRate(filterLfoRate);
+    synthEngine.setFilterLfoClockSync(getClockDivider(filterLfoRateIdx));
     synthEngine.setFilterLfoAmount(filterLfoAmount);
 
     // Update filter mode
@@ -596,11 +640,11 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     synthEngine.setSaturatorDrive(satDrive);
     synthEngine.setSaturatorMix(satMix);
 
-    // Update effects - Delay
-    float delayTime = *apvts.getRawParameterValue("delay_time");
+    // Update effects - Delay (clock synced)
+    int delayTimeIdx = static_cast<int>(*apvts.getRawParameterValue("delay_time"));
     float delayFeedback = *apvts.getRawParameterValue("delay_feedback");
     float delayMix = *apvts.getRawParameterValue("delay_mix");
-    synthEngine.setDelayTime(delayTime);
+    synthEngine.setDelayClockSync(getClockDivider(delayTimeIdx));
     synthEngine.setDelayFeedback(delayFeedback);
     synthEngine.setDelayMix(delayMix);
 
@@ -618,11 +662,13 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     float compAttack = *apvts.getRawParameterValue("comp_attack");
     float compRelease = *apvts.getRawParameterValue("comp_release");
     float compMakeup = *apvts.getRawParameterValue("comp_makeup");
+    float compMix = *apvts.getRawParameterValue("comp_mix");
     synthEngine.setCompThreshold(compThreshold);
     synthEngine.setCompRatio(compRatio);
     synthEngine.setCompAttack(compAttack);
     synthEngine.setCompRelease(compRelease);
     synthEngine.setCompMakeup(compMakeup);
+    synthEngine.setCompMix(compMix);
 
     // Handle MIDI messages (for manual triggering)
     for (const auto metadata : midiMessages)

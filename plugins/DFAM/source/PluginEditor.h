@@ -55,6 +55,9 @@ private:
     /** Send audio data to WebView for visualization */
     void sendAudioDataToWebView();
 
+    /** Send sequencer state to WebView for step highlighting */
+    void sendSequencerStateToWebView();
+
     /** Handle parameter change from WebView */
     void handleParameterFromWebView(const juce::String& paramId, float value);
 

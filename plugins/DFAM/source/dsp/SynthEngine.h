@@ -184,6 +184,25 @@ public:
 
     float getTempo() const { return tempo; }
 
+    /**
+     * @brief Set sequencer clock divider
+     * @param divider Clock divider value (0.0625 = 1/16x to 16 = 16x)
+     *
+     * Clock divider values (musical divisions):
+     * 1/16, 1/12, 1/8, 1/6, 1/5, 1/4, 1/3, 1/2, 1x, 3/2, 2x, 3x, 4x, 5x, 6x, 8x, 12x, 16x
+     */
+    void setClockDivider(float divider)
+    {
+        float newDivider = std::clamp(divider, 0.0625f, 16.0f);
+        if (std::abs(newDivider - clockDivider) > 0.0001f)
+        {
+            clockDivider = newDivider;
+            updateClockRate();
+        }
+    }
+
+    float getClockDivider() const { return clockDivider; }
+
     // =========================================================================
     // Sequencer Settings
     // =========================================================================
@@ -221,14 +240,16 @@ public:
     void setPitchToDecayAmount(float amount) { voice.setPitchToDecayAmount(amount); }
 
     // =========================================================================
-    // LFO Parameters
+    // LFO Parameters (with clock sync support)
     // =========================================================================
 
     void setPitchLfoRate(float hz) { pitchLfo.setRate(hz); }
+    void setPitchLfoClockSync(float divider) { pitchLfo.setClockSyncRate(tempo, divider); }
     void setPitchLfoAmount(float semitones) { pitchLfoAmount = semitones; }
     void setPitchLfoWaveform(int w) { pitchLfo.setWaveform(w); }
 
     void setVelocityLfoRate(float hz) { velocityLfo.setRate(hz); }
+    void setVelocityLfoClockSync(float divider) { velocityLfo.setClockSyncRate(tempo, divider); }
     void setVelocityLfoAmount(float amount) { velocityLfoAmount = std::clamp(amount, 0.0f, 1.0f); }
     void setVelocityLfoWaveform(int w) { velocityLfo.setWaveform(w); }
 
@@ -272,10 +293,11 @@ public:
     void setFilterMode(int mode) { voice.setFilterMode(mode); }
 
     // =========================================================================
-    // Filter LFO
+    // Filter LFO (with clock sync support)
     // =========================================================================
 
     void setFilterLfoRate(float hz) { filterLfo.setRate(hz); }
+    void setFilterLfoClockSync(float divider) { filterLfo.setClockSyncRate(tempo, divider); }
     void setFilterLfoAmount(float amount) { filterLfoAmount = std::clamp(amount, 0.0f, 1.0f); }
     void setFilterLfoWaveform(int w) { filterLfo.setWaveform(w); }
 
@@ -287,10 +309,11 @@ public:
     void setSaturatorMix(float mix) { saturator.setMix(mix); }
 
     // =========================================================================
-    // Effects - Delay
+    // Effects - Delay (with clock sync support)
     // =========================================================================
 
     void setDelayTime(float seconds) { delay.setTime(seconds); }
+    void setDelayClockSync(float divider) { delay.setClockSyncTime(tempo, divider); }
     void setDelayFeedback(float fb) { delay.setFeedback(fb); }
     void setDelayMix(float mix) { delay.setMix(mix); }
 
@@ -311,6 +334,7 @@ public:
     void setCompAttack(float ms) { compressor.setAttack(ms); }
     void setCompRelease(float ms) { compressor.setRelease(ms); }
     void setCompMakeup(float db) { compressor.setMakeupGain(db); }
+    void setCompMix(float mix) { compressor.setMix(mix); }
 
     // =========================================================================
     // Pitch Envelope
@@ -396,7 +420,8 @@ private:
     {
         // Calculate samples per sequencer step
         // At 120 BPM with 16th notes: 120/60 * 4 = 8 steps per second
-        float stepsPerSecond = (tempo / 60.0f) * 4.0f;  // 16th notes
+        // Clock divider multiplies/divides the step rate
+        float stepsPerSecond = (tempo / 60.0f) * 4.0f * clockDivider;  // 16th notes * divider
         samplesPerStep = sampleRate / stepsPerSecond;
     }
 
@@ -458,6 +483,7 @@ private:
     // Transport
     bool running = false;
     float tempo = 120.0f;
+    float clockDivider = 1.0f;  // 1/64x to 64x (0.015625 to 64.0)
     double samplesPerStep = 1000.0;
     double clockAccumulator = 0.0;
 

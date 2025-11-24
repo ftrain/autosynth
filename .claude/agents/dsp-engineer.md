@@ -349,6 +349,139 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 }
 ```
 
+## Preventing Clicks at Note Attack
+
+Note attacks can produce audible clicks. Implement ALL THREE of these strategies:
+
+### 1. Reset Oscillator Phase on Trigger
+```cpp
+void resetPhase() { phase = 0.0f; }
+
+void trigger() {
+    osc1.resetPhase();
+    osc2.resetPhase();
+    // ...
+}
+```
+
+### 2. Use Exponential Envelope Curves
+Linear envelopes create harsh transitions. Use exponential curves:
+```cpp
+void updateCoefficients()
+{
+    float attackSamples = attackTime * static_cast<float>(sampleRate);
+    attackCoef = 1.0f - std::exp(-4.0f / attackSamples);  // Exponential!
+
+    float decaySamples = decayTime * static_cast<float>(sampleRate);
+    decayCoef = std::exp(-4.0f / decaySamples);  // Exponential!
+}
+
+float process()
+{
+    if (inAttack) {
+        currentLevel += attackCoef * (1.0f - currentLevel);  // Approaches 1.0 asymptotically
+    } else {
+        currentLevel *= decayCoef;  // Exponential decay
+    }
+    return currentLevel;
+}
+```
+
+### 3. Anti-Click Ramp (~2ms fade-in)
+```cpp
+static constexpr float ANTI_CLICK_TIME = 0.002f;  // 2ms
+float antiClickRamp = 0.0f;
+bool antiClickActive = false;
+
+void trigger() {
+    antiClickRamp = 0.0f;
+    antiClickActive = true;
+}
+
+float process() {
+    float output = /* oscillator output */;
+
+    if (antiClickActive) {
+        float antiClickIncrement = 1.0f / (ANTI_CLICK_TIME * sampleRate);
+        antiClickRamp = std::min(1.0f, antiClickRamp + antiClickIncrement);
+        output *= antiClickRamp;
+        if (antiClickRamp >= 1.0f) antiClickActive = false;
+    }
+    return output;
+}
+```
+
+## Clock-Synced LFOs and Delays
+
+For tempo-synchronized modulation, use musical clock divisions:
+
+### Clock Divider Values (Musical Divisions)
+```cpp
+// Musical divisions including triplets and quintuplets
+static const float clockDividerValues[] = {
+    0.0625f,     // 1/16
+    0.0833333f,  // 1/12 (triplet)
+    0.125f,      // 1/8
+    0.1666667f,  // 1/6 (triplet)
+    0.2f,        // 1/5 (quintuplet)
+    0.25f,       // 1/4
+    0.3333333f,  // 1/3 (triplet)
+    0.5f,        // 1/2
+    1.0f,        // 1x
+    1.5f,        // 3/2
+    2.0f,        // 2x
+    3.0f,        // 3x
+    4.0f,        // 4x
+    5.0f,        // 5x
+    6.0f,        // 6x
+    8.0f,        // 8x
+    12.0f,       // 12x
+    16.0f        // 16x
+};
+
+static const char* clockDividerLabels[] = {
+    "1/16", "1/12", "1/8", "1/6", "1/5", "1/4", "1/3", "1/2",
+    "1x", "3/2", "2x", "3x", "4x", "5x", "6x", "8x", "12x", "16x"
+};
+```
+
+### Using AudioParameterChoice for Clock Dividers
+```cpp
+params.push_back(std::make_unique<juce::AudioParameterChoice>(
+    juce::ParameterID{"lfo1_rate", 1},
+    "LFO 1 Rate",
+    juce::StringArray(clockDividerLabels, 18),
+    8  // Default to 1x
+));
+
+// In processBlock:
+int rateIndex = static_cast<int>(*apvts.getRawParameterValue("lfo1_rate"));
+float clockMultiplier = clockDividerValues[rateIndex];
+float lfoRate = (bpm / 60.0f) * clockMultiplier;  // Beats per second * multiplier
+```
+
+## Gradual Effect Mix Curves
+
+For effects like reverb where the mix becomes overwhelming quickly, use power curves:
+
+```cpp
+void setMix(float m)
+{
+    float linearMix = std::clamp(m, 0.0f, 1.0f);
+    // 4th power curve: 50% knob = 6.25% actual mix
+    mix = linearMix * linearMix * linearMix * linearMix;
+}
+```
+
+| Knob Position | Linear | Squared (x²) | 4th Power (x⁴) |
+|---------------|--------|--------------|----------------|
+| 25%           | 25%    | 6.25%        | 0.4%           |
+| 50%           | 50%    | 25%          | 6.25%          |
+| 75%           | 75%    | 56.25%       | 31.6%          |
+| 100%          | 100%   | 100%         | 100%           |
+
+Use x⁴ for effects where subtle amounts are most useful (reverb, heavy distortion).
+
 ## Testing
 
 Write tests for:

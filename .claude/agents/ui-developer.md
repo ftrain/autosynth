@@ -352,6 +352,81 @@ export function useSynthParameters() {
 }
 ```
 
+## Receiving Sequencer State from JUCE
+
+For step sequencers that highlight the current step, JUCE sends state via `window.onSequencerState`:
+
+### JUCE C++ Side (PluginEditor.cpp)
+```cpp
+void PluginEditor::sendSequencerStateToWebView()
+{
+    if (!webView) return;
+    auto state = processorRef.getSequencerState();
+
+    juce::DynamicObject::Ptr stateObj = new juce::DynamicObject();
+    stateObj->setProperty("currentStep", state.currentStep);
+    stateObj->setProperty("running", state.running);
+
+    juce::var stateVar(stateObj.get());
+    juce::String json = juce::JSON::toString(stateVar);
+    juce::String script = "if (window.onSequencerState) window.onSequencerState(" + json + ");";
+    webView->evaluateJavascript(script, nullptr);
+}
+
+// Call in timerCallback for regular updates
+void PluginEditor::timerCallback()
+{
+    sendAudioDataToWebView();
+    sendSequencerStateToWebView();  // Update step highlight
+}
+```
+
+### React Side (useJUCEBridge.ts)
+```tsx
+// Add sequencer state to hook
+const [sequencerState, setSequencerState] = useState({ currentStep: 0, running: false });
+
+useEffect(() => {
+    // Register sequencer state handler
+    (window as any).onSequencerState = (state: { currentStep: number; running: boolean }) => {
+        setSequencerState(state);
+    };
+}, []);
+
+// Return in hook
+return { ..., sequencerState };
+```
+
+### In Sequencer Component
+```tsx
+const { sequencerState } = useJUCEBridge();
+
+// Highlight current step
+<div className={`step ${index === sequencerState.currentStep ? 'active' : ''}`}>
+```
+
+## Clock Divider UI for Tempo-Synced Parameters
+
+When parameters use AudioParameterChoice for clock divisions, display the label options:
+
+```tsx
+const CLOCK_DIVIDER_OPTIONS = [
+    '1/16', '1/12', '1/8', '1/6', '1/5', '1/4', '1/3', '1/2',
+    '1x', '3/2', '2x', '3x', '4x', '5x', '6x', '8x', '12x', '16x'
+];
+
+// For SynthKnob with discrete options:
+<SynthKnob
+    label="LFO Rate"
+    value={parameters.lfo1_rate}
+    onChange={(v) => setParameter('lfo1_rate', v)}
+    min={0}
+    max={17}
+    step={1}
+    options={CLOCK_DIVIDER_OPTIONS}  // Shows "1/4" instead of "5"
+/>
+```
+
 ## Layout Patterns
 
 **Use SynthRow with themes for responsive, visually distinct layouts:**

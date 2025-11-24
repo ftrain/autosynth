@@ -32,6 +32,15 @@ export const PARAMETER_DEFINITIONS: ParameterMap = {
     step: 1,
   },
 
+  clock_divider: {
+    id: 'clock_divider',
+    name: 'Clock Divider',
+    min: 0,
+    max: 17,
+    default: 8,
+    step: 1,
+  },
+
   // =========================================================================
   // VCO1
   // =========================================================================
@@ -240,7 +249,7 @@ export const PARAMETER_DEFINITIONS: ParameterMap = {
   // PITCH LFO
   // =========================================================================
 
-  pitch_lfo_rate: { id: 'pitch_lfo_rate', name: 'Pitch LFO Rate', min: 0.1, max: 10, default: 1, unit: 'Hz' },
+  pitch_lfo_rate: { id: 'pitch_lfo_rate', name: 'Pitch LFO Rate', min: 0, max: 17, default: 8, step: 1 },
   pitch_lfo_amount: { id: 'pitch_lfo_amount', name: 'Pitch LFO Amount', min: 0, max: 24, default: 12, unit: 'st' },
 
   pitch_lfo_en_0: { id: 'pitch_lfo_en_0', name: 'Step 1 Pitch LFO', min: 0, max: 1, default: 0, step: 1 },
@@ -256,7 +265,7 @@ export const PARAMETER_DEFINITIONS: ParameterMap = {
   // VELOCITY LFO
   // =========================================================================
 
-  vel_lfo_rate: { id: 'vel_lfo_rate', name: 'Velocity LFO Rate', min: 0.1, max: 10, default: 1, unit: 'Hz' },
+  vel_lfo_rate: { id: 'vel_lfo_rate', name: 'Velocity LFO Rate', min: 0, max: 17, default: 8, step: 1 },
   vel_lfo_amount: { id: 'vel_lfo_amount', name: 'Velocity LFO Amount', min: 0, max: 1, default: 0.5 },
 
   vel_lfo_en_0: { id: 'vel_lfo_en_0', name: 'Step 1 Velocity LFO', min: 0, max: 1, default: 0, step: 1 },
@@ -272,7 +281,7 @@ export const PARAMETER_DEFINITIONS: ParameterMap = {
   // FILTER LFO
   // =========================================================================
 
-  filter_lfo_rate: { id: 'filter_lfo_rate', name: 'Filter LFO Rate', min: 0.1, max: 10, default: 1, unit: 'Hz' },
+  filter_lfo_rate: { id: 'filter_lfo_rate', name: 'Filter LFO Rate', min: 0, max: 17, default: 8, step: 1 },
   filter_lfo_amount: { id: 'filter_lfo_amount', name: 'Filter LFO Amount', min: 0, max: 1, default: 0 },
 
   // =========================================================================
@@ -292,7 +301,7 @@ export const PARAMETER_DEFINITIONS: ParameterMap = {
   // EFFECTS - DELAY
   // =========================================================================
 
-  delay_time: { id: 'delay_time', name: 'Delay Time', min: 0.001, max: 2, default: 0.25, unit: 's' },
+  delay_time: { id: 'delay_time', name: 'Delay Time', min: 0, max: 17, default: 5, step: 1 },
   delay_feedback: { id: 'delay_feedback', name: 'Delay Feedback', min: 0, max: 0.95, default: 0.3 },
   delay_mix: { id: 'delay_mix', name: 'Delay Mix', min: 0, max: 1, default: 0 },
 
@@ -313,6 +322,7 @@ export const PARAMETER_DEFINITIONS: ParameterMap = {
   comp_attack: { id: 'comp_attack', name: 'Comp Attack', min: 0.1, max: 100, default: 10, unit: 'ms' },
   comp_release: { id: 'comp_release', name: 'Comp Release', min: 10, max: 1000, default: 100, unit: 'ms' },
   comp_makeup: { id: 'comp_makeup', name: 'Comp Makeup', min: 0, max: 24, default: 0, unit: 'dB' },
+  comp_mix: { id: 'comp_mix', name: 'Comp Mix', min: 0, max: 1, default: 1 },
 
   // =========================================================================
   // MASTER

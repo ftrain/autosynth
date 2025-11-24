@@ -13,6 +13,9 @@ import { useJUCEBridge } from './hooks/useJUCEBridge';
 import { useParameters, normalizeValue, denormalizeValue } from './hooks/useParameters';
 import { PARAMETER_DEFINITIONS, WAVEFORM_OPTIONS, SequencerState } from './types/parameters';
 
+// Clock divider options for sync controls - musical divisions including triplets
+const CLOCK_DIVIDER_OPTIONS = ['1/16', '1/12', '1/8', '1/6', '1/5', '1/4', '1/3', '1/2', '1x', '3/2', '2x', '3x', '4x', '5x', '6x', '8x', '12x', '16x'];
+
 import { SynthKnob } from './components/SynthKnob';
 import { SynthRow } from './components/SynthRow';
 import { DFAMSequencer } from './components/DFAMSequencer';
@@ -97,6 +100,10 @@ const App: React.FC = () => {
         <SynthKnob label="TEMPO" min={20} max={300}
           value={getDenormalized('tempo', paramValues.tempo ?? 0.5)}
           onChange={(v) => handleChange('tempo', getNormalized('tempo', v))}
+        />
+        <SynthKnob label="CLK÷" min={0} max={17} step={1} options={CLOCK_DIVIDER_OPTIONS}
+          value={getDenormalized('clock_divider', paramValues.clock_divider ?? 0.47)}
+          onChange={(v) => handleChange('clock_divider', getNormalized('clock_divider', v))}
         />
         <SynthKnob label="MASTER" min={-60} max={0}
           value={getDenormalized('master_volume', paramValues.master_volume ?? 0.1)}
@@ -201,8 +208,8 @@ const App: React.FC = () => {
         <div style={{ background: 'rgba(0,0,30,0.4)', border: '1px solid #5555cc', borderRadius: '8px', padding: '12px' }}>
           <div style={{ color: '#aaaaff', fontSize: '10px', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '8px', textAlign: 'center' }}>FILTER LFO</div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <SynthKnob label="RATE" min={0.1} max={10}
-              value={getDenormalized('filter_lfo_rate', paramValues.filter_lfo_rate ?? 0.1)}
+            <SynthKnob label="RATE" min={0} max={17} step={1} options={CLOCK_DIVIDER_OPTIONS}
+              value={getDenormalized('filter_lfo_rate', paramValues.filter_lfo_rate ?? 0.47)}
               onChange={(v) => handleChange('filter_lfo_rate', getNormalized('filter_lfo_rate', v))}
             />
             <SynthKnob label="AMT" min={0} max={1}
@@ -267,8 +274,8 @@ const App: React.FC = () => {
               lfoColor="#ff00ff"
             />
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <SynthKnob label="LFO ↻" min={0.1} max={10}
-                value={getDenormalized('pitch_lfo_rate', paramValues.pitch_lfo_rate ?? 0.1)}
+              <SynthKnob label="LFO ↻" min={0} max={17} step={1} options={CLOCK_DIVIDER_OPTIONS}
+                value={getDenormalized('pitch_lfo_rate', paramValues.pitch_lfo_rate ?? 0.47)}
                 onChange={(v) => handleChange('pitch_lfo_rate', getNormalized('pitch_lfo_rate', v))}
               />
               <SynthKnob label="LFO ↕" min={0} max={24}
@@ -296,8 +303,8 @@ const App: React.FC = () => {
               lfoColor="#00ffff"
             />
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <SynthKnob label="LFO ↻" min={0.1} max={10}
-                value={getDenormalized('vel_lfo_rate', paramValues.vel_lfo_rate ?? 0.1)}
+              <SynthKnob label="LFO ↻" min={0} max={17} step={1} options={CLOCK_DIVIDER_OPTIONS}
+                value={getDenormalized('vel_lfo_rate', paramValues.vel_lfo_rate ?? 0.47)}
                 onChange={(v) => handleChange('vel_lfo_rate', getNormalized('vel_lfo_rate', v))}
               />
               <SynthKnob label="LFO ↕" min={0} max={1}
@@ -332,8 +339,8 @@ const App: React.FC = () => {
         <div style={{ background: 'rgba(255,51,102,0.05)', border: '1px solid rgba(255,51,102,0.3)', borderRadius: '8px', padding: '10px' }}>
           <div style={{ color: '#ff6688', fontSize: '10px', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '8px', textAlign: 'center' }}>📡 DELAY</div>
           <div style={{ display: 'flex', gap: '6px' }}>
-            <SynthKnob label="TIME" min={0.001} max={2}
-              value={getDenormalized('delay_time', paramValues.delay_time ?? 0.125)}
+            <SynthKnob label="TIME" min={0} max={17} step={1} options={CLOCK_DIVIDER_OPTIONS}
+              value={getDenormalized('delay_time', paramValues.delay_time ?? 0.29)}
               onChange={(v) => handleChange('delay_time', getNormalized('delay_time', v))}
             />
             <SynthKnob label="FDBK" min={0} max={0.95}
@@ -381,6 +388,10 @@ const App: React.FC = () => {
             <SynthKnob label="GAIN" min={0} max={24}
               value={getDenormalized('comp_makeup', paramValues.comp_makeup ?? 0)}
               onChange={(v) => handleChange('comp_makeup', getNormalized('comp_makeup', v))}
+            />
+            <SynthKnob label="MIX" min={0} max={1}
+              value={getDenormalized('comp_mix', paramValues.comp_mix ?? 1)}
+              onChange={(v) => handleChange('comp_mix', getNormalized('comp_mix', v))}
             />
           </div>
         </div>
