@@ -129,9 +129,12 @@ private:
     std::atomic<float>* delayFeedbackParam = nullptr;
     std::atomic<float>* delayMixParam = nullptr;
 
-    std::atomic<float>* reverbDecayParam = nullptr;
+    std::atomic<float>* reverbReplaceParam = nullptr;
+    std::atomic<float>* reverbBrightnessParam = nullptr;
+    std::atomic<float>* reverbDetuneParam = nullptr;
+    std::atomic<float>* reverbBignessParam = nullptr;
+    std::atomic<float>* reverbSizeParam = nullptr;
     std::atomic<float>* reverbMixParam = nullptr;
-    std::atomic<float>* reverbDampingParam = nullptr;
 
     std::atomic<float>* compThresholdParam = nullptr;
     std::atomic<float>* compRatioParam = nullptr;

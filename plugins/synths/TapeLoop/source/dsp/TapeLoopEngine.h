@@ -307,101 +307,8 @@ private:
     float mix = 0.0f;
 };
 
-/**
- * @brief Schroeder-style reverb with allpass diffusion and comb filters
- */
-class AmbisonicReverb
-{
-public:
-    void prepare(double sr)
-    {
-        sampleRate = sr;
-
-        // Allpass delays for diffusion
-        for (int i = 0; i < 4; ++i)
-        {
-            apDelays[i].resize(static_cast<size_t>(sr * apTimes[i]), 0.0f);
-            apPos[i] = 0;
-        }
-
-        // Comb filters for reverb tail
-        for (int i = 0; i < 8; ++i)
-        {
-            combDelays[i].resize(static_cast<size_t>(sr * combTimes[i]), 0.0f);
-            combPos[i] = 0;
-            combFilters[i] = 0.0f;
-        }
-    }
-
-    void setDecay(float d) { decay = std::clamp(d, 0.1f, 10.0f); }
-    void setMix(float m)
-    {
-        float linearMix = std::clamp(m, 0.0f, 1.0f);
-        // 4th power curve for gradual onset
-        mix = linearMix * linearMix * linearMix * linearMix;
-    }
-    void setDamping(float d) { damping = std::clamp(d, 0.0f, 1.0f); }
-
-    void process(float& left, float& right)
-    {
-        float input = (left + right) * 0.5f;
-
-        // Allpass diffusion
-        float diffused = input;
-        for (int i = 0; i < 4; ++i)
-            diffused = processAllpass(i, diffused);
-
-        // Parallel comb filters
-        float reverbL = 0.0f;
-        float reverbR = 0.0f;
-        float combGain = std::pow(0.001f, 1.0f / (decay * static_cast<float>(sampleRate)));
-
-        for (int i = 0; i < 4; ++i)
-            reverbL += processComb(i, diffused, combGain);
-        for (int i = 4; i < 8; ++i)
-            reverbR += processComb(i, diffused, combGain);
-
-        reverbL *= 0.25f;
-        reverbR *= 0.25f;
-
-        left = left * (1.0f - mix) + reverbL * mix;
-        right = right * (1.0f - mix) + reverbR * mix;
-    }
-
-private:
-    float processAllpass(int idx, float input)
-    {
-        float delayed = apDelays[idx][apPos[idx]];
-        float output = -input + delayed;
-        apDelays[idx][apPos[idx]] = input + delayed * 0.5f;
-        apPos[idx] = (apPos[idx] + 1) % apDelays[idx].size();
-        return output;
-    }
-
-    float processComb(int idx, float input, float gain)
-    {
-        float delayed = combDelays[idx][combPos[idx]];
-        combFilters[idx] = delayed * (1.0f - damping) + combFilters[idx] * damping;
-        combDelays[idx][combPos[idx]] = input + combFilters[idx] * gain;
-        combPos[idx] = (combPos[idx] + 1) % combDelays[idx].size();
-        return delayed;
-    }
-
-    double sampleRate = 44100.0;
-    float decay = 2.0f;
-    float mix = 0.0f;
-    float damping = 0.5f;
-
-    float apTimes[4] = {0.0051f, 0.0076f, 0.01f, 0.0123f};
-    std::vector<float> apDelays[4];
-    size_t apPos[4] = {0, 0, 0, 0};
-
-    float combTimes[8] = {0.0297f, 0.0371f, 0.0411f, 0.0437f,
-                          0.0299f, 0.0373f, 0.0413f, 0.0439f};
-    std::vector<float> combDelays[8];
-    size_t combPos[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-    float combFilters[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-};
+// Forward declare Galactic3Reverb (defined in separate header)
+#include "Galactic3Reverb.h"
 
 /**
  * @brief Simple compressor with dry/wet mix
@@ -1174,10 +1081,13 @@ public:
     void setDelayFeedback(float fb) { delay.setFeedback(fb); }
     void setDelayMix(float m) { delay.setMix(m); }
 
-    // Reverb
-    void setReverbDecay(float d) { reverb.setDecay(d); }
-    void setReverbMix(float m) { reverb.setMix(m); }
-    void setReverbDamping(float d) { reverb.setDamping(d); }
+    // Reverb (Galactic3 parameters)
+    void setReverbReplace(float r) { reverb.setReplace(r); }      // Replace (regeneration/feedback)
+    void setReverbBrightness(float b) { reverb.setBrightness(b); } // Brightness (lowpass filter)
+    void setReverbDetune(float d) { reverb.setDetune(d); }        // Detune (vibrato/drift)
+    void setReverbBigness(float b) { reverb.setBigness(b); }      // Bigness (undersampling)
+    void setReverbSize(float s) { reverb.setSize(s); }            // Size (delay network scaling)
+    void setReverbMix(float m) { reverb.setMix(m); }              // Mix (dry/wet)
 
     // Compressor
     void setCompThreshold(float db) { compressor.setThreshold(db); }
@@ -1384,6 +1294,6 @@ private:
     //==========================================================================
 
     StereoDelay delay;
-    AmbisonicReverb reverb;
+    Galactic3Reverb reverb;
     Compressor compressor;
 };
