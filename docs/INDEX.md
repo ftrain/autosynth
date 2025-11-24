@@ -10,6 +10,7 @@ A comprehensive index of all documentation, resources, and references for buildi
 | Start a new synth project | [CLAUDE.md](../CLAUDE.md) |
 | Understand DSP architecture | [LLM_SYNTH_PROGRAMMING_GUIDE.md](#dsp-architecture) |
 | Find SST library components | [SST_LIBRARIES_INDEX.md](#sst-libraries) |
+| Find open-source DSP libraries | [OPEN_SOURCE_DSP_LIBRARIES.md](#open-source-dsp) |
 | Build React UI components | [TYPESCRIPT_COMPONENT_DEVELOPER_GUIDE.md](#ui-development) |
 | Design parameter interfaces | [DESIGNER_GUIDE.md](#design-patterns) |
 | Browse UI components | [Storybook](#component-library) (`npm run storybook`) |
@@ -58,7 +59,7 @@ A comprehensive index of all documentation, resources, and references for buildi
 
 #### docs/SST_LIBRARIES_INDEX.md {#sst-libraries}
 **Purpose**: Complete reference for all SST (Surge Synth Team) libraries
-**Use When**: Selecting DSP components, finding implementation examples
+**Use When**: Selecting DSP components, finding implementation examples from Surge
 **Libraries Covered**:
 
 | Library | Purpose | Key Components |
@@ -76,6 +77,28 @@ A comprehensive index of all documentation, resources, and references for buildi
 #include "sst/filters/VintageLadder.h"
 #include "sst/effects/Reverb.h"
 ```
+
+#### docs/OPEN_SOURCE_DSP_LIBRARIES.md {#open-source-dsp}
+**Purpose**: Comprehensive reference for open-source audio/DSP libraries beyond SST
+**Use When**: Selecting external DSP components, time-stretching, granular synthesis, reverbs, utility DSP
+**Libraries Covered**:
+
+| Category | Libraries |
+|----------|-----------|
+| Core DSP & Filters | Faust, HIIR, signalsmith-stretch, Rubber Band |
+| Synthesis | Surge DSP core, Vital/Vitalium, DPF |
+| Effects | zita-rev1, zita-convolver, Dattorro reverbs, x42 plugins |
+| Utilities | KFR (FFT/filters), SpeexDSP (echo/noise), libsamplerate |
+| Mutable Instruments | Clouds, Rings, Plaits, Elements |
+| Anti-Aliasing | PolyBLEP, MinBLEP implementations |
+
+**Key Use Cases**:
+- Time-stretching/pitch-shifting → Rubber Band, Signalsmith Stretch
+- Granular synthesis → Mutable Clouds
+- Physical modeling → Mutable Rings, Elements
+- High-quality reverb → zita-rev1, Dattorro
+- Fast FFT → KFR
+- Oversampling → HIIR
 
 #### docs/TYPESCRIPT_COMPONENT_DEVELOPER_GUIDE.md {#ui-development}
 **Purpose**: Guide for React engineers building synth UIs
@@ -302,6 +325,18 @@ Browse: `npm run storybook`
 - [sst-effects](https://github.com/surge-synthesizer/sst-effects)
 - [sst-waveshapers](https://github.com/surge-synthesizer/sst-waveshapers)
 
+### Open Source DSP Libraries
+- [Faust](https://github.com/grame-cncm/faust) - Functional DSP language
+- [HIIR](https://github.com/unevens/hiir) - Polyphase filters & Hilbert transform
+- [Signalsmith Stretch](https://github.com/Signalsmith-Audio/signalsmith-stretch) - Time/pitch shifting
+- [Rubber Band](https://github.com/breakfastquay/rubberband) - Industry-standard time-stretching
+- [Mutable Instruments](https://github.com/pichenettes/eurorack) - Clouds, Rings, Plaits, Elements
+- [Vital](https://github.com/mtytel/vital) - Wavetable synth
+- [zita-rev1](https://github.com/PelleJuul/zita-rev1) - Algorithmic reverb
+- [KFR](https://github.com/kfrlib/kfr) - Fast FFT & DSP
+- [libsamplerate](https://github.com/libsndfile/libsamplerate) - Sample rate conversion
+- [DPF](https://github.com/DISTRHO/DPF) - Plugin framework
+
 ### JUCE
 - [JUCE Framework](https://juce.com/)
 - [JUCE Tutorials](https://juce.com/learn/tutorials)
@@ -411,6 +446,7 @@ studio/
 │   ├── INDEX.md                 # This file
 │   ├── LLM_SYNTH_PROGRAMMING_GUIDE.md
 │   ├── SST_LIBRARIES_INDEX.md
+│   ├── OPEN_SOURCE_DSP_LIBRARIES.md  # Faust, Mutable, zita, KFR, etc.
 │   ├── TYPESCRIPT_COMPONENT_DEVELOPER_GUIDE.md
 │   └── DESIGNER_GUIDE.md
 ├── templates/
@@ -453,6 +489,11 @@ To find specific information:
 | Oscillator implementation | `LLM_SYNTH_PROGRAMMING_GUIDE.md` Section 5 |
 | Filter types available | `SST_LIBRARIES_INDEX.md` → sst-filters |
 | Effect algorithms | `SST_LIBRARIES_INDEX.md` → sst-effects |
+| Time-stretching/pitch-shifting | `OPEN_SOURCE_DSP_LIBRARIES.md` → Rubber Band, Signalsmith |
+| Granular/physical modeling | `OPEN_SOURCE_DSP_LIBRARIES.md` → Mutable Instruments |
+| Reverb algorithms | `OPEN_SOURCE_DSP_LIBRARIES.md` → zita-rev1, Dattorro |
+| FFT/Resampling | `OPEN_SOURCE_DSP_LIBRARIES.md` → KFR, libsamplerate |
+| Anti-aliasing oscillators | `OPEN_SOURCE_DSP_LIBRARIES.md` → PolyBLEP, MinBLEP |
 | UI component props | Storybook or `TYPESCRIPT_COMPONENT_DEVELOPER_GUIDE.md` |
 | Control design patterns | `DESIGNER_GUIDE.md` |
 | Project setup | `systems-engineer.md` agent |

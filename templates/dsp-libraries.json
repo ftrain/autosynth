@@ -1,0 +1,426 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Registry of available DSP libraries and their components for synth-spec.json",
+  "libraries": {
+    "sst-basic-blocks": {
+      "name": "SST Basic Blocks",
+      "repo": "https://github.com/surge-synthesizer/sst-basic-blocks",
+      "license": "GPL3",
+      "includePath": "sst/basic-blocks",
+      "components": {
+        "oscillators": {
+          "DPWSawOscillator": {
+            "include": "dsp/DPWSawOscillator.h",
+            "description": "Differentiated parabolic waveform saw with anti-aliasing",
+            "outputs": ["saw", "square", "triangle"]
+          },
+          "SinOscillator": {
+            "include": "dsp/QuadratureOscillators.h",
+            "description": "Quadrature sine oscillator"
+          },
+          "PulseOscillator": {
+            "include": "dsp/PulseOscillator.h",
+            "description": "Band-limited pulse with PWM"
+          },
+          "CorrelatedNoise": {
+            "include": "dsp/CorrelatedNoise.h",
+            "description": "Noise generator with correlation control"
+          }
+        },
+        "envelopes": {
+          "ADSREnvelope": {
+            "include": "modulators/ADSREnvelope.h",
+            "stages": ["attack", "decay", "sustain", "release"]
+          },
+          "DAHDSREnvelope": {
+            "include": "modulators/DAHDSREnvelope.h",
+            "stages": ["delay", "attack", "hold", "decay", "sustain", "release"]
+          }
+        },
+        "lfos": {
+          "SimpleLFO": {
+            "include": "modulators/SimpleLFO.h",
+            "shapes": ["sine", "triangle", "saw", "square", "sampleHold"]
+          }
+        },
+        "utilities": {
+          "SincTable": { "include": "tables/SincTableProvider.h" },
+          "LanczosResampler": { "include": "dsp/LanczosResampler.h" },
+          "Lag": { "include": "dsp/Lag.h" },
+          "FastMath": { "include": "dsp/FastMath.h" },
+          "Clippers": { "include": "dsp/Clippers.h" }
+        }
+      }
+    },
+    "sst-filters": {
+      "name": "SST Filters",
+      "repo": "https://github.com/surge-synthesizer/sst-filters",
+      "license": "GPL3",
+      "includePath": "sst/filters",
+      "components": {
+        "filters": {
+          "CytomicSVF": {
+            "include": "CytomicSVF.h",
+            "modes": ["LP", "HP", "BP", "Notch", "Peak", "AllPass"],
+            "description": "Andrew Simper's state variable filter"
+          },
+          "VintageLadder": {
+            "include": "VintageLadder.h",
+            "modes": ["LP6", "LP12", "LP18", "LP24"],
+            "description": "Moog-style ladder filter"
+          },
+          "K35Filter": {
+            "include": "K35Filter.h",
+            "modes": ["LP", "HP"],
+            "description": "Korg MS-20 style filter"
+          },
+          "DiodeLadder": {
+            "include": "DiodeLadder.h",
+            "modes": ["LP24"],
+            "description": "TB-303 style diode ladder"
+          },
+          "NonlinearFeedback": {
+            "include": "NonlinearFeedback.h",
+            "description": "Filter with nonlinear feedback"
+          },
+          "CombFilter": {
+            "include": "CombFilter.h",
+            "description": "Comb filter for Karplus-Strong"
+          }
+        }
+      }
+    },
+    "sst-effects": {
+      "name": "SST Effects",
+      "repo": "https://github.com/surge-synthesizer/sst-effects",
+      "license": "GPL3",
+      "includePath": "sst/effects",
+      "components": {
+        "effects": {
+          "Delay": { "include": "Delay.h" },
+          "Reverb": { "include": "Reverb.h" },
+          "Chorus": { "include": "Chorus.h" },
+          "Phaser": { "include": "Phaser.h" },
+          "Flanger": { "include": "Flanger.h" },
+          "Distortion": { "include": "Distortion.h" },
+          "Compressor": { "include": "Compressor.h" },
+          "EQ": { "include": "EQ.h" }
+        }
+      }
+    },
+    "sst-waveshapers": {
+      "name": "SST Waveshapers",
+      "repo": "https://github.com/surge-synthesizer/sst-waveshapers",
+      "license": "GPL3",
+      "includePath": "sst/waveshapers",
+      "components": {
+        "waveshapers": {
+          "SoftClip": { "include": "WaveshaperTables.h", "type": "soft" },
+          "HardClip": { "include": "WaveshaperTables.h", "type": "hard" },
+          "Wavefold": { "include": "WaveshaperTables.h", "type": "fold" },
+          "ADAA": { "include": "WaveshaperTables.h", "description": "Anti-derivative anti-aliasing" }
+        }
+      }
+    },
+    "mutable-plaits": {
+      "name": "Mutable Instruments Plaits",
+      "repo": "https://github.com/pichenettes/eurorack",
+      "license": "MIT",
+      "includePath": "plaits",
+      "components": {
+        "oscillators": {
+          "VirtualAnalogEngine": {
+            "include": "dsp/engine/virtual_analog_engine.h",
+            "description": "Classic VA oscillator with sync, PWM, sub"
+          },
+          "WaveshapingEngine": {
+            "include": "dsp/engine/waveshaping_engine.h",
+            "description": "Waveshaping synthesis"
+          },
+          "FMEngine": {
+            "include": "dsp/engine/fm_engine.h",
+            "description": "2-operator FM"
+          },
+          "GrainEngine": {
+            "include": "dsp/engine/grain_engine.h",
+            "description": "Granular formant oscillator"
+          },
+          "StringEngine": {
+            "include": "dsp/engine/string_engine.h",
+            "description": "Karplus-Strong string model"
+          },
+          "ModalEngine": {
+            "include": "dsp/engine/modal_engine.h",
+            "description": "Modal synthesis (struck/bowed)"
+          },
+          "ChordEngine": {
+            "include": "dsp/engine/chord_engine.h",
+            "description": "Chord generator"
+          },
+          "SpeechEngine": {
+            "include": "dsp/engine/speech_engine.h",
+            "description": "Speech synthesis (SAM-style)"
+          },
+          "WavetableEngine": {
+            "include": "dsp/engine/wavetable_engine.h",
+            "description": "Wavetable oscillator"
+          },
+          "HarmonicEngine": {
+            "include": "dsp/engine/harmonic_engine.h",
+            "description": "Additive harmonic oscillator"
+          }
+        }
+      }
+    },
+    "mutable-rings": {
+      "name": "Mutable Instruments Rings",
+      "repo": "https://github.com/pichenettes/eurorack",
+      "license": "MIT",
+      "includePath": "rings",
+      "components": {
+        "resonators": {
+          "Resonator": {
+            "include": "dsp/resonator.h",
+            "description": "Modal resonator bank",
+            "parameters": ["frequency", "structure", "brightness", "damping", "position"]
+          },
+          "StringSynth": {
+            "include": "dsp/string_synth_part.h",
+            "description": "Sympathetic string model"
+          }
+        }
+      }
+    },
+    "mutable-clouds": {
+      "name": "Mutable Instruments Clouds",
+      "repo": "https://github.com/pichenettes/eurorack",
+      "license": "MIT",
+      "includePath": "clouds",
+      "components": {
+        "processors": {
+          "GranularProcessor": {
+            "include": "dsp/granular_processor.h",
+            "description": "Real-time granular processor",
+            "parameters": ["position", "size", "pitch", "density", "texture", "dry_wet", "stereo_spread", "feedback", "reverb"]
+          }
+        }
+      }
+    },
+    "mutable-elements": {
+      "name": "Mutable Instruments Elements",
+      "repo": "https://github.com/pichenettes/eurorack",
+      "license": "MIT",
+      "includePath": "elements",
+      "components": {
+        "synthesis": {
+          "Exciter": {
+            "include": "dsp/exciter.h",
+            "description": "Bow/blow/strike exciter",
+            "parameters": ["bow_level", "bow_timbre", "blow_level", "blow_timbre", "strike_level", "strike_timbre"]
+          },
+          "Resonator": {
+            "include": "dsp/resonator.h",
+            "description": "Modal resonator for Elements",
+            "parameters": ["frequency", "geometry", "brightness", "damping", "position"]
+          }
+        }
+      }
+    },
+    "zita-rev1": {
+      "name": "Zita Rev1",
+      "repo": "https://github.com/PelleJuul/zita-rev1",
+      "license": "GPL2",
+      "includePath": "zita-rev1",
+      "components": {
+        "effects": {
+          "Reverb": {
+            "include": "reverb.h",
+            "description": "Fons Adriaensen's FDN reverb",
+            "parameters": ["delay", "xover", "rtlow", "rtmid", "fdamp", "eq1_freq", "eq1_gain", "eq2_freq", "eq2_gain", "mix"]
+          }
+        }
+      }
+    },
+    "signalsmith-stretch": {
+      "name": "Signalsmith Stretch",
+      "repo": "https://github.com/Signalsmith-Audio/signalsmith-stretch",
+      "license": "MIT",
+      "includePath": "",
+      "headerOnly": true,
+      "components": {
+        "processors": {
+          "SignalsmithStretch": {
+            "include": "signalsmith-stretch.h",
+            "description": "Time-stretching and pitch-shifting",
+            "parameters": ["transpose", "stretch_ratio", "formant_base"]
+          }
+        }
+      }
+    },
+    "rubber-band": {
+      "name": "Rubber Band",
+      "repo": "https://github.com/breakfastquay/rubberband",
+      "license": "GPL2",
+      "includePath": "rubberband",
+      "components": {
+        "processors": {
+          "RubberBandStretcher": {
+            "include": "RubberBandStretcher.h",
+            "description": "Industry-standard time/pitch",
+            "modes": ["offline", "realtime"],
+            "parameters": ["time_ratio", "pitch_scale"]
+          },
+          "RubberBandLiveShifter": {
+            "include": "RubberBandLiveShifter.h",
+            "description": "Simplified real-time pitch shifter"
+          }
+        }
+      }
+    },
+    "hiir": {
+      "name": "HIIR",
+      "repo": "https://github.com/unevens/hiir",
+      "license": "WTFPL",
+      "includePath": "hiir",
+      "headerOnly": true,
+      "components": {
+        "utilities": {
+          "Upsampler2x": {
+            "include": "Upsampler2xSse.h",
+            "description": "2x upsampling filter",
+            "variants": ["Fpu", "Sse", "Avx", "Neon"]
+          },
+          "Downsampler2x": {
+            "include": "Downsampler2xSse.h",
+            "description": "2x downsampling filter",
+            "variants": ["Fpu", "Sse", "Avx", "Neon"]
+          },
+          "PhaseHalfPi": {
+            "include": "PhaseHalfPiSse.h",
+            "description": "Hilbert transform"
+          },
+          "PolyphaseIir2Designer": {
+            "include": "PolyphaseIir2Designer.h",
+            "description": "Filter coefficient calculator"
+          }
+        }
+      }
+    },
+    "kfr": {
+      "name": "KFR",
+      "repo": "https://github.com/kfrlib/kfr",
+      "license": "GPL2",
+      "includePath": "kfr",
+      "components": {
+        "utilities": {
+          "DFT": {
+            "include": "dft.hpp",
+            "description": "Fast FFT (faster than FFTW)"
+          },
+          "FIRFilter": {
+            "include": "dsp.hpp",
+            "description": "FIR filter design and processing"
+          },
+          "BiquadFilter": {
+            "include": "dsp.hpp",
+            "description": "Biquad/IIR filter"
+          },
+          "Resampler": {
+            "include": "dsp.hpp",
+            "description": "High-quality resampling"
+          }
+        }
+      }
+    },
+    "libsamplerate": {
+      "name": "libsamplerate",
+      "repo": "https://github.com/libsndfile/libsamplerate",
+      "license": "BSD-2",
+      "includePath": "",
+      "components": {
+        "utilities": {
+          "SRC": {
+            "include": "samplerate.h",
+            "description": "Sample rate conversion",
+            "qualities": ["SRC_SINC_BEST_QUALITY", "SRC_SINC_MEDIUM_QUALITY", "SRC_SINC_FASTEST", "SRC_ZERO_ORDER_HOLD", "SRC_LINEAR"]
+          }
+        }
+      }
+    },
+    "speexdsp": {
+      "name": "SpeexDSP",
+      "repo": "https://github.com/xiph/speexdsp",
+      "license": "BSD-3",
+      "includePath": "speex",
+      "components": {
+        "processors": {
+          "EchoCanceller": {
+            "include": "speex_echo.h",
+            "description": "Acoustic echo cancellation"
+          },
+          "Preprocessor": {
+            "include": "speex_preprocess.h",
+            "description": "Noise suppression, AGC, VAD"
+          },
+          "Resampler": {
+            "include": "speex_resampler.h",
+            "description": "Audio resampling"
+          }
+        }
+      }
+    },
+    "dattorro-mverb": {
+      "name": "MVerb (Dattorro)",
+      "repo": "https://github.com/martineastwood/mverb",
+      "license": "GPL3",
+      "includePath": "",
+      "headerOnly": true,
+      "components": {
+        "effects": {
+          "MVerb": {
+            "include": "mverb.h",
+            "description": "Dattorro plate reverb",
+            "parameters": ["damping", "density", "bandwidth", "decay", "predelay", "size", "gain", "mix", "earlymix"]
+          }
+        }
+      }
+    },
+    "vital": {
+      "name": "Vital Synth",
+      "repo": "https://github.com/mtytel/vital",
+      "license": "GPL3",
+      "includePath": "vital/synthesis",
+      "note": "Reference implementation - complex integration",
+      "components": {
+        "oscillators": {
+          "WavetableOscillator": {
+            "include": "producers/sample_source.h",
+            "description": "Anti-aliased wavetable with spectral warping"
+          }
+        },
+        "filters": {
+          "SynthFilter": {
+            "include": "filters/synth_filter.h",
+            "description": "Multi-mode filter"
+          }
+        }
+      }
+    },
+    "polyblep": {
+      "name": "PolyBLEP",
+      "repo": "https://github.com/martinfinke/PolyBLEP",
+      "license": "MIT",
+      "includePath": "",
+      "headerOnly": true,
+      "components": {
+        "oscillators": {
+          "PolyBLEPOscillator": {
+            "include": "PolyBLEP.h",
+            "description": "Anti-aliased geometric waveforms",
+            "waveforms": ["saw", "square", "triangle", "pulse"]
+          }
+        }
+      }
+    }
+  }
+}

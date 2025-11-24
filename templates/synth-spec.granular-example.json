@@ -1,0 +1,175 @@
+{
+  "$schema": "./synth-spec.schema.json",
+  "meta": {
+    "name": "Granular Resonator",
+    "id": "GranularResonator",
+    "code": "GrRs",
+    "type": "granular",
+    "voices": 4,
+    "description": "Granular processor with modal resonator, using Mutable Instruments DSP",
+    "inspiration": ["Mutable Instruments Clouds", "Mutable Instruments Rings", "Make Noise Morphagene"]
+  },
+  "libraries": {
+    "mutable-clouds": {
+      "source": "submodule",
+      "repo": "https://github.com/pichenettes/eurorack",
+      "version": "master",
+      "includePath": "clouds"
+    },
+    "mutable-rings": {
+      "source": "submodule",
+      "repo": "https://github.com/pichenettes/eurorack",
+      "version": "master",
+      "includePath": "rings"
+    },
+    "zita-rev1": {
+      "source": "submodule",
+      "repo": "https://github.com/PelleJuul/zita-rev1",
+      "version": "master"
+    },
+    "signalsmith-stretch": {
+      "source": "fetch",
+      "repo": "https://github.com/Signalsmith-Audio/signalsmith-stretch",
+      "version": "v1.0.0"
+    }
+  },
+  "voice": {
+    "oscillators": [
+      {
+        "id": "osc1",
+        "library": "mutable-plaits",
+        "component": "GrainEngine",
+        "features": ["level"],
+        "config": {
+          "blockSize": 24
+        }
+      },
+      {
+        "id": "osc2",
+        "sst": "DPWSawOscillator",
+        "features": ["detune", "level", "pwm"]
+      }
+    ],
+    "processors": [
+      {
+        "id": "granular",
+        "type": "granular",
+        "library": "mutable-clouds",
+        "component": "GranularProcessor"
+      },
+      {
+        "id": "stretch",
+        "type": "timestretch",
+        "library": "signalsmith-stretch",
+        "component": "SignalsmithStretch",
+        "config": {
+          "preset": "default"
+        }
+      }
+    ],
+    "resonators": [
+      {
+        "id": "body",
+        "library": "mutable-rings",
+        "component": "Resonator",
+        "modes": ["modal", "string"]
+      }
+    ],
+    "filters": [
+      {
+        "id": "filter1",
+        "sst": "VintageLadder",
+        "modes": ["LP24"],
+        "keyTracking": true,
+        "envAmount": true
+      }
+    ],
+    "envelopes": [
+      { "id": "env1", "type": "ADSR", "target": "amp" },
+      { "id": "env2", "type": "ADSR", "target": "filter" },
+      { "id": "env3", "type": "AD", "target": "resonator" }
+    ],
+    "lfos": [
+      {
+        "id": "lfo1",
+        "shapes": ["sine", "triangle", "random"],
+        "sync": true,
+        "defaultTarget": "grain_position"
+      }
+    ],
+    "modMatrix": {
+      "slots": 4,
+      "sources": ["lfo1", "env2", "env3", "velocity", "modWheel", "aftertouch"],
+      "destinations": ["grain_position", "grain_size", "grain_density", "resonator_brightness", "filter_cutoff"]
+    }
+  },
+  "effects": [
+    {
+      "id": "reverb",
+      "library": "zita-rev1",
+      "component": "Reverb",
+      "bypass": false
+    },
+    {
+      "id": "delay",
+      "sst": "Delay",
+      "bypass": true
+    }
+  ],
+  "parameters": [
+    { "id": "osc1_level", "name": "Grain Osc Level", "min": 0, "max": 1, "default": 0.8, "category": "osc1", "control": "knob" },
+    { "id": "osc2_level", "name": "Saw Level", "min": 0, "max": 1, "default": 0.3, "category": "osc2", "control": "knob" },
+    { "id": "osc2_detune", "name": "Saw Detune", "min": -1, "max": 1, "default": 0, "unit": "st", "category": "osc2", "control": "knob" },
+
+    { "id": "grain_position", "name": "Position", "min": 0, "max": 1, "default": 0.5, "category": "granular", "control": "knob" },
+    { "id": "grain_size", "name": "Size", "min": 0, "max": 1, "default": 0.5, "category": "granular", "control": "knob" },
+    { "id": "grain_pitch", "name": "Pitch", "min": -24, "max": 24, "default": 0, "unit": "st", "category": "granular", "control": "knob" },
+    { "id": "grain_density", "name": "Density", "min": 0, "max": 1, "default": 0.5, "category": "granular", "control": "knob" },
+    { "id": "grain_texture", "name": "Texture", "min": 0, "max": 1, "default": 0.5, "category": "granular", "control": "knob" },
+    { "id": "grain_freeze", "name": "Freeze", "min": 0, "max": 1, "default": 0, "category": "granular", "control": "toggle" },
+    { "id": "grain_mix", "name": "Dry/Wet", "min": 0, "max": 1, "default": 0.5, "category": "granular", "control": "knob" },
+
+    { "id": "stretch_ratio", "name": "Time Stretch", "min": 0.5, "max": 2, "default": 1, "unit": "x", "category": "stretch", "control": "knob" },
+    { "id": "stretch_pitch", "name": "Pitch Shift", "min": -12, "max": 12, "default": 0, "unit": "st", "category": "stretch", "control": "knob" },
+
+    { "id": "resonator_freq", "name": "Frequency", "min": 20, "max": 2000, "default": 220, "unit": "Hz", "scale": "log", "category": "resonator", "control": "knob" },
+    { "id": "resonator_structure", "name": "Structure", "min": 0, "max": 1, "default": 0.5, "category": "resonator", "control": "knob" },
+    { "id": "resonator_brightness", "name": "Brightness", "min": 0, "max": 1, "default": 0.5, "category": "resonator", "control": "knob" },
+    { "id": "resonator_damping", "name": "Damping", "min": 0, "max": 1, "default": 0.5, "category": "resonator", "control": "knob" },
+    { "id": "resonator_position", "name": "Position", "min": 0, "max": 1, "default": 0.5, "category": "resonator", "control": "knob" },
+    { "id": "resonator_mode", "name": "Mode", "min": 0, "max": 1, "default": 0, "category": "resonator", "control": "select", "options": ["Modal", "String"] },
+    { "id": "resonator_mix", "name": "Mix", "min": 0, "max": 1, "default": 0.5, "category": "resonator", "control": "knob" },
+
+    { "id": "filter_cutoff", "name": "Cutoff", "min": 20, "max": 20000, "default": 8000, "unit": "Hz", "scale": "log", "category": "filter", "control": "knob", "cc": 74 },
+    { "id": "filter_reso", "name": "Resonance", "min": 0, "max": 1, "default": 0.2, "category": "filter", "control": "knob", "cc": 71 },
+    { "id": "filter_env", "name": "Env Amount", "min": -1, "max": 1, "default": 0.3, "category": "filter", "control": "knob" },
+
+    { "id": "amp_attack", "name": "Attack", "min": 0.001, "max": 10, "default": 0.1, "unit": "s", "scale": "log", "category": "amp", "control": "adsr" },
+    { "id": "amp_decay", "name": "Decay", "min": 0.001, "max": 10, "default": 0.3, "unit": "s", "scale": "log", "category": "amp", "control": "adsr" },
+    { "id": "amp_sustain", "name": "Sustain", "min": 0, "max": 1, "default": 0.7, "category": "amp", "control": "adsr" },
+    { "id": "amp_release", "name": "Release", "min": 0.001, "max": 10, "default": 0.5, "unit": "s", "scale": "log", "category": "amp", "control": "adsr" },
+
+    { "id": "lfo_rate", "name": "LFO Rate", "min": 0.01, "max": 20, "default": 0.5, "unit": "Hz", "scale": "log", "category": "lfo", "control": "knob" },
+    { "id": "lfo_depth", "name": "LFO Depth", "min": 0, "max": 1, "default": 0.3, "category": "lfo", "control": "knob" },
+
+    { "id": "reverb_decay", "name": "Reverb Decay", "min": 0.5, "max": 10, "default": 3, "unit": "s", "category": "reverb", "control": "knob" },
+    { "id": "reverb_damping", "name": "Reverb Damping", "min": 1000, "max": 20000, "default": 8000, "unit": "Hz", "scale": "log", "category": "reverb", "control": "knob" },
+    { "id": "reverb_mix", "name": "Reverb Mix", "min": 0, "max": 1, "default": 0.3, "category": "reverb", "control": "knob" },
+
+    { "id": "master_volume", "name": "Volume", "min": 0, "max": 1, "default": 0.8, "category": "master", "control": "slider" }
+  ],
+  "ui": {
+    "layout": [
+      { "section": "osc", "label": "Oscillators", "params": ["osc1_level", "osc2_level", "osc2_detune"] },
+      { "section": "granular", "label": "Granular", "params": ["grain_position", "grain_size", "grain_pitch", "grain_density", "grain_texture", "grain_freeze", "grain_mix"] },
+      { "section": "stretch", "label": "Stretch", "params": ["stretch_ratio", "stretch_pitch"] },
+      { "section": "resonator", "label": "Resonator", "params": ["resonator_freq", "resonator_structure", "resonator_brightness", "resonator_damping", "resonator_position", "resonator_mode", "resonator_mix"] },
+      { "section": "filter", "label": "Filter", "params": ["filter_cutoff", "filter_reso", "filter_env"] },
+      { "section": "amp", "label": "Amp Envelope", "params": ["amp_attack", "amp_decay", "amp_sustain", "amp_release"] },
+      { "section": "lfo", "label": "LFO", "params": ["lfo_rate", "lfo_depth"] },
+      { "section": "reverb", "label": "Reverb", "params": ["reverb_decay", "reverb_damping", "reverb_mix"] },
+      { "section": "master", "label": "Master", "params": ["master_volume"] }
+    ],
+    "theme": "dark"
+  }
+}

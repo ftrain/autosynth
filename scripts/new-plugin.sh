@@ -2,15 +2,20 @@
 #
 # new-plugin.sh - Create a new plugin from the template
 #
-# Usage: ./scripts/new-plugin.sh "Plugin Name" "PluginCode" "PlCd"
+# Usage:
+#   ./scripts/new-plugin.sh [type] "Plugin Name" "PluginCode" "PlCd"
 #
 # Arguments:
+#   type (optional) - Plugin type: synth, effect, or midi (default: synth)
 #   $1 - Plugin display name (e.g., "My Awesome Synth")
 #   $2 - Plugin class name (e.g., "MyAwesomeSynth", no spaces)
 #   $3 - 4-character plugin code (e.g., "MASy")
 #
-# Example:
-#   ./scripts/new-plugin.sh "Warm Bass" "WarmBass" "WmBs"
+# Examples:
+#   ./scripts/new-plugin.sh "Warm Bass" "WarmBass" "WmBs"          # Creates synth
+#   ./scripts/new-plugin.sh synth "Warm Bass" "WarmBass" "WmBs"    # Creates synth
+#   ./scripts/new-plugin.sh effect "Tape Delay" "TapeDelay" "TpDl" # Creates effect
+#   ./scripts/new-plugin.sh midi "Arp Generator" "ArpGen" "ArpG"   # Creates MIDI util
 #
 
 set -e
@@ -19,6 +24,7 @@ set -e
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Logging functions
@@ -34,17 +40,37 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+log_step() {
+    echo -e "${BLUE}[STEP]${NC} $1"
+}
+
+# Determine plugin type from first argument
+PLUGIN_TYPE="synth"
+if [ "$1" = "synth" ] || [ "$1" = "effect" ] || [ "$1" = "midi" ]; then
+    PLUGIN_TYPE="$1"
+    shift
+fi
+
 # Validate arguments
 if [ $# -lt 3 ]; then
-    echo "Usage: $0 \"Plugin Name\" \"PluginClassName\" \"PlCd\""
+    echo "Usage: $0 [type] \"Plugin Name\" \"PluginClassName\" \"PlCd\""
     echo ""
     echo "Arguments:"
+    echo "  type (optional) - Plugin type: synth, effect, or midi (default: synth)"
     echo "  Plugin Name     - Display name (e.g., \"My Synth\")"
     echo "  PluginClassName - Class name, no spaces (e.g., \"MySynth\")"
     echo "  PlCd            - 4-character plugin code (e.g., \"MySy\")"
     echo ""
-    echo "Example:"
-    echo "  $0 \"Warm Bass\" \"WarmBass\" \"WmBs\""
+    echo "Examples:"
+    echo "  $0 \"Warm Bass\" \"WarmBass\" \"WmBs\"          # Creates synth"
+    echo "  $0 synth \"Warm Bass\" \"WarmBass\" \"WmBs\"    # Creates synth"
+    echo "  $0 effect \"Tape Delay\" \"TapeDelay\" \"TpDl\" # Creates effect"
+    echo "  $0 midi \"Arp Generator\" \"ArpGen\" \"ArpG\"   # Creates MIDI util"
+    echo ""
+    echo "Plugin locations:"
+    echo "  synth  -> plugins/synths/<PluginClassName>"
+    echo "  effect -> plugins/effects/<PluginClassName>"
+    echo "  midi   -> plugins/midi/<PluginClassName>"
     exit 1
 fi
 
@@ -64,11 +90,29 @@ if [[ ! "$PLUGIN_CLASS" =~ ^[a-zA-Z][a-zA-Z0-9]*$ ]]; then
     exit 1
 fi
 
-# Determine paths
+# Determine paths based on type
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 TEMPLATE_DIR="$REPO_ROOT/templates/plugin-template"
-TARGET_DIR="$REPO_ROOT/plugins/$PLUGIN_CLASS"
+
+case "$PLUGIN_TYPE" in
+    synth)
+        TARGET_DIR="$REPO_ROOT/plugins/synths/$PLUGIN_CLASS"
+        TYPE_LABEL="Synthesizer"
+        ;;
+    effect)
+        TARGET_DIR="$REPO_ROOT/plugins/effects/$PLUGIN_CLASS"
+        TYPE_LABEL="Effect"
+        ;;
+    midi)
+        TARGET_DIR="$REPO_ROOT/plugins/midi/$PLUGIN_CLASS"
+        TYPE_LABEL="MIDI Utility"
+        ;;
+    *)
+        log_error "Unknown plugin type: $PLUGIN_TYPE"
+        exit 1
+        ;;
+esac
 
 # Check template exists
 if [ ! -d "$TEMPLATE_DIR" ]; then
@@ -82,24 +126,29 @@ if [ -d "$TARGET_DIR" ]; then
     exit 1
 fi
 
-log_info "Creating new plugin: $PLUGIN_NAME"
-log_info "Class name: $PLUGIN_CLASS"
-log_info "Plugin code: $PLUGIN_CODE"
-log_info "Target: $TARGET_DIR"
+echo ""
+log_info "Creating new $TYPE_LABEL: $PLUGIN_NAME"
+log_info "  Type: $PLUGIN_TYPE"
+log_info "  Class: $PLUGIN_CLASS"
+log_info "  Code: $PLUGIN_CODE"
+log_info "  Path: $TARGET_DIR"
 echo ""
 
 # Create branch name from plugin class (lowercase with hyphens)
 BRANCH_NAME="plugin/$(echo "$PLUGIN_CLASS" | sed 's/\([A-Z]\)/-\L\1/g' | sed 's/^-//')"
 
 # Create and switch to new branch
-log_info "Creating branch: $BRANCH_NAME"
-git checkout -b "$BRANCH_NAME"
+log_step "Creating branch: $BRANCH_NAME"
+git checkout -b "$BRANCH_NAME" 2>/dev/null || {
+    log_warn "Branch already exists or error creating branch"
+    log_info "Continuing on current branch..."
+}
 
 # Create target directory
 mkdir -p "$(dirname "$TARGET_DIR")"
 
 # Copy template
-log_info "Copying template..."
+log_step "Copying template..."
 cp -r "$TEMPLATE_DIR" "$TARGET_DIR"
 
 # Remove .git if it exists (from template development)
@@ -121,7 +170,7 @@ replace_in_file() {
 }
 
 # Replace placeholders in all files
-log_info "Replacing placeholders..."
+log_step "Replacing placeholders..."
 
 # Find all text files and replace
 find "$TARGET_DIR" -type f \( \
@@ -162,76 +211,88 @@ if [ -f "$CMAKE_FILE" ]; then
     replace_in_file "$CMAKE_FILE" 'set(PLUGIN_CODE "MyPl")' "set(PLUGIN_CODE \"$PLUGIN_CODE\")"
 fi
 
-# Rename class files if needed
-# (Template uses PluginProcessor which is generic, so no renaming needed)
+# ============================================================================
+# MONOREPO SETUP: Link to shared libraries
+# ============================================================================
 
-# ============================================================================
-# LINK CACHED LIBRARIES (Docker environment)
-# If running in Docker with pre-cached JUCE/SST, symlink them for instant setup
-# ============================================================================
+# For monorepo builds, we use the root-level libs/
+# Individual plugin CMakeLists.txt will be updated to find libs relative to repo root
+
+log_step "Setting up monorepo library paths..."
+
+# Create symlinks to root-level JUCE and SST
+LIBS_DIR="$TARGET_DIR/libs"
+mkdir -p "$LIBS_DIR/sst"
+
+# Check for Docker environment first
 if [ -d "/opt/JUCE" ] && [ -d "/opt/sst" ]; then
     log_info "Docker environment detected - linking cached libraries..."
-
-    # Link JUCE
     ln -sf /opt/JUCE "$TARGET_DIR/JUCE"
-
-    # Link SST libraries
-    mkdir -p "$TARGET_DIR/libs/sst"
-    ln -sf /opt/sst/sst-basic-blocks "$TARGET_DIR/libs/sst/sst-basic-blocks"
-    ln -sf /opt/sst/sst-filters "$TARGET_DIR/libs/sst/sst-filters"
-    ln -sf /opt/sst/sst-effects "$TARGET_DIR/libs/sst/sst-effects"
-    ln -sf /opt/sst/sst-waveshapers "$TARGET_DIR/libs/sst/sst-waveshapers"
-
-    log_info "Libraries linked (no git submodule setup needed)"
-
-    # Build UI
-    log_info "Installing UI dependencies..."
-    cd "$TARGET_DIR/ui"
-    npm install --silent
-    npm run build --silent
-    cd "$REPO_ROOT"
-
-    log_info "Plugin created and ready to build!"
-    log_info "Branch: $BRANCH_NAME"
-    echo ""
-    echo "Build immediately:"
-    echo "  cd $TARGET_DIR"
-    echo "  cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release"
-    echo "  cmake --build build"
-    echo ""
-    echo "Or use: ./scripts/dev.sh build-plugin $TARGET_DIR"
-    echo ""
+    ln -sf /opt/sst/sst-basic-blocks "$LIBS_DIR/sst/sst-basic-blocks"
+    ln -sf /opt/sst/sst-filters "$LIBS_DIR/sst/sst-filters"
+    ln -sf /opt/sst/sst-effects "$LIBS_DIR/sst/sst-effects"
+    ln -sf /opt/sst/sst-waveshapers "$LIBS_DIR/sst/sst-waveshapers"
 else
-    # Standard setup (outside Docker)
-    log_info "Plugin created successfully!"
-    log_info "Branch: $BRANCH_NAME"
-    echo ""
-    echo "Next steps:"
-    echo ""
-    echo "  1. Add git submodules:"
-    echo "     cd $TARGET_DIR"
-    echo "     git submodule add https://github.com/juce-framework/JUCE.git JUCE"
-    echo "     git submodule add https://github.com/surge-synthesizer/sst-basic-blocks.git libs/sst/sst-basic-blocks"
-    echo "     git submodule add https://github.com/surge-synthesizer/sst-filters.git libs/sst/sst-filters"
-    echo "     git submodule add https://github.com/surge-synthesizer/sst-effects.git libs/sst/sst-effects"
-    echo "     git submodule add https://github.com/surge-synthesizer/sst-waveshapers.git libs/sst/sst-waveshapers"
-    echo ""
-    echo "  2. Build the UI:"
-    echo "     cd $TARGET_DIR/ui"
-    echo "     npm install"
-    echo "     npm run build"
-    echo ""
-    echo "  3. Build the plugin:"
-    echo "     cd $TARGET_DIR"
-    echo "     cmake -B build -DCMAKE_BUILD_TYPE=Release"
-    echo "     cmake --build build --config Release"
-    echo ""
-    echo "  TIP: Use Docker for faster setup: ./scripts/dev.sh"
-    echo ""
+    # Link to repo-level libraries
+    if [ -d "$REPO_ROOT/libs/JUCE" ]; then
+        ln -sf "$REPO_ROOT/libs/JUCE" "$TARGET_DIR/JUCE"
+    fi
+    if [ -d "$REPO_ROOT/libs/sst-basic-blocks" ]; then
+        ln -sf "$REPO_ROOT/libs/sst-basic-blocks" "$LIBS_DIR/sst/sst-basic-blocks"
+    fi
+    if [ -d "$REPO_ROOT/libs/sst-filters" ]; then
+        ln -sf "$REPO_ROOT/libs/sst-filters" "$LIBS_DIR/sst/sst-filters"
+    fi
+    if [ -d "$REPO_ROOT/libs/sst-effects" ]; then
+        ln -sf "$REPO_ROOT/libs/sst-effects" "$LIBS_DIR/sst/sst-effects"
+    fi
+    if [ -d "$REPO_ROOT/libs/sst-waveshapers" ]; then
+        ln -sf "$REPO_ROOT/libs/sst-waveshapers" "$LIBS_DIR/sst/sst-waveshapers"
+    fi
 fi
 
-echo "  Start developing:"
-echo "    - Edit source/dsp/Voice.h for DSP"
-echo "    - Edit ui/src/App.tsx for UI"
-echo "    - See README.md for more info"
+# ============================================================================
+# Build UI
+# ============================================================================
+
+if [ -d "$TARGET_DIR/ui" ]; then
+    if command -v npm &> /dev/null; then
+        log_step "Installing UI dependencies..."
+        cd "$TARGET_DIR/ui"
+        npm install --silent 2>/dev/null || npm install
+        npm run build --silent 2>/dev/null || npm run build
+        cd "$REPO_ROOT"
+    else
+        log_warn "npm not found - skip UI build. Run 'npm install && npm run build' in ui/ later."
+    fi
+fi
+
+# ============================================================================
+# Done!
+# ============================================================================
+
+echo ""
+log_info "Plugin created successfully!"
+echo ""
+echo "Location: $TARGET_DIR"
+echo ""
+echo "Build options:"
+echo ""
+echo "  Option 1 - Single plugin build:"
+echo "    cd $TARGET_DIR"
+echo "    cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release"
+echo "    cmake --build build"
+echo ""
+echo "  Option 2 - Monorepo build (from repo root):"
+echo "    cmake -B build -DPLUGINS=\"$PLUGIN_CLASS\""
+echo "    cmake --build build"
+echo ""
+echo "  Option 3 - Build all ${PLUGIN_TYPE}s:"
+echo "    cmake -B build -DBUILD_$(echo $PLUGIN_TYPE | tr '[:lower:]' '[:upper:]')S=ON"
+echo "    cmake --build build"
+echo ""
+echo "Development:"
+echo "  - Edit source/dsp/Voice.h for DSP"
+echo "  - Edit ui/src/App.tsx for UI"
+echo "  - Run 'npm run dev' in ui/ for live reload"
 echo ""
