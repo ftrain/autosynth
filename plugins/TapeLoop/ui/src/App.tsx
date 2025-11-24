@@ -127,8 +127,8 @@ const App: React.FC = () => {
         <SynthKnob
           label="LENGTH"
           min={0.5}
-          max={10}
-          value={getDenormalized('loop_length', paramValues.loop_length ?? 0.368)}
+          max={60}
+          value={getDenormalized('loop_length', paramValues.loop_length ?? 0.059)}
           onChange={(v) => handleChange('loop_length', getNormalized('loop_length', v))}
         />
         <SynthKnob
@@ -187,6 +187,149 @@ const App: React.FC = () => {
           max={1}
           value={getDenormalized('tape_age', paramValues.tape_age ?? 0.3)}
           onChange={(v) => handleChange('tape_age', getNormalized('tape_age', v))}
+        />
+        <SynthKnob
+          label="DEGRADE"
+          min={0}
+          max={1}
+          value={getDenormalized('tape_degrade', paramValues.tape_degrade ?? 0)}
+          onChange={(v) => handleChange('tape_degrade', getNormalized('tape_degrade', v))}
+        />
+      </SynthRow>
+
+      {/* RECORDING ENVELOPE */}
+      <SynthRow label="RECORDING">
+        <SynthKnob
+          label="ATTACK"
+          min={0.005}
+          max={0.5}
+          value={getDenormalized('rec_attack', paramValues.rec_attack ?? 0.03)}
+          onChange={(v) => handleChange('rec_attack', getNormalized('rec_attack', v))}
+        />
+        <SynthKnob
+          label="DECAY"
+          min={0.01}
+          max={5}
+          value={getDenormalized('rec_decay', paramValues.rec_decay ?? 0.098)}
+          onChange={(v) => handleChange('rec_decay', getNormalized('rec_decay', v))}
+        />
+        <SynthKnob
+          label="FM"
+          min={0}
+          max={1}
+          value={getDenormalized('fm_amount', paramValues.fm_amount ?? 0)}
+          onChange={(v) => handleChange('fm_amount', getNormalized('fm_amount', v))}
+        />
+      </SynthRow>
+
+      {/* LFO */}
+      <SynthRow label="TAPE LFO">
+        <SynthKnob
+          label="RATE"
+          min={0.1}
+          max={20}
+          value={getDenormalized('lfo_rate', paramValues.lfo_rate ?? 0.045)}
+          onChange={(v) => handleChange('lfo_rate', getNormalized('lfo_rate', v))}
+        />
+        <SynthKnob
+          label="DEPTH"
+          min={0}
+          max={1}
+          value={getDenormalized('lfo_depth', paramValues.lfo_depth ?? 0)}
+          onChange={(v) => handleChange('lfo_depth', getNormalized('lfo_depth', v))}
+        />
+        <SynthKnob
+          label="WAVE"
+          min={0}
+          max={3}
+          step={1}
+          value={getDenormalized('lfo_waveform', paramValues.lfo_waveform ?? 0)}
+          onChange={(v) => handleChange('lfo_waveform', getNormalized('lfo_waveform', v))}
+          options={['SIN', 'TRI', 'SAW', 'SQR']}
+        />
+        <SynthKnob
+          label="TARGET"
+          min={0}
+          max={3}
+          step={1}
+          value={getDenormalized('lfo_target', paramValues.lfo_target ?? 0)}
+          onChange={(v) => handleChange('lfo_target', getNormalized('lfo_target', v))}
+          options={['SAT', 'AGE', 'WOB', 'DEG']}
+        />
+      </SynthRow>
+
+      {/* DELAY */}
+      <SynthRow label="DELAY">
+        <SynthKnob
+          label="TIME"
+          min={0.01}
+          max={2}
+          value={getDenormalized('delay_time', paramValues.delay_time ?? 0.25)}
+          onChange={(v) => handleChange('delay_time', getNormalized('delay_time', v))}
+        />
+        <SynthKnob
+          label="FEEDBACK"
+          min={0}
+          max={0.95}
+          value={getDenormalized('delay_feedback', paramValues.delay_feedback ?? 0.316)}
+          onChange={(v) => handleChange('delay_feedback', getNormalized('delay_feedback', v))}
+        />
+        <SynthKnob
+          label="MIX"
+          min={0}
+          max={1}
+          value={getDenormalized('delay_mix', paramValues.delay_mix ?? 0)}
+          onChange={(v) => handleChange('delay_mix', getNormalized('delay_mix', v))}
+        />
+      </SynthRow>
+
+      {/* REVERB */}
+      <SynthRow label="REVERB">
+        <SynthKnob
+          label="DECAY"
+          min={0.1}
+          max={10}
+          value={getDenormalized('reverb_decay', paramValues.reverb_decay ?? 0.192)}
+          onChange={(v) => handleChange('reverb_decay', getNormalized('reverb_decay', v))}
+        />
+        <SynthKnob
+          label="DAMPING"
+          min={0}
+          max={1}
+          value={getDenormalized('reverb_damping', paramValues.reverb_damping ?? 0.5)}
+          onChange={(v) => handleChange('reverb_damping', getNormalized('reverb_damping', v))}
+        />
+        <SynthKnob
+          label="MIX"
+          min={0}
+          max={1}
+          value={getDenormalized('reverb_mix', paramValues.reverb_mix ?? 0)}
+          onChange={(v) => handleChange('reverb_mix', getNormalized('reverb_mix', v))}
+        />
+      </SynthRow>
+
+      {/* COMPRESSOR */}
+      <SynthRow label="COMPRESSOR">
+        <SynthKnob
+          label="THRESHOLD"
+          min={-40}
+          max={0}
+          value={getDenormalized('comp_threshold', paramValues.comp_threshold ?? 0.75)}
+          onChange={(v) => handleChange('comp_threshold', getNormalized('comp_threshold', v))}
+        />
+        <SynthKnob
+          label="RATIO"
+          min={1}
+          max={20}
+          value={getDenormalized('comp_ratio', paramValues.comp_ratio ?? 0.158)}
+          onChange={(v) => handleChange('comp_ratio', getNormalized('comp_ratio', v))}
+        />
+        <SynthKnob
+          label="MIX"
+          min={0}
+          max={1}
+          value={getDenormalized('comp_mix', paramValues.comp_mix ?? 0)}
+          onChange={(v) => handleChange('comp_mix', getNormalized('comp_mix', v))}
         />
       </SynthRow>
 

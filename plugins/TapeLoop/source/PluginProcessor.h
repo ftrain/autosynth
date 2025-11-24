@@ -108,10 +108,34 @@ private:
 
     std::atomic<float>* tapeHissParam = nullptr;
     std::atomic<float>* tapeAgeParam = nullptr;
+    std::atomic<float>* tapeDegradeParam = nullptr;
+
+    std::atomic<float>* recAttackParam = nullptr;
+    std::atomic<float>* recDecayParam = nullptr;
+
+    std::atomic<float>* fmAmountParam = nullptr;
+
+    std::atomic<float>* lfoRateParam = nullptr;
+    std::atomic<float>* lfoDepthParam = nullptr;
+    std::atomic<float>* lfoWaveformParam = nullptr;
+    std::atomic<float>* lfoTargetParam = nullptr;
 
     std::atomic<float>* dryLevelParam = nullptr;
     std::atomic<float>* loopLevelParam = nullptr;
     std::atomic<float>* masterLevelParam = nullptr;
+
+    // Effects
+    std::atomic<float>* delayTimeParam = nullptr;
+    std::atomic<float>* delayFeedbackParam = nullptr;
+    std::atomic<float>* delayMixParam = nullptr;
+
+    std::atomic<float>* reverbDecayParam = nullptr;
+    std::atomic<float>* reverbMixParam = nullptr;
+    std::atomic<float>* reverbDampingParam = nullptr;
+
+    std::atomic<float>* compThresholdParam = nullptr;
+    std::atomic<float>* compRatioParam = nullptr;
+    std::atomic<float>* compMixParam = nullptr;
 
     //==========================================================================
     // State

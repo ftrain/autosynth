@@ -86,7 +86,7 @@ export const PARAMETER_DEFINITIONS: ParameterMap = {
     id: 'loop_length',
     name: 'Loop Length',
     min: 0.5,
-    max: 10,
+    max: 60,
     default: 4,
     unit: 's',
   },
@@ -156,6 +156,87 @@ export const PARAMETER_DEFINITIONS: ParameterMap = {
     default: 0.3,
   },
 
+  tape_degrade: {
+    id: 'tape_degrade',
+    name: 'Tape Degrade',
+    min: 0,
+    max: 1,
+    default: 0,
+  },
+
+  // =========================================================================
+  // RECORDING ENVELOPE
+  // =========================================================================
+
+  rec_attack: {
+    id: 'rec_attack',
+    name: 'Rec Attack',
+    min: 0.005,
+    max: 0.5,
+    default: 0.02,
+    unit: 's',
+  },
+
+  rec_decay: {
+    id: 'rec_decay',
+    name: 'Rec Decay',
+    min: 0.01,
+    max: 5,
+    default: 0.5,
+    unit: 's',
+  },
+
+  // =========================================================================
+  // FM MODULATION
+  // =========================================================================
+
+  fm_amount: {
+    id: 'fm_amount',
+    name: 'FM Amount',
+    min: 0,
+    max: 1,
+    default: 0,
+  },
+
+  // =========================================================================
+  // TAPE CHARACTER LFO
+  // =========================================================================
+
+  lfo_rate: {
+    id: 'lfo_rate',
+    name: 'LFO Rate',
+    min: 0.1,
+    max: 20,
+    default: 1,
+    unit: 'Hz',
+  },
+
+  lfo_depth: {
+    id: 'lfo_depth',
+    name: 'LFO Depth',
+    min: 0,
+    max: 1,
+    default: 0,
+  },
+
+  lfo_waveform: {
+    id: 'lfo_waveform',
+    name: 'LFO Wave',
+    min: 0,
+    max: 3,
+    default: 0,
+    step: 1,
+  },
+
+  lfo_target: {
+    id: 'lfo_target',
+    name: 'LFO Target',
+    min: 0,
+    max: 3,
+    default: 0,
+    step: 1,
+  },
+
   // =========================================================================
   // MIX
   // =========================================================================
@@ -182,6 +263,93 @@ export const PARAMETER_DEFINITIONS: ParameterMap = {
     min: 0,
     max: 1,
     default: 0.8,
+  },
+
+  // =========================================================================
+  // DELAY
+  // =========================================================================
+
+  delay_time: {
+    id: 'delay_time',
+    name: 'Delay Time',
+    min: 0.01,
+    max: 2,
+    default: 0.5,
+    unit: 's',
+  },
+
+  delay_feedback: {
+    id: 'delay_feedback',
+    name: 'Delay Feedback',
+    min: 0,
+    max: 0.95,
+    default: 0.3,
+  },
+
+  delay_mix: {
+    id: 'delay_mix',
+    name: 'Delay Mix',
+    min: 0,
+    max: 1,
+    default: 0,
+  },
+
+  // =========================================================================
+  // REVERB
+  // =========================================================================
+
+  reverb_decay: {
+    id: 'reverb_decay',
+    name: 'Reverb Decay',
+    min: 0.1,
+    max: 10,
+    default: 2,
+    unit: 's',
+  },
+
+  reverb_mix: {
+    id: 'reverb_mix',
+    name: 'Reverb Mix',
+    min: 0,
+    max: 1,
+    default: 0,
+  },
+
+  reverb_damping: {
+    id: 'reverb_damping',
+    name: 'Reverb Damping',
+    min: 0,
+    max: 1,
+    default: 0.5,
+  },
+
+  // =========================================================================
+  // COMPRESSOR
+  // =========================================================================
+
+  comp_threshold: {
+    id: 'comp_threshold',
+    name: 'Comp Threshold',
+    min: -40,
+    max: 0,
+    default: -10,
+    unit: 'dB',
+  },
+
+  comp_ratio: {
+    id: 'comp_ratio',
+    name: 'Comp Ratio',
+    min: 1,
+    max: 20,
+    default: 4,
+  },
+
+  comp_mix: {
+    id: 'comp_mix',
+    name: 'Comp Mix',
+    min: 0,
+    max: 1,
+    default: 0,
   },
 };
 
