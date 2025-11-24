@@ -351,6 +351,175 @@ export const PARAMETER_DEFINITIONS: ParameterMap = {
     max: 1,
     default: 0,
   },
+
+  // =========================================================================
+  // SEQUENCERS (dual - one per oscillator)
+  // =========================================================================
+
+  seq_enabled: {
+    id: 'seq_enabled',
+    name: 'Sequencer',
+    min: 0,
+    max: 1,
+    default: 0,
+    step: 1,
+  },
+
+  seq_bpm: {
+    id: 'seq_bpm',
+    name: 'BPM',
+    min: 30,
+    max: 300,
+    default: 120,
+    step: 1,
+  },
+
+  // Sequencer 1 (Osc 1)
+  seq1_division: {
+    id: 'seq1_division',
+    name: 'Seq1 Div',
+    min: 0,
+    max: 15,
+    default: 4,
+    step: 1,
+  },
+
+  seq1_pitch1: { id: 'seq1_pitch1', name: 'Seq1 Pitch 1', min: 36, max: 84, default: 60, step: 1 },
+  seq1_pitch2: { id: 'seq1_pitch2', name: 'Seq1 Pitch 2', min: 36, max: 84, default: 60, step: 1 },
+  seq1_pitch3: { id: 'seq1_pitch3', name: 'Seq1 Pitch 3', min: 36, max: 84, default: 60, step: 1 },
+  seq1_pitch4: { id: 'seq1_pitch4', name: 'Seq1 Pitch 4', min: 36, max: 84, default: 60, step: 1 },
+
+  seq1_gate1: { id: 'seq1_gate1', name: 'Seq1 Gate 1', min: 0, max: 1, default: 1, step: 1 },
+  seq1_gate2: { id: 'seq1_gate2', name: 'Seq1 Gate 2', min: 0, max: 1, default: 1, step: 1 },
+  seq1_gate3: { id: 'seq1_gate3', name: 'Seq1 Gate 3', min: 0, max: 1, default: 1, step: 1 },
+  seq1_gate4: { id: 'seq1_gate4', name: 'Seq1 Gate 4', min: 0, max: 1, default: 1, step: 1 },
+
+  // Sequencer 2 (Osc 2)
+  seq2_division: {
+    id: 'seq2_division',
+    name: 'Seq2 Div',
+    min: 0,
+    max: 15,
+    default: 4,
+    step: 1,
+  },
+
+  seq2_pitch1: { id: 'seq2_pitch1', name: 'Seq2 Pitch 1', min: 36, max: 84, default: 60, step: 1 },
+  seq2_pitch2: { id: 'seq2_pitch2', name: 'Seq2 Pitch 2', min: 36, max: 84, default: 60, step: 1 },
+  seq2_pitch3: { id: 'seq2_pitch3', name: 'Seq2 Pitch 3', min: 36, max: 84, default: 60, step: 1 },
+  seq2_pitch4: { id: 'seq2_pitch4', name: 'Seq2 Pitch 4', min: 36, max: 84, default: 60, step: 1 },
+
+  seq2_gate1: { id: 'seq2_gate1', name: 'Seq2 Gate 1', min: 0, max: 1, default: 1, step: 1 },
+  seq2_gate2: { id: 'seq2_gate2', name: 'Seq2 Gate 2', min: 0, max: 1, default: 1, step: 1 },
+  seq2_gate3: { id: 'seq2_gate3', name: 'Seq2 Gate 3', min: 0, max: 1, default: 1, step: 1 },
+  seq2_gate4: { id: 'seq2_gate4', name: 'Seq2 Gate 4', min: 0, max: 1, default: 1, step: 1 },
+
+  // =========================================================================
+  // VOICE TO LOOP FM
+  // =========================================================================
+
+  voice_loop_fm: {
+    id: 'voice_loop_fm',
+    name: 'Voice->Loop FM',
+    min: 0,
+    max: 1,
+    default: 0,
+  },
+
+  // =========================================================================
+  // ADSR ENVELOPES (per oscillator)
+  // =========================================================================
+
+  osc1_attack: {
+    id: 'osc1_attack',
+    name: 'Osc1 Attack',
+    min: 1,
+    max: 5000,
+    default: 10,
+    unit: 'ms',
+  },
+
+  osc1_decay: {
+    id: 'osc1_decay',
+    name: 'Osc1 Decay',
+    min: 1,
+    max: 5000,
+    default: 100,
+    unit: 'ms',
+  },
+
+  osc1_sustain: {
+    id: 'osc1_sustain',
+    name: 'Osc1 Sustain',
+    min: 0,
+    max: 1,
+    default: 0.7,
+  },
+
+  osc1_release: {
+    id: 'osc1_release',
+    name: 'Osc1 Release',
+    min: 1,
+    max: 10000,
+    default: 300,
+    unit: 'ms',
+  },
+
+  osc2_attack: {
+    id: 'osc2_attack',
+    name: 'Osc2 Attack',
+    min: 1,
+    max: 5000,
+    default: 10,
+    unit: 'ms',
+  },
+
+  osc2_decay: {
+    id: 'osc2_decay',
+    name: 'Osc2 Decay',
+    min: 1,
+    max: 5000,
+    default: 100,
+    unit: 'ms',
+  },
+
+  osc2_sustain: {
+    id: 'osc2_sustain',
+    name: 'Osc2 Sustain',
+    min: 0,
+    max: 1,
+    default: 0.7,
+  },
+
+  osc2_release: {
+    id: 'osc2_release',
+    name: 'Osc2 Release',
+    min: 1,
+    max: 10000,
+    default: 300,
+    unit: 'ms',
+  },
+
+  // =========================================================================
+  // PAN LFO
+  // =========================================================================
+
+  pan_speed: {
+    id: 'pan_speed',
+    name: 'Pan Speed',
+    min: 0.01,
+    max: 10,
+    default: 0.5,
+    unit: 'Hz',
+  },
+
+  pan_depth: {
+    id: 'pan_depth',
+    name: 'Pan Depth',
+    min: 0,
+    max: 1,
+    default: 0,
+  },
 };
 
 /**

@@ -102,6 +102,104 @@ private:
 };
 
 /**
+ * @brief Full ADSR envelope with sustain stage
+ */
+class ADSREnvelope
+{
+public:
+    enum Stage { IDLE, ATTACK, DECAY, SUSTAIN, RELEASE };
+
+    void setSampleRate(float sr) { sampleRate = sr; updateCoefficients(); }
+    void setAttack(float ms) { attackTime = std::max(1.0f, ms) / 1000.0f; updateCoefficients(); }
+    void setDecay(float ms) { decayTime = std::max(1.0f, ms) / 1000.0f; updateCoefficients(); }
+    void setSustain(float level) { sustainLevel = std::clamp(level, 0.0f, 1.0f); }
+    void setRelease(float ms) { releaseTime = std::max(1.0f, ms) / 1000.0f; updateCoefficients(); }
+
+    void trigger()
+    {
+        stage = ATTACK;
+        // Don't reset level - continue from current for click-free retrigger
+    }
+
+    void release()
+    {
+        if (stage != IDLE)
+            stage = RELEASE;
+    }
+
+    float process()
+    {
+        switch (stage)
+        {
+            case ATTACK:
+                currentLevel += attackIncrement;
+                if (currentLevel >= 1.0f)
+                {
+                    currentLevel = 1.0f;
+                    stage = DECAY;
+                }
+                break;
+
+            case DECAY:
+                currentLevel += decayIncrement * (sustainLevel - currentLevel);
+                if (currentLevel <= sustainLevel + 0.001f)
+                {
+                    currentLevel = sustainLevel;
+                    stage = SUSTAIN;
+                }
+                break;
+
+            case SUSTAIN:
+                currentLevel = sustainLevel;
+                break;
+
+            case RELEASE:
+                currentLevel *= releaseCoef;
+                if (currentLevel < 0.0001f)
+                {
+                    currentLevel = 0.0f;
+                    stage = IDLE;
+                }
+                break;
+
+            case IDLE:
+            default:
+                currentLevel = 0.0f;
+                break;
+        }
+        return currentLevel;
+    }
+
+    bool isActive() const { return stage != IDLE || currentLevel > 0.0001f; }
+    float getLevel() const { return currentLevel; }
+    Stage getStage() const { return stage; }
+
+private:
+    void updateCoefficients()
+    {
+        float attackSamples = attackTime * sampleRate;
+        attackIncrement = 1.0f / std::max(1.0f, attackSamples);
+
+        float decaySamples = decayTime * sampleRate;
+        decayIncrement = 4.0f / std::max(1.0f, decaySamples);
+
+        float releaseSamples = releaseTime * sampleRate;
+        releaseCoef = std::exp(-4.0f / std::max(1.0f, releaseSamples));
+    }
+
+    float sampleRate = 44100.0f;
+    float attackTime = 0.01f;
+    float decayTime = 0.1f;
+    float sustainLevel = 0.7f;
+    float releaseTime = 0.3f;
+    float attackIncrement = 0.001f;
+    float decayIncrement = 0.01f;
+    float releaseCoef = 0.999f;
+    float currentLevel = 0.0f;
+    Stage stage = IDLE;
+};
+
+/**
  * @brief Simple LFO with multiple waveforms
  */
 class SimpleLFO
@@ -473,11 +571,128 @@ private:
 };
 
 /**
+ * @brief 4-step sequencer with clock division, MIDI pitch and gate
+ *
+ * Each step has a MIDI pitch (note number) and gate (on/off).
+ * Clock divides from 1/128 to 1 (whole note).
+ * Used to sequence oscillator pitches in the TapeLoopEngine.
+ */
+class StepSequencer
+{
+public:
+    static constexpr int NUM_STEPS = 4;
+    static constexpr int NUM_DIVISIONS = 16;  // Extended to include slower divisions
+
+    void setSampleRate(float sr) { sampleRate = sr; }
+    void setBPM(float bpm) { this->bpm = bpm; }
+    void setDivisionIndex(int idx) { divisionIndex = std::clamp(idx, 0, NUM_DIVISIONS - 1); }
+
+    void setStepPitch(int step, int midiNote)
+    {
+        if (step >= 0 && step < NUM_STEPS)
+            stepPitches[step] = std::clamp(midiNote, 0, 127);
+    }
+
+    void setStepGate(int step, bool gate)
+    {
+        if (step >= 0 && step < NUM_STEPS)
+            stepGates[step] = gate;
+    }
+
+    int getStepPitch(int step) const
+    {
+        return (step >= 0 && step < NUM_STEPS) ? stepPitches[step] : 60;
+    }
+
+    bool getStepGate(int step) const
+    {
+        return (step >= 0 && step < NUM_STEPS) ? stepGates[step] : true;
+    }
+
+    int getCurrentStep() const { return currentStep; }
+
+    void reset()
+    {
+        phase = 0.0f;
+        currentStep = 0;
+    }
+
+    /**
+     * @brief Process one sample and advance sequencer
+     * @param outMidiNote Output: MIDI note for current step
+     * @param outGate Output: gate state for current step
+     * @return true if step just changed (trigger point)
+     */
+    bool process(int& outMidiNote, bool& outGate)
+    {
+        bool stepped = false;
+
+        // Clock division values: 1/128 (fast) to 1/64 (very slow, 64 bars)
+        static constexpr float CLOCK_DIVISIONS[] = {
+            128.0f,   // 1/128 note
+            64.0f,    // 1/64 note
+            32.0f,    // 1/32 note
+            16.0f,    // 1/16 note
+            8.0f,     // 1/8 note
+            4.0f,     // 1/4 (quarter)
+            2.0f,     // 1/2 (half)
+            1.0f,     // 1 (whole = 1 bar)
+            0.5f,     // 2 bars
+            0.25f,    // 4 bars
+            0.125f,   // 8 bars
+            0.0625f,  // 16 bars
+            0.03125f, // 32 bars
+            0.015625f,// 64 bars
+            0.0078125f,// 128 bars (very slow)
+            0.00390625f // 256 bars (glacial)
+        };
+
+        // Calculate step duration in samples
+        float beatsPerSecond = bpm / 60.0f;
+        float stepsPerSecond = beatsPerSecond * CLOCK_DIVISIONS[divisionIndex] / 4.0f;
+        float phaseIncrement = stepsPerSecond / sampleRate;
+
+        phase += phaseIncrement;
+
+        if (phase >= 1.0f)
+        {
+            phase -= 1.0f;
+            currentStep = (currentStep + 1) % NUM_STEPS;
+            stepped = true;
+        }
+
+        outMidiNote = stepPitches[currentStep];
+        outGate = stepGates[currentStep];
+        return stepped;
+    }
+
+    /**
+     * @brief Get frequency in Hz for a MIDI note
+     */
+    static float midiToFrequency(int midiNote)
+    {
+        return 440.0f * std::pow(2.0f, (midiNote - 69) / 12.0f);
+    }
+
+private:
+    float sampleRate = 44100.0f;
+    float bpm = 120.0f;
+    int divisionIndex = 4;  // Default: 1/8 note
+    float phase = 0.0f;
+    int currentStep = 0;
+    int stepPitches[NUM_STEPS] = {60, 60, 60, 60};  // MIDI notes (C4 default)
+    bool stepGates[NUM_STEPS] = {true, true, true, true};  // Gates on by default
+};
+
+/**
  * @brief Tape loop drone synthesizer engine
  *
  * Generates layered drone textures through a tape loop mechanism.
  * Two oscillators provide source material that gets recorded into
  * a circular buffer with tape-style degradation on each pass.
+ *
+ * NEW: 4-step sequencer drives oscillator pitch, and oscillator output
+ * can FM-modulate the tape loop read position for wild effects.
  */
 class TapeLoopEngine
 {
@@ -528,6 +743,18 @@ public:
 
         // Initialize tape character LFO
         tapeCharLFO.setSampleRate(sampleRate);
+
+        // Initialize sequencers (one per oscillator)
+        sequencer1.setSampleRate(sampleRate);
+        sequencer2.setSampleRate(sampleRate);
+
+        // Initialize ADSR envelopes (one per oscillator)
+        osc1ADSR.setSampleRate(sampleRate);
+        osc2ADSR.setSampleRate(sampleRate);
+
+        // Initialize pan LFO
+        panLFO.setSampleRate(sampleRate);
+        panLFO.setWaveform(0);  // Sine wave for smooth panning
 
         // Calculate buffer size for current sample rate
         maxBufferSamples = static_cast<size_t>(MAX_LOOP_SECONDS * sampleRate);
@@ -588,6 +815,8 @@ public:
         if (!wasRecording)
         {
             recordEnvelope.trigger();
+            osc1ADSR.trigger();
+            osc2ADSR.trigger();
         }
 
         // Always update frequency for pitch changes
@@ -609,6 +838,8 @@ public:
         {
             isRecording = false;
             recordEnvelope.release();
+            osc1ADSR.release();
+            osc2ADSR.release();
             activeNote = -1;
         }
     }
@@ -677,31 +908,87 @@ public:
             }
 
             // ================================================================
-            // ENVELOPE
+            // SEQUENCERS (one per oscillator)
+            // ================================================================
+            int seq1MidiNote = 60, seq2MidiNote = 60;
+            bool seq1Gate = true, seq2Gate = true;
+
+            if (seqEnabled)
+            {
+                // Process sequencers - they return current step's pitch/gate
+                sequencer1.process(seq1MidiNote, seq1Gate);
+                sequencer2.process(seq2MidiNote, seq2Gate);
+
+                // Set oscillator frequencies from sequencer
+                float freq1 = StepSequencer::midiToFrequency(seq1MidiNote);
+                freq1 *= std::pow(2.0f, osc1Tune / 12.0f);
+                osc1.setFrequency(freq1, sampleRate);
+
+                float freq2 = StepSequencer::midiToFrequency(seq2MidiNote);
+                freq2 *= std::pow(2.0f, (osc2Tune + osc2Detune / 100.0f) / 12.0f);
+                osc2.setFrequency(freq2, sampleRate);
+            }
+
+            // ================================================================
+            // ENVELOPES
             // ================================================================
             float envLevel = recordEnvelope.process();
+            float osc1EnvLevel = osc1ADSR.process();
+            float osc2EnvLevel = osc2ADSR.process();
 
             // ================================================================
-            // OSCILLATORS (source material) with FM
+            // PAN LFO (for stereo loop recording)
             // ================================================================
-            float oscOut = 0.0f;
+            float panLFOValue = panLFO.process();  // -1 to +1
+            float panAmount = panLFOValue * panDepth;  // Scale by depth
+            // Calculate stereo pan gains (constant power panning approximation)
+            float panLeft = std::sqrt(0.5f * (1.0f - panAmount));
+            float panRight = std::sqrt(0.5f * (1.0f + panAmount));
 
-            if (isRecording || recordEnvelope.isActive())
+            // ================================================================
+            // OSCILLATORS (source material) with FM and ADSR
+            // ================================================================
+            float oscOutL = 0.0f;
+            float oscOutR = 0.0f;
+            float osc1Out = 0.0f;
+            float osc2Out = 0.0f;
+
+            // Sequencer plays automatically when enabled (no MIDI required)
+            // MIDI input still works for manual playing
+            bool shouldPlay = seqEnabled || isRecording || recordEnvelope.isActive() ||
+                              osc1ADSR.isActive() || osc2ADSR.isActive();
+
+            if (shouldPlay)
             {
+                // Apply sequencer gates (if sequencer enabled)
+                float osc1GateLevel = (!seqEnabled || seq1Gate) ? 1.0f : 0.0f;
+                float osc2GateLevel = (!seqEnabled || seq2Gate) ? 1.0f : 0.0f;
+
+                // Apply ADSR envelopes to oscillators
+                // When sequencer is enabled, use gate level; otherwise use ADSR
+                float osc1AmpMod = seqEnabled ? osc1GateLevel : (osc1GateLevel * osc1EnvLevel);
+                float osc2AmpMod = seqEnabled ? osc2GateLevel : (osc2GateLevel * osc2EnvLevel);
+
                 // Generate oscillator 1 (carrier or modulator depending on FM)
-                float osc1Out = osc1.process(osc1Waveform) * osc1Level;
+                osc1Out = osc1.process(osc1Waveform) * osc1Level * osc1AmpMod;
 
                 // Calculate FM modulation from osc1 to osc2
                 float fmMod = osc1Out * fmAmount * 0.1f;  // Scale FM index
 
                 // Generate oscillator 2 with FM modulation
-                float osc2Out = osc2.process(osc2Waveform, fmMod) * osc2Level;
+                osc2Out = osc2.process(osc2Waveform, fmMod) * osc2Level * osc2AmpMod;
 
-                oscOut = (osc1Out + osc2Out) * currentVelocity * recordLevel * envLevel;
+                // When sequencer is playing, use full level; otherwise use envelope
+                float levelMod = seqEnabled ? recordLevel : (currentVelocity * recordLevel * envLevel);
+                float oscMono = (osc1Out + osc2Out) * levelMod;
+
+                // Apply pan LFO to create stereo output for recording
+                oscOutL = oscMono * panLeft;
+                oscOutR = oscMono * panRight;
             }
 
             // ================================================================
-            // TAPE LOOP - Read with wobble
+            // TAPE LOOP - Read with wobble + VOICE FM
             // ================================================================
 
             // Calculate wobbled read position (wow/flutter effect)
@@ -710,9 +997,16 @@ public:
 
             float wobbleOffset = std::sin(wobblePhase * 6.283185f) * modulatedWobbleDepth * 100.0f;
 
-            // Read position with wobble (fractional for interpolation)
-            float readPosF = static_cast<float>(writePos) - wobbleOffset;
-            if (readPosF < 0) readPosF += static_cast<float>(loopSamples);
+            // VOICE FM TO LOOP: oscillator output modulates tape read position
+            // This creates wild pitch-shifting effects - the voice "plays" the tape
+            // voiceLoopFM scales the oscillator output to samples offset (up to ~1000 samples)
+            float oscMono = (oscOutL + oscOutR) * 0.5f;  // Use mono for FM calculation
+            float voiceFMOffset = oscMono * voiceLoopFM * 1000.0f;
+
+            // Read position with wobble + voice FM (fractional for interpolation)
+            float readPosF = static_cast<float>(writePos) - wobbleOffset - voiceFMOffset;
+            while (readPosF < 0) readPosF += static_cast<float>(loopSamples);
+            while (readPosF >= static_cast<float>(loopSamples)) readPosF -= static_cast<float>(loopSamples);
 
             // Linear interpolation for smooth playback
             size_t readPos0 = static_cast<size_t>(readPosF) % loopSamples;
@@ -774,15 +1068,20 @@ public:
             }
 
             // ================================================================
-            // TAPE LOOP - Write (overdub with feedback)
+            // TAPE LOOP - Write (overdub with feedback + voice FM + pan)
             // ================================================================
 
             // Reduce feedback based on degradation (tape wears out)
             float effectiveFeedback = loopFeedback * (1.0f - modulatedDegrade * 0.15f);
 
-            // Mix feedback and new input
-            float newL = tapeBufferL[writePos] * effectiveFeedback + oscOut;
-            float newR = tapeBufferR[writePos] * effectiveFeedback + oscOut;
+            // Read current tape content WITH voice FM offset (so FM gets "baked in")
+            // This creates the effect where playing modulates what gets recorded
+            float fmReadL = tapeBufferL[readPos0] * (1.0f - frac) + tapeBufferL[readPos1] * frac;
+            float fmReadR = tapeBufferR[readPos0] * (1.0f - frac) + tapeBufferR[readPos1] * frac;
+
+            // Mix feedback (from FM-modulated read position) and new stereo input with pan
+            float newL = fmReadL * effectiveFeedback + oscOutL;
+            float newR = fmReadR * effectiveFeedback + oscOutR;
 
             // Soft limit to prevent runaway
             newL = std::tanh(newL);
@@ -798,8 +1097,8 @@ public:
             // OUTPUT MIX
             // ================================================================
 
-            float dryL = oscOut * dryLevel;
-            float dryR = oscOut * dryLevel;
+            float dryL = oscOutL * dryLevel;
+            float dryR = oscOutR * dryLevel;
 
             float wetL = tapeL * loopOutputLevel;
             float wetR = tapeR * loopOutputLevel;
@@ -887,6 +1186,44 @@ public:
     void setCompRelease(float ms) { compressor.setRelease(ms); }
     void setCompMakeup(float db) { compressor.setMakeupGain(db); }
     void setCompMix(float m) { compressor.setMix(m); }
+
+    // Sequencers (dual - one per oscillator)
+    void setSeqEnabled(bool enabled) { seqEnabled = enabled; }
+    void setSeqBPM(float bpm) { sequencer1.setBPM(bpm); sequencer2.setBPM(bpm); }
+
+    // Sequencer 1 (controls Osc 1)
+    void setSeq1Division(int divIdx) { sequencer1.setDivisionIndex(divIdx); }
+    void setSeq1StepPitch(int step, int midiNote) { sequencer1.setStepPitch(step, midiNote); }
+    void setSeq1StepGate(int step, bool gate) { sequencer1.setStepGate(step, gate); }
+    int getSeq1CurrentStep() const { return sequencer1.getCurrentStep(); }
+    int getSeq1StepPitch(int step) const { return sequencer1.getStepPitch(step); }
+    bool getSeq1StepGate(int step) const { return sequencer1.getStepGate(step); }
+
+    // Sequencer 2 (controls Osc 2)
+    void setSeq2Division(int divIdx) { sequencer2.setDivisionIndex(divIdx); }
+    void setSeq2StepPitch(int step, int midiNote) { sequencer2.setStepPitch(step, midiNote); }
+    void setSeq2StepGate(int step, bool gate) { sequencer2.setStepGate(step, gate); }
+    int getSeq2CurrentStep() const { return sequencer2.getCurrentStep(); }
+    int getSeq2StepPitch(int step) const { return sequencer2.getStepPitch(step); }
+    bool getSeq2StepGate(int step) const { return sequencer2.getStepGate(step); }
+
+    // Voice to Loop FM
+    void setVoiceLoopFM(float amount) { voiceLoopFM = std::clamp(amount, 0.0f, 1.0f); }
+
+    // ADSR Envelopes (per oscillator)
+    void setOsc1Attack(float ms) { osc1Attack = ms; osc1ADSR.setAttack(ms); }
+    void setOsc1Decay(float ms) { osc1Decay = ms; osc1ADSR.setDecay(ms); }
+    void setOsc1Sustain(float level) { osc1Sustain = level; osc1ADSR.setSustain(level); }
+    void setOsc1Release(float ms) { osc1Release = ms; osc1ADSR.setRelease(ms); }
+
+    void setOsc2Attack(float ms) { osc2Attack = ms; osc2ADSR.setAttack(ms); }
+    void setOsc2Decay(float ms) { osc2Decay = ms; osc2ADSR.setDecay(ms); }
+    void setOsc2Sustain(float level) { osc2Sustain = level; osc2ADSR.setSustain(level); }
+    void setOsc2Release(float ms) { osc2Release = ms; osc2ADSR.setRelease(ms); }
+
+    // Pan LFO
+    void setPanSpeed(float hz) { panSpeed = hz; panLFO.setRate(hz); }
+    void setPanDepth(float depth) { panDepth = std::clamp(depth, 0.0f, 1.0f); }
 
 private:
     //==========================================================================
@@ -1001,6 +1338,46 @@ private:
     SimpleLFO tapeCharLFO;
     float lfoDepth = 0.0f;
     int lfoTarget = 0;  // 0=saturation, 1=age, 2=wobble, 3=degrade
+
+    //==========================================================================
+    // Sequencers (dual - one per oscillator)
+    //==========================================================================
+
+    StepSequencer sequencer1;  // Controls Osc 1
+    StepSequencer sequencer2;  // Controls Osc 2
+    bool seqEnabled = false;
+
+    //==========================================================================
+    // ADSR Envelopes (one per oscillator)
+    //==========================================================================
+
+    ADSREnvelope osc1ADSR;
+    ADSREnvelope osc2ADSR;
+
+    // ADSR parameters (in ms)
+    float osc1Attack = 10.0f;
+    float osc1Decay = 100.0f;
+    float osc1Sustain = 0.7f;
+    float osc1Release = 300.0f;
+
+    float osc2Attack = 10.0f;
+    float osc2Decay = 100.0f;
+    float osc2Sustain = 0.7f;
+    float osc2Release = 300.0f;
+
+    //==========================================================================
+    // Pan LFO (for stereo loop recording)
+    //==========================================================================
+
+    SimpleLFO panLFO;
+    float panSpeed = 0.5f;    // Hz
+    float panDepth = 0.0f;    // 0-1
+
+    //==========================================================================
+    // Voice to Loop FM
+    //==========================================================================
+
+    float voiceLoopFM = 0.0f;  // Amount of oscillator->loop FM modulation
 
     //==========================================================================
     // Effects

@@ -137,6 +137,50 @@ private:
     std::atomic<float>* compRatioParam = nullptr;
     std::atomic<float>* compMixParam = nullptr;
 
+    // Sequencers (dual)
+    std::atomic<float>* seqEnabledParam = nullptr;
+    std::atomic<float>* seqBPMParam = nullptr;
+
+    // Sequencer 1 (Osc 1)
+    std::atomic<float>* seq1DivisionParam = nullptr;
+    std::atomic<float>* seq1Pitch1Param = nullptr;
+    std::atomic<float>* seq1Pitch2Param = nullptr;
+    std::atomic<float>* seq1Pitch3Param = nullptr;
+    std::atomic<float>* seq1Pitch4Param = nullptr;
+    std::atomic<float>* seq1Gate1Param = nullptr;
+    std::atomic<float>* seq1Gate2Param = nullptr;
+    std::atomic<float>* seq1Gate3Param = nullptr;
+    std::atomic<float>* seq1Gate4Param = nullptr;
+
+    // Sequencer 2 (Osc 2)
+    std::atomic<float>* seq2DivisionParam = nullptr;
+    std::atomic<float>* seq2Pitch1Param = nullptr;
+    std::atomic<float>* seq2Pitch2Param = nullptr;
+    std::atomic<float>* seq2Pitch3Param = nullptr;
+    std::atomic<float>* seq2Pitch4Param = nullptr;
+    std::atomic<float>* seq2Gate1Param = nullptr;
+    std::atomic<float>* seq2Gate2Param = nullptr;
+    std::atomic<float>* seq2Gate3Param = nullptr;
+    std::atomic<float>* seq2Gate4Param = nullptr;
+
+    // Voice to Loop FM
+    std::atomic<float>* voiceLoopFMParam = nullptr;
+
+    // ADSR Envelopes (per oscillator)
+    std::atomic<float>* osc1AttackParam = nullptr;
+    std::atomic<float>* osc1DecayParam = nullptr;
+    std::atomic<float>* osc1SustainParam = nullptr;
+    std::atomic<float>* osc1ReleaseParam = nullptr;
+
+    std::atomic<float>* osc2AttackParam = nullptr;
+    std::atomic<float>* osc2DecayParam = nullptr;
+    std::atomic<float>* osc2SustainParam = nullptr;
+    std::atomic<float>* osc2ReleaseParam = nullptr;
+
+    // Pan LFO
+    std::atomic<float>* panSpeedParam = nullptr;
+    std::atomic<float>* panDepthParam = nullptr;
+
     //==========================================================================
     // State
     //==========================================================================

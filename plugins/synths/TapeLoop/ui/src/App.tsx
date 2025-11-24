@@ -9,6 +9,9 @@ import { useParameters, normalizeValue, denormalizeValue } from './hooks/usePara
 import { PARAMETER_DEFINITIONS } from './types/parameters';
 import { SynthKnob } from './components/SynthKnob';
 import { SynthRow } from './components/SynthRow';
+import { SynthToggle } from './components/SynthToggle';
+import { SynthSequencer } from './components/SynthSequencer';
+import { SynthADSR } from './components/SynthADSR';
 import Oscilloscope from './components/Oscilloscope';
 
 /**
@@ -58,69 +61,221 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      {/* OSCILLATOR 1 */}
-      <SynthRow label="OSC 1">
-        <SynthKnob
-          label="WAVE"
-          min={0}
-          max={2}
-          step={1}
-          value={getDenormalized('osc1_waveform', paramValues.osc1_waveform ?? 0)}
-          onChange={(v) => handleChange('osc1_waveform', getNormalized('osc1_waveform', v))}
-          options={['SIN', 'TRI', 'SAW']}
+      {/* TRANSPORT */}
+      <SynthRow label="TRANSPORT">
+        <SynthToggle
+          label="SEQ"
+          value={(paramValues.seq_enabled ?? 0) > 0.5}
+          onChange={(v: boolean) => handleChange('seq_enabled', v ? 1 : 0)}
+          variant="signal"
         />
         <SynthKnob
-          label="TUNE"
-          min={-24}
-          max={24}
+          label="BPM"
+          min={30}
+          max={300}
           step={1}
-          value={getDenormalized('osc1_tune', paramValues.osc1_tune ?? 0.5)}
-          onChange={(v) => handleChange('osc1_tune', getNormalized('osc1_tune', v))}
-        />
-        <SynthKnob
-          label="LEVEL"
-          min={0}
-          max={1}
-          value={getDenormalized('osc1_level', paramValues.osc1_level ?? 0.7)}
-          onChange={(v) => handleChange('osc1_level', getNormalized('osc1_level', v))}
+          value={getDenormalized('seq_bpm', paramValues.seq_bpm ?? 0.333)}
+          onChange={(v) => handleChange('seq_bpm', getNormalized('seq_bpm', v))}
         />
       </SynthRow>
 
-      {/* OSCILLATOR 2 */}
-      <SynthRow label="OSC 2">
-        <SynthKnob
-          label="WAVE"
-          min={0}
-          max={2}
-          step={1}
-          value={getDenormalized('osc2_waveform', paramValues.osc2_waveform ?? 0)}
-          onChange={(v) => handleChange('osc2_waveform', getNormalized('osc2_waveform', v))}
-          options={['SIN', 'TRI', 'SAW']}
-        />
-        <SynthKnob
-          label="TUNE"
-          min={-24}
-          max={24}
-          step={1}
-          value={getDenormalized('osc2_tune', paramValues.osc2_tune ?? 0.5)}
-          onChange={(v) => handleChange('osc2_tune', getNormalized('osc2_tune', v))}
-        />
-        <SynthKnob
-          label="DETUNE"
-          min={-100}
-          max={100}
-          step={1}
-          value={getDenormalized('osc2_detune', paramValues.osc2_detune ?? 0.535)}
-          onChange={(v) => handleChange('osc2_detune', getNormalized('osc2_detune', v))}
-        />
-        <SynthKnob
-          label="LEVEL"
-          min={0}
-          max={1}
-          value={getDenormalized('osc2_level', paramValues.osc2_level ?? 0.5)}
-          onChange={(v) => handleChange('osc2_level', getNormalized('osc2_level', v))}
-        />
-      </SynthRow>
+      {/* OSCILLATOR 1 ROW: OSC + ADSR + SEQUENCER */}
+      <div style={styles.oscRow}>
+        {/* OSC 1 Controls */}
+        <div style={styles.oscSection}>
+          <div style={styles.sectionLabel}>OSC 1</div>
+          <div style={styles.knobRow}>
+            <SynthKnob
+              label="WAVE"
+              min={0}
+              max={2}
+              step={1}
+              value={getDenormalized('osc1_waveform', paramValues.osc1_waveform ?? 0)}
+              onChange={(v) => handleChange('osc1_waveform', getNormalized('osc1_waveform', v))}
+              options={['SIN', 'TRI', 'SAW']}
+            />
+            <SynthKnob
+              label="TUNE"
+              min={-24}
+              max={24}
+              step={1}
+              value={getDenormalized('osc1_tune', paramValues.osc1_tune ?? 0.5)}
+              onChange={(v) => handleChange('osc1_tune', getNormalized('osc1_tune', v))}
+            />
+            <SynthKnob
+              label="LEVEL"
+              min={0}
+              max={1}
+              value={getDenormalized('osc1_level', paramValues.osc1_level ?? 0.7)}
+              onChange={(v) => handleChange('osc1_level', getNormalized('osc1_level', v))}
+            />
+          </div>
+        </div>
+
+        {/* OSC 1 ADSR */}
+        <div style={styles.adsrSection}>
+          <SynthADSR
+            label="OSC1 ENV"
+            attack={getDenormalized('osc1_attack', paramValues.osc1_attack ?? 0.002)}
+            decay={getDenormalized('osc1_decay', paramValues.osc1_decay ?? 0.02)}
+            sustain={getDenormalized('osc1_sustain', paramValues.osc1_sustain ?? 0.7) * 100}
+            release={getDenormalized('osc1_release', paramValues.osc1_release ?? 0.03)}
+            onAttackChange={(v: number) => handleChange('osc1_attack', getNormalized('osc1_attack', v))}
+            onDecayChange={(v: number) => handleChange('osc1_decay', getNormalized('osc1_decay', v))}
+            onSustainChange={(v: number) => handleChange('osc1_sustain', v / 100)}
+            onReleaseChange={(v: number) => handleChange('osc1_release', getNormalized('osc1_release', v))}
+            maxAttack={5000}
+            maxDecay={5000}
+            maxRelease={10000}
+          />
+        </div>
+
+        {/* OSC 1 Sequencer */}
+        <div style={styles.seqSection}>
+          <div style={styles.seqHeader}>
+            <SynthKnob
+              label="SEQ DIV"
+              min={0}
+              max={15}
+              step={1}
+              value={getDenormalized('seq1_division', paramValues.seq1_division ?? 0.267)}
+              onChange={(v) => handleChange('seq1_division', getNormalized('seq1_division', v))}
+              options={['1/128', '1/64', '1/32', '1/16', '1/8', '1/4', '1/2', '1', '2bar', '4bar', '8bar', '16bar', '32bar', '64bar', '128bar', '256bar']}
+            />
+          </div>
+          <SynthSequencer
+            steps={4}
+            pitchValues={[
+              getDenormalized('seq1_pitch1', paramValues.seq1_pitch1 ?? 0.5),
+              getDenormalized('seq1_pitch2', paramValues.seq1_pitch2 ?? 0.5),
+              getDenormalized('seq1_pitch3', paramValues.seq1_pitch3 ?? 0.5),
+              getDenormalized('seq1_pitch4', paramValues.seq1_pitch4 ?? 0.5),
+            ]}
+            gateValues={[
+              (paramValues.seq1_gate1 ?? 1) > 0.5,
+              (paramValues.seq1_gate2 ?? 1) > 0.5,
+              (paramValues.seq1_gate3 ?? 1) > 0.5,
+              (paramValues.seq1_gate4 ?? 1) > 0.5,
+            ]}
+            currentStep={-1}
+            onPitchChange={(step: number, pitch: number) => {
+              const paramIds = ['seq1_pitch1', 'seq1_pitch2', 'seq1_pitch3', 'seq1_pitch4'];
+              const paramId = paramIds[step];
+              if (paramId) handleChange(paramId, getNormalized(paramId, pitch));
+            }}
+            onGateChange={(step: number, gate: boolean) => {
+              const paramIds = ['seq1_gate1', 'seq1_gate2', 'seq1_gate3', 'seq1_gate4'];
+              const paramId = paramIds[step];
+              if (paramId) handleChange(paramId, gate ? 1 : 0);
+            }}
+            minPitch={36}
+            maxPitch={84}
+          />
+        </div>
+      </div>
+
+      {/* OSCILLATOR 2 ROW: OSC + ADSR + SEQUENCER */}
+      <div style={styles.oscRow}>
+        {/* OSC 2 Controls */}
+        <div style={styles.oscSection}>
+          <div style={styles.sectionLabel}>OSC 2</div>
+          <div style={styles.knobRow}>
+            <SynthKnob
+              label="WAVE"
+              min={0}
+              max={2}
+              step={1}
+              value={getDenormalized('osc2_waveform', paramValues.osc2_waveform ?? 0)}
+              onChange={(v) => handleChange('osc2_waveform', getNormalized('osc2_waveform', v))}
+              options={['SIN', 'TRI', 'SAW']}
+            />
+            <SynthKnob
+              label="TUNE"
+              min={-24}
+              max={24}
+              step={1}
+              value={getDenormalized('osc2_tune', paramValues.osc2_tune ?? 0.5)}
+              onChange={(v) => handleChange('osc2_tune', getNormalized('osc2_tune', v))}
+            />
+            <SynthKnob
+              label="DETUNE"
+              min={-100}
+              max={100}
+              step={1}
+              value={getDenormalized('osc2_detune', paramValues.osc2_detune ?? 0.535)}
+              onChange={(v) => handleChange('osc2_detune', getNormalized('osc2_detune', v))}
+            />
+            <SynthKnob
+              label="LEVEL"
+              min={0}
+              max={1}
+              value={getDenormalized('osc2_level', paramValues.osc2_level ?? 0.5)}
+              onChange={(v) => handleChange('osc2_level', getNormalized('osc2_level', v))}
+            />
+          </div>
+        </div>
+
+        {/* OSC 2 ADSR */}
+        <div style={styles.adsrSection}>
+          <SynthADSR
+            label="OSC2 ENV"
+            attack={getDenormalized('osc2_attack', paramValues.osc2_attack ?? 0.002)}
+            decay={getDenormalized('osc2_decay', paramValues.osc2_decay ?? 0.02)}
+            sustain={getDenormalized('osc2_sustain', paramValues.osc2_sustain ?? 0.7) * 100}
+            release={getDenormalized('osc2_release', paramValues.osc2_release ?? 0.03)}
+            onAttackChange={(v: number) => handleChange('osc2_attack', getNormalized('osc2_attack', v))}
+            onDecayChange={(v: number) => handleChange('osc2_decay', getNormalized('osc2_decay', v))}
+            onSustainChange={(v: number) => handleChange('osc2_sustain', v / 100)}
+            onReleaseChange={(v: number) => handleChange('osc2_release', getNormalized('osc2_release', v))}
+            maxAttack={5000}
+            maxDecay={5000}
+            maxRelease={10000}
+          />
+        </div>
+
+        {/* OSC 2 Sequencer */}
+        <div style={styles.seqSection}>
+          <div style={styles.seqHeader}>
+            <SynthKnob
+              label="SEQ DIV"
+              min={0}
+              max={15}
+              step={1}
+              value={getDenormalized('seq2_division', paramValues.seq2_division ?? 0.267)}
+              onChange={(v) => handleChange('seq2_division', getNormalized('seq2_division', v))}
+              options={['1/128', '1/64', '1/32', '1/16', '1/8', '1/4', '1/2', '1', '2bar', '4bar', '8bar', '16bar', '32bar', '64bar', '128bar', '256bar']}
+            />
+          </div>
+          <SynthSequencer
+            steps={4}
+            pitchValues={[
+              getDenormalized('seq2_pitch1', paramValues.seq2_pitch1 ?? 0.5),
+              getDenormalized('seq2_pitch2', paramValues.seq2_pitch2 ?? 0.5),
+              getDenormalized('seq2_pitch3', paramValues.seq2_pitch3 ?? 0.5),
+              getDenormalized('seq2_pitch4', paramValues.seq2_pitch4 ?? 0.5),
+            ]}
+            gateValues={[
+              (paramValues.seq2_gate1 ?? 1) > 0.5,
+              (paramValues.seq2_gate2 ?? 1) > 0.5,
+              (paramValues.seq2_gate3 ?? 1) > 0.5,
+              (paramValues.seq2_gate4 ?? 1) > 0.5,
+            ]}
+            currentStep={-1}
+            onPitchChange={(step: number, pitch: number) => {
+              const paramIds = ['seq2_pitch1', 'seq2_pitch2', 'seq2_pitch3', 'seq2_pitch4'];
+              const paramId = paramIds[step];
+              if (paramId) handleChange(paramId, getNormalized(paramId, pitch));
+            }}
+            onGateChange={(step: number, gate: boolean) => {
+              const paramIds = ['seq2_gate1', 'seq2_gate2', 'seq2_gate3', 'seq2_gate4'];
+              const paramId = paramIds[step];
+              if (paramId) handleChange(paramId, gate ? 1 : 0);
+            }}
+            minPitch={36}
+            maxPitch={84}
+          />
+        </div>
+      </div>
 
       {/* TAPE LOOP */}
       <SynthRow label="TAPE LOOP">
@@ -333,6 +488,35 @@ const App: React.FC = () => {
         />
       </SynthRow>
 
+      {/* VOICE FM TO LOOP */}
+      <SynthRow label="VOICE FM">
+        <SynthKnob
+          label="LOOP FM"
+          min={0}
+          max={1}
+          value={getDenormalized('voice_loop_fm', paramValues.voice_loop_fm ?? 0)}
+          onChange={(v) => handleChange('voice_loop_fm', getNormalized('voice_loop_fm', v))}
+        />
+      </SynthRow>
+
+      {/* PAN LFO */}
+      <SynthRow label="PAN">
+        <SynthKnob
+          label="SPEED"
+          min={0.01}
+          max={10}
+          value={getDenormalized('pan_speed', paramValues.pan_speed ?? 0.049)}
+          onChange={(v) => handleChange('pan_speed', getNormalized('pan_speed', v))}
+        />
+        <SynthKnob
+          label="DEPTH"
+          min={0}
+          max={1}
+          value={getDenormalized('pan_depth', paramValues.pan_depth ?? 0)}
+          onChange={(v) => handleChange('pan_depth', getNormalized('pan_depth', v))}
+        />
+      </SynthRow>
+
       {/* MIX */}
       <SynthRow label="MIX">
         <SynthKnob
@@ -434,6 +618,51 @@ const styles: Record<string, React.CSSProperties> = {
     background: 'linear-gradient(145deg, #1a1a1a, #141414)',
     borderRadius: '8px',
     border: '1px solid #2a2a2a',
+  },
+  oscRow: {
+    display: 'flex',
+    flexDirection: 'row' as const,
+    gap: '16px',
+    marginBottom: '16px',
+    padding: '16px',
+    background: 'linear-gradient(145deg, #1a1a1a, #141414)',
+    borderRadius: '8px',
+    border: '1px solid #2a2a2a',
+    alignItems: 'flex-start',
+  },
+  oscSection: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '8px',
+    minWidth: '180px',
+  },
+  sectionLabel: {
+    color: 'var(--synth-text-primary, #fff)',
+    fontSize: '12px',
+    fontWeight: 'bold',
+    letterSpacing: '1.5px',
+    textTransform: 'uppercase' as const,
+  },
+  knobRow: {
+    display: 'flex',
+    flexDirection: 'row' as const,
+    gap: '8px',
+    flexWrap: 'wrap' as const,
+  },
+  adsrSection: {
+    flex: '0 0 auto',
+    minWidth: '280px',
+  },
+  seqSection: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '8px',
+    flex: '1 1 auto',
+  },
+  seqHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
   },
   debug: {
     marginTop: '24px',
