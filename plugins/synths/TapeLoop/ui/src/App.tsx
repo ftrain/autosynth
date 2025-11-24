@@ -7,12 +7,17 @@ import React from 'react';
 import { useJUCEBridge } from './hooks/useJUCEBridge';
 import { useParameters, normalizeValue, denormalizeValue } from './hooks/useParameters';
 import { PARAMETER_DEFINITIONS } from './types/parameters';
-import { SynthKnob } from './components/SynthKnob';
-import { SynthRow } from './components/SynthRow';
+// Import from core component library
+import { SynthKnob } from '../../../../../core/ui/components/SynthKnob';
+import { SynthRow } from '../../../../../core/ui/components/SynthRow';
+import { SynthADSR } from '../../../../../core/ui/components/SynthADSR';
+import { SynthLFO } from '../../../../../core/ui/components/SynthLFO';
+import { SynthSequencer } from '../../../../../core/ui/components/SynthSequencer';
+import { SynthLED } from '../../../../../core/ui/components/SynthLED';
+import Oscilloscope from '../../../../../core/ui/components/Oscilloscope';
+
+// Local toggle component (not in core library yet)
 import { SynthToggle } from './components/SynthToggle';
-import { SynthSequencer } from './components/SynthSequencer';
-import { SynthADSR } from './components/SynthADSR';
-import Oscilloscope from './components/Oscilloscope';
 
 /**
  * Helper to denormalize a value from 0-1 to the parameter's actual range
@@ -377,14 +382,16 @@ const App: React.FC = () => {
         />
       </SynthRow>
 
-      {/* LFO */}
+      {/* LFO - Visual Component */}
       <SynthRow label="TAPE LFO">
-        <SynthKnob
-          label="RATE"
-          min={0.1}
-          max={20}
-          value={getDenormalized('lfo_rate', paramValues.lfo_rate ?? 0.045)}
-          onChange={(v) => handleChange('lfo_rate', getNormalized('lfo_rate', v))}
+        <SynthLFO
+          label="TAPE MOD"
+          waveform={Math.round(getDenormalized('lfo_waveform', paramValues.lfo_waveform ?? 0))}
+          rate={getDenormalized('lfo_rate', paramValues.lfo_rate ?? 0.045)}
+          onWaveformChange={(w: number) => handleChange('lfo_waveform', getNormalized('lfo_waveform', w))}
+          onRateChange={(r: number) => handleChange('lfo_rate', getNormalized('lfo_rate', r))}
+          minRate={0.1}
+          maxRate={20}
         />
         <SynthKnob
           label="DEPTH"
@@ -392,15 +399,6 @@ const App: React.FC = () => {
           max={1}
           value={getDenormalized('lfo_depth', paramValues.lfo_depth ?? 0)}
           onChange={(v) => handleChange('lfo_depth', getNormalized('lfo_depth', v))}
-        />
-        <SynthKnob
-          label="WAVE"
-          min={0}
-          max={3}
-          step={1}
-          value={getDenormalized('lfo_waveform', paramValues.lfo_waveform ?? 0)}
-          onChange={(v) => handleChange('lfo_waveform', getNormalized('lfo_waveform', v))}
-          options={['SIN', 'TRI', 'SAW', 'SQR']}
         />
         <SynthKnob
           label="TARGET"
@@ -438,21 +436,42 @@ const App: React.FC = () => {
         />
       </SynthRow>
 
-      {/* REVERB */}
-      <SynthRow label="REVERB">
+      {/* REVERB - Airwindows Galactic3 */}
+      <SynthRow label="GALACTIC REVERB">
         <SynthKnob
-          label="DECAY"
-          min={0.1}
-          max={10}
-          value={getDenormalized('reverb_decay', paramValues.reverb_decay ?? 0.192)}
-          onChange={(v) => handleChange('reverb_decay', getNormalized('reverb_decay', v))}
-        />
-        <SynthKnob
-          label="DAMPING"
+          label="REPLACE"
           min={0}
           max={1}
-          value={getDenormalized('reverb_damping', paramValues.reverb_damping ?? 0.5)}
-          onChange={(v) => handleChange('reverb_damping', getNormalized('reverb_damping', v))}
+          value={getDenormalized('reverb_replace', paramValues.reverb_replace ?? 0.5)}
+          onChange={(v) => handleChange('reverb_replace', getNormalized('reverb_replace', v))}
+        />
+        <SynthKnob
+          label="BRIGHTNESS"
+          min={0}
+          max={1}
+          value={getDenormalized('reverb_brightness', paramValues.reverb_brightness ?? 0.5)}
+          onChange={(v) => handleChange('reverb_brightness', getNormalized('reverb_brightness', v))}
+        />
+        <SynthKnob
+          label="DETUNE"
+          min={0}
+          max={1}
+          value={getDenormalized('reverb_detune', paramValues.reverb_detune ?? 0.2)}
+          onChange={(v) => handleChange('reverb_detune', getNormalized('reverb_detune', v))}
+        />
+        <SynthKnob
+          label="BIGNESS"
+          min={0}
+          max={1}
+          value={getDenormalized('reverb_bigness', paramValues.reverb_bigness ?? 0.5)}
+          onChange={(v) => handleChange('reverb_bigness', getNormalized('reverb_bigness', v))}
+        />
+        <SynthKnob
+          label="SIZE"
+          min={0}
+          max={1}
+          value={getDenormalized('reverb_size', paramValues.reverb_size ?? 0.5)}
+          onChange={(v) => handleChange('reverb_size', getNormalized('reverb_size', v))}
         />
         <SynthKnob
           label="MIX"

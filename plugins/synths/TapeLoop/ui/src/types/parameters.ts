@@ -295,16 +295,47 @@ export const PARAMETER_DEFINITIONS: ParameterMap = {
   },
 
   // =========================================================================
-  // REVERB
+  // REVERB (Airwindows Galactic3)
   // =========================================================================
 
-  reverb_decay: {
-    id: 'reverb_decay',
-    name: 'Reverb Decay',
-    min: 0.1,
-    max: 10,
-    default: 2,
-    unit: 's',
+  reverb_replace: {
+    id: 'reverb_replace',
+    name: 'Reverb Replace',
+    min: 0,
+    max: 1,
+    default: 0.5,
+  },
+
+  reverb_brightness: {
+    id: 'reverb_brightness',
+    name: 'Reverb Brightness',
+    min: 0,
+    max: 1,
+    default: 0.5,
+  },
+
+  reverb_detune: {
+    id: 'reverb_detune',
+    name: 'Reverb Detune',
+    min: 0,
+    max: 1,
+    default: 0.2,
+  },
+
+  reverb_bigness: {
+    id: 'reverb_bigness',
+    name: 'Reverb Bigness',
+    min: 0,
+    max: 1,
+    default: 0.5,
+  },
+
+  reverb_size: {
+    id: 'reverb_size',
+    name: 'Reverb Size',
+    min: 0,
+    max: 1,
+    default: 0.5,
   },
 
   reverb_mix: {
@@ -313,14 +344,6 @@ export const PARAMETER_DEFINITIONS: ParameterMap = {
     min: 0,
     max: 1,
     default: 0,
-  },
-
-  reverb_damping: {
-    id: 'reverb_damping',
-    name: 'Reverb Damping',
-    min: 0,
-    max: 1,
-    default: 0.5,
   },
 
   // =========================================================================
