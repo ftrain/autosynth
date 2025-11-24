@@ -1,0 +1,268 @@
+/**
+ * @file tokens.css
+ * @brief Design tokens for synth UI theming
+ *
+ * This file contains all design tokens as CSS custom properties.
+ * Modify these values to completely restyle the entire UI.
+ * LLMs can easily customize the look by editing this single file.
+ */
+
+:root {
+  /* ============================================ */
+  /* COLOR PALETTE */
+  /* ============================================ */
+
+  /* Background colors - darkest to lightest */
+  --synth-bg-darkest: #0a0a0a;
+  --synth-bg-darker: #1a1a1a;
+  --synth-bg-dark: #2a2a2a;
+  --synth-bg-medium: #3a3a3a;
+  --synth-bg-light: #4a4a4a;
+
+  /* Text colors */
+  --synth-text-primary: #ffffff;
+  --synth-text-secondary: #999999;
+  --synth-text-tertiary: #666666;
+  --synth-text-disabled: #444444;
+
+  /* Accent colors */
+  --synth-accent-primary: #2563eb;
+  --synth-accent-secondary: #3b82f6;
+  --synth-accent-glow: rgba(37, 99, 235, 0.4);
+
+  /* State colors */
+  --synth-color-active: #ffffff;
+  --synth-color-inactive: #666666;
+  --synth-color-hover: #888888;
+  --synth-color-pressed: #555555;
+
+  /* LED colors */
+  --synth-led-white: #ffffff;
+  --synth-led-red: #ff3333;
+  --synth-led-green: #33ff33;
+  --synth-led-blue: #3333ff;
+  --synth-led-yellow: #ffff33;
+
+  /* ============================================ */
+  /* GRADIENTS */
+  /* ============================================ */
+
+  --synth-gradient-panel: linear-gradient(145deg, var(--synth-bg-dark), var(--synth-bg-darker));
+  --synth-gradient-knob: linear-gradient(145deg, var(--synth-bg-medium), #252525);
+  --synth-gradient-button: linear-gradient(145deg, #c8c4b8, #b0ac9a);
+  --synth-gradient-button-active: linear-gradient(145deg, #666, #98947a);
+  --synth-gradient-inset: linear-gradient(145deg, var(--synth-bg-darker), var(--synth-bg-darkest));
+  --synth-gradient-toggle-on: radial-gradient(circle at 30% 30%, #4a4a4a, #2a2a2a);
+  --synth-gradient-toggle-off: radial-gradient(circle at 30% 30%, #3a3a3a, #1a1a1a);
+
+  /* ============================================ */
+  /* SHADOWS */
+  /* ============================================ */
+
+  /* Panel shadows */
+  --synth-shadow-panel: inset 1px 1px 3px rgba(0,0,0,0.5), 3px 3px 8px rgba(0,0,0,0.6);
+
+  /* Component shadows */
+  --synth-shadow-inset: inset 2px 2px 4px rgba(0,0,0,0.6);
+  --synth-shadow-inset-deep: inset 3px 3px 6px rgba(0,0,0,0.9);
+  --synth-shadow-raised: 2px 2px 6px rgba(0,0,0,0.5);
+  --synth-shadow-raised-light: 1px 1px 3px rgba(0,0,0,0.3);
+  --synth-shadow-pressed: inset 3px 3px 6px rgba(0,0,0,0.9), inset -2px -2px 4px rgba(60,60,60,0.2);
+
+  /* Glow effects */
+  --synth-shadow-glow: 0 0 20px rgba(255, 255, 255, 0.6);
+  --synth-shadow-glow-strong: 0 0 30px rgba(255, 255, 255, 0.8);
+  --synth-shadow-glow-accent: 0 0 12px var(--synth-accent-glow);
+
+  /* Knob-specific shadows */
+  --synth-shadow-knob: inset 1px 1px 2px rgba(0,0,0,0.6), inset -1px -1px 2px rgba(60,60,60,0.2), 1px 1px 3px rgba(0,0,0,0.3);
+  --synth-shadow-knob-active: inset 1px 1px 2px rgba(0,0,0,0.6), inset -1px -1px 2px rgba(60,60,60,0.2), 1px 1px 3px rgba(0,0,0,0.3), var(--synth-shadow-glow-accent);
+
+  /* ============================================ */
+  /* TYPOGRAPHY */
+  /* ============================================ */
+
+  --synth-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --synth-font-mono: 'Courier New', 'Monaco', monospace;
+
+  /* Font sizes */
+  --synth-font-size-xs: 8px;
+  --synth-font-size-sm: 10px;
+  --synth-font-size-md: 11px;
+  --synth-font-size-base: 12px;
+  --synth-font-size-lg: 13px;
+  --synth-font-size-xl: 14px;
+  --synth-font-size-2xl: 18px;
+  --synth-font-size-3xl: 22px;
+
+  /* Font weights */
+  --synth-font-weight-normal: 400;
+  --synth-font-weight-bold: 700;
+
+  /* Letter spacing */
+  --synth-letter-spacing-tight: 1px;
+  --synth-letter-spacing-normal: 1.5px;
+  --synth-letter-spacing-wide: 2px;
+  --synth-letter-spacing-wider: 3px;
+
+  /* ============================================ */
+  /* SPACING */
+  /* ============================================ */
+
+  --synth-space-xs: 4px;
+  --synth-space-sm: 8px;
+  --synth-space-md: 12px;
+  --synth-space-lg: 16px;
+  --synth-space-xl: 20px;
+  --synth-space-2xl: 24px;
+  --synth-space-3xl: 32px;
+
+  /* ============================================ */
+  /* BORDERS */
+  /* ============================================ */
+
+  --synth-border-width: 1px;
+  --synth-border-width-thick: 2px;
+  --synth-border-color: var(--synth-bg-medium);
+  --synth-border-color-light: var(--synth-bg-light);
+
+  /* Border radius */
+  --synth-radius-sm: 3px;
+  --synth-radius-md: 4px;
+  --synth-radius-base: 6px;
+  --synth-radius-lg: 8px;
+  --synth-radius-xl: 12px;
+  --synth-radius-round: 50%;
+
+  /* ============================================ */
+  /* SIZING */
+  /* ============================================ */
+
+  /* K-based sizing system - everything is a multiple of knob size (K) */
+  --synth-k: 64px;  /* Base unit - knob size */
+  --synth-knob-size: var(--synth-k);
+  --synth-knob-inner-size: 48px;
+  --synth-knob-indicator-width: 3px;
+  --synth-knob-indicator-height: 16px;
+
+  /* Derived component sizes */
+  --synth-1k: var(--synth-k);           /* 64px - knob, toggle */
+  --synth-2k: calc(var(--synth-k) * 2); /* 128px - slider length, VU meter height */
+  --synth-3k: calc(var(--synth-k) * 3); /* 192px - LFO width, etc */
+  --synth-4k: calc(var(--synth-k) * 4); /* 256px - ADSR/DAHDSR width */
+
+  /* Toggle sizes */
+  --synth-toggle-size: 48px;
+
+  /* Button sizes */
+  --synth-button-height: 32px;
+  --synth-button-padding: 8px 16px;
+
+  /* ============================================ */
+  /* TRANSITIONS */
+  /* ============================================ */
+
+  --synth-transition-fast: all 0.1s ease;
+  --synth-transition-normal: all 0.15s ease;
+  --synth-transition-slow: all 0.2s ease;
+  --synth-transition-very-slow: all 0.3s ease;
+
+  /* ============================================ */
+  /* Z-INDEX */
+  /* ============================================ */
+
+  --synth-z-base: 0;
+  --synth-z-dropdown: 100;
+  --synth-z-overlay: 200;
+  --synth-z-modal: 300;
+  --synth-z-tooltip: 400;
+}
+
+/* ============================================ */
+/* THEME VARIANTS */
+/* ============================================ */
+
+/* Cyberpunk theme */
+[data-theme="cyberpunk"] {
+  --synth-bg-darkest: #0a0015;
+  --synth-bg-darker: #1a0030;
+  --synth-bg-dark: #2a0045;
+  --synth-bg-medium: #3a0060;
+  --synth-bg-light: #4a0075;
+
+  --synth-accent-primary: #00ff9f;
+  --synth-accent-secondary: #00ffff;
+  --synth-accent-glow: rgba(0, 255, 159, 0.6);
+
+  --synth-text-primary: #00ff9f;
+  --synth-text-secondary: #00ffff;
+  --synth-text-tertiary: #00aa66;
+}
+
+/* Warm analog theme */
+[data-theme="analog"] {
+  --synth-bg-darkest: #1a0f00;
+  --synth-bg-darker: #2a1f10;
+  --synth-bg-dark: #3a2f20;
+  --synth-bg-medium: #4a3f30;
+  --synth-bg-light: #5a4f40;
+
+  --synth-accent-primary: #ff6b35;
+  --synth-accent-secondary: #ff8c42;
+  --synth-accent-glow: rgba(255, 107, 53, 0.5);
+
+  --synth-gradient-panel: linear-gradient(145deg, #3a2f20, #2a1f10);
+}
+
+/* Minimal light theme */
+[data-theme="minimal"] {
+  --synth-bg-darkest: #ffffff;
+  --synth-bg-darker: #f5f5f5;
+  --synth-bg-dark: #e5e5e5;
+  --synth-bg-medium: #d5d5d5;
+  --synth-bg-light: #c5c5c5;
+
+  --synth-text-primary: #000000;
+  --synth-text-secondary: #444444;
+  --synth-text-tertiary: #888888;
+
+  --synth-accent-primary: #0066cc;
+  --synth-accent-glow: rgba(0, 102, 204, 0.3);
+
+  --synth-shadow-inset: inset 1px 1px 2px rgba(0,0,0,0.1);
+  --synth-shadow-raised: 1px 1px 3px rgba(0,0,0,0.2);
+}
+
+/* Nord theme */
+[data-theme="nord"] {
+  --synth-bg-darkest: #2e3440;
+  --synth-bg-darker: #3b4252;
+  --synth-bg-dark: #434c5e;
+  --synth-bg-medium: #4c566a;
+  --synth-bg-light: #5e6b82;
+
+  --synth-text-primary: #eceff4;
+  --synth-text-secondary: #d8dee9;
+  --synth-text-tertiary: #a3be8c;
+
+  --synth-accent-primary: #88c0d0;
+  --synth-accent-secondary: #81a1c1;
+  --synth-accent-glow: rgba(136, 192, 208, 0.4);
+}
+
+/* Solarized Dark theme */
+[data-theme="solarized"] {
+  --synth-bg-darkest: #002b36;
+  --synth-bg-darker: #073642;
+  --synth-bg-dark: #0e4652;
+  --synth-bg-medium: #155663;
+  --synth-bg-light: #1c6674;
+
+  --synth-text-primary: #fdf6e3;
+  --synth-text-secondary: #93a1a1;
+  --synth-text-tertiary: #657b83;
+
+  --synth-accent-primary: #268bd2;
+  --synth-accent-secondary: #2aa198;
+  --synth-accent-glow: rgba(38, 139, 210, 0.4);
+}

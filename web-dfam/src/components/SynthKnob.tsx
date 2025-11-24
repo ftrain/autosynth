@@ -1,35 +1,90 @@
 /**
  * @file SynthKnob.tsx
- * @brief Rotary knob control
+ * @brief Rotary knob control with mouse/touch drag support
+ *
+ * @description
+ * The fundamental control element for synthesizer interfaces. A rotary knob
+ * with 270° rotation range, vertical drag control, and optional stepped/discrete values.
+ *
+ * ## Use Cases
+ * - **Filter Cutoff**: Primary filter frequency control (20Hz - 20kHz)
+ * - **Resonance**: Filter resonance/Q control (0-100%)
+ * - **Oscillator Level**: Mix level for each oscillator
+ * - **Tune/Detune**: Coarse tuning (-24 to +24 semitones) or fine tune (-100 to +100 cents)
+ * - **Attack/Decay/Release**: Envelope time controls
+ * - **Sustain Level**: Envelope sustain amount
+ * - **Pan**: Stereo position (-100 to +100)
+ * - **Drive/Saturation**: Distortion amount
+ * - **LFO Rate/Depth**: Modulation controls
+ * - **Effect Mix**: Wet/dry balance
+ * - **Waveform Selection**: Stepped knob with options array
+ *
+ * ## Interaction
+ * - Drag vertically to adjust (up = increase, down = decrease)
+ * - Double-click to reset to default value
+ * - Arrow keys for fine adjustment when focused
+ * - Home/End keys jump to min/max
+ *
+ * ## Stepped Mode
+ * Use the `options` prop for discrete selections like waveforms or modes.
+ * The knob will snap to positions and display option labels.
+ *
+ * ## Accessibility
+ * - Full ARIA slider support
+ * - Keyboard navigation
+ * - Focus indicators
+ *
+ * @example
+ * ```tsx
+ * // Continuous filter cutoff
+ * <SynthKnob
+ *   label="CUTOFF"
+ *   min={20}
+ *   max={20000}
+ *   value={cutoff}
+ *   onChange={setCutoff}
+ * />
+ *
+ * // Stepped waveform selector
+ * <SynthKnob
+ *   label="WAVE"
+ *   min={0}
+ *   max={3}
+ *   step={1}
+ *   options={['SIN', 'SAW', 'SQR', 'TRI']}
+ * />
+ *
+ * // Bipolar pan control
+ * <SynthKnob
+ *   label="PAN"
+ *   min={-100}
+ *   max={100}
+ *   defaultValue={0}
+ * />
+ * ```
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-
-interface SynthKnobProps {
-  label: string;
-  min: number;
-  max: number;
-  value: number;
-  onChange: (value: number) => void;
-  step?: number;
-  options?: string[];
-  defaultValue?: number;
-}
-
+import { SynthKnobProps } from '../types/components';
+import { synthStyles } from '../styles/shared';
 export const SynthKnob: React.FC<SynthKnobProps> = ({
   label,
   min,
   max,
   value: propValue,
   onChange,
+  defaultValue = (min + max) / 2,
   step,
   options,
-  defaultValue,
 }) => {
+  const [value, setValue] = useState<number>(propValue ?? defaultValue);
   const [isDragging, setIsDragging] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const knobRef = useRef<HTMLDivElement>(null);
   const startY = useRef(0);
   const startValue = useRef(0);
+
+  const handleValue = propValue ?? value;
 
   const applyStep = (val: number): number => {
     if (step) {
@@ -44,20 +99,21 @@ export const SynthKnob: React.FC<SynthKnobProps> = ({
 
   const updateValue = (newValue: number) => {
     const steppedValue = applyStep(clampValue(newValue));
-    onChange(steppedValue);
+    setValue(steppedValue);
+    onChange?.(steppedValue);
   };
 
   const handleStart = (clientY: number) => {
     setIsDragging(true);
     startY.current = clientY;
-    startValue.current = propValue;
+    startValue.current = handleValue;
   };
 
   const handleMove = (clientY: number) => {
     if (!isDragging) return;
     const deltaY = startY.current - clientY;
     const range = max - min;
-    const sensitivity = 100;
+    const sensitivity = range > 100 ? 200 : 100; // Adjust sensitivity based on range
     const rawValue = startValue.current + (deltaY / sensitivity) * range;
     updateValue(rawValue);
   };
@@ -77,24 +133,53 @@ export const SynthKnob: React.FC<SynthKnobProps> = ({
   };
 
   const handleDoubleClick = () => {
-    if (defaultValue !== undefined) {
-      updateValue(defaultValue);
+    updateValue(defaultValue);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    const keyStep = step ?? (max - min) / 100;
+    switch (e.key) {
+      case 'ArrowUp':
+      case 'ArrowRight':
+        updateValue(handleValue + keyStep);
+        e.preventDefault();
+        break;
+      case 'ArrowDown':
+      case 'ArrowLeft':
+        updateValue(handleValue - keyStep);
+        e.preventDefault();
+        break;
+      case 'Home':
+        updateValue(min);
+        e.preventDefault();
+        break;
+      case 'End':
+        updateValue(max);
+        e.preventDefault();
+        break;
+      case 'Enter':
+      case ' ':
+        handleDoubleClick();
+        e.preventDefault();
+        break;
     }
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    handleMove(e.clientY);
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    handleMove(e.touches[0]!.clientY);
+    e.preventDefault();
   };
 
   useEffect(() => {
     if (isDragging) {
-      const handleMouseMove = (e: MouseEvent) => handleMove(e.clientY);
-      const handleTouchMove = (e: TouchEvent) => {
-        handleMove(e.touches[0]!.clientY);
-        e.preventDefault();
-      };
-
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleEnd);
       window.addEventListener('touchmove', handleTouchMove, { passive: false });
       window.addEventListener('touchend', handleEnd);
-
       return () => {
         window.removeEventListener('mousemove', handleMouseMove);
         window.removeEventListener('mouseup', handleEnd);
@@ -102,94 +187,90 @@ export const SynthKnob: React.FC<SynthKnobProps> = ({
         window.removeEventListener('touchend', handleEnd);
       };
     }
-  }, [isDragging, propValue]);
+    return undefined;
+  }, [isDragging, handleValue]);
 
-  const rotation = ((propValue - min) / (max - min)) * 270 - 135;
+  // Calculate rotation (-135° to +135° = 270° total range)
+  const rotation = ((handleValue - min) / (max - min)) * 270 - 135;
 
+  // Calculate glow intensity (0 to 1) based on value position
+  const glowIntensity = (handleValue - min) / (max - min);
+
+  // For stepped knobs with options, calculate LED color based on step
+  const getLEDColor = () => {
+    if (!options || options.length === 0) return null;
+    const colors = [
+      'rgb(50, 50, 50)',     // OFF - dark gray
+      'rgb(100, 200, 100)',  // LOW - green
+      'rgb(255, 200, 50)',   // MID - yellow/amber
+      'rgb(255, 100, 50)',   // HIGH - orange
+      'rgb(255, 50, 50)',    // MAX - red
+    ];
+    const index = Math.round(handleValue);
+    return colors[Math.min(index, colors.length - 1)] || colors[0];
+  };
+
+  const ledColor = getLEDColor();
+  const effectiveGlowIntensity = ledColor ? 1 : glowIntensity;
+
+  // Format display value
   const displayValue = (() => {
+    // If options array is provided, use it for display
     if (options && options.length > 0) {
-      const index = Math.round(propValue - min);
-      return options[Math.max(0, Math.min(index, options.length - 1))] ?? '';
+      const index = Math.round(handleValue);
+      return options[Math.min(index, options.length - 1)] ?? '';
     }
     if (step && step >= 1) {
-      return Math.round(propValue).toString();
+      return Math.round(handleValue).toString();
     }
     const range = max - min;
     if (range >= 100) {
-      return Math.round(propValue).toString();
+      return Math.round(handleValue).toString();
     } else if (range >= 10) {
-      return propValue.toFixed(1);
+      return handleValue.toFixed(1);
     } else {
-      return propValue.toFixed(2);
+      return handleValue.toFixed(2);
     }
   })();
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '4px',
-      userSelect: 'none',
-    }}>
-      <div style={{
-        fontSize: '10px',
-        color: '#888',
-        letterSpacing: '1px',
-        textTransform: 'uppercase',
-      }}>{label}</div>
+    <div style={synthStyles.knobContainer}>
+      {/* Label */}
+      <div style={synthStyles.knobLabel}>{label}</div>
 
+      {/* Knob */}
       <div
         ref={knobRef}
+        role="slider"
+        aria-label={label}
+        aria-valuemin={min}
+        aria-valuemax={max}
+        aria-valuenow={handleValue}
+        aria-valuetext={displayValue}
+        tabIndex={0}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
         onDoubleClick={handleDoubleClick}
+        onKeyDown={handleKeyDown}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         style={{
-          width: '48px',
-          height: '48px',
-          borderRadius: '50%',
-          background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)',
-          boxShadow: isDragging
-            ? '0 0 15px rgba(255, 102, 0, 0.5), inset 0 2px 4px rgba(0,0,0,0.5)'
-            : 'inset 0 2px 4px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.3)',
-          cursor: 'ns-resize',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          border: '2px solid #333',
+          ...synthStyles.knobBody(isDragging || isFocused, effectiveGlowIntensity, ledColor),
+          outline: isFocused ? '2px solid var(--synth-accent-primary)' : 'none',
+          outlineOffset: '2px',
         }}
       >
-        <div style={{
-          width: '36px',
-          height: '36px',
-          borderRadius: '50%',
-          background: 'linear-gradient(145deg, #222, #181818)',
-          position: 'relative',
-        }}>
-          {/* Indicator line */}
-          <div style={{
-            position: 'absolute',
-            width: '3px',
-            height: '12px',
-            background: '#ff6600',
-            borderRadius: '2px',
-            left: '50%',
-            top: '4px',
-            marginLeft: '-1.5px',
-            transformOrigin: '50% 14px',
-            transform: `rotate(${rotation}deg)`,
-            boxShadow: '0 0 8px rgba(255, 102, 0, 0.6)',
-          }} />
+        {/* Inner circle */}
+        <div style={synthStyles.knobInner}>
+          {/* Indicator */}
+          <div style={synthStyles.knobIndicator(rotation)} />
         </div>
       </div>
 
-      <div style={{
-        fontSize: '11px',
-        color: '#ff6600',
-        fontFamily: 'monospace',
-        minWidth: '40px',
-        textAlign: 'center',
-      }}>{displayValue}</div>
+      {/* Value display */}
+      <div style={synthStyles.knobValue}>{displayValue}</div>
     </div>
   );
 };
+
+export default SynthKnob;
