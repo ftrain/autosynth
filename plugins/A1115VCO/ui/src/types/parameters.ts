@@ -1,7 +1,8 @@
 /**
  * @file parameters.ts
- * @brief Parameter definitions for A111-5 VCO
+ * @brief Parameter definitions for A111-5 Mini Synthesizer Voice
  *
+ * Based on Doepfer A-111-5 with VCO, VCF, VCA, dual LFOs, and ADSR.
  * These MUST match the parameters defined in PluginProcessor.cpp
  */
 
@@ -11,11 +12,12 @@ import { ParameterMap, ParameterDefinition } from '../hooks/useParameters';
  * Parameter categories for UI organization
  */
 export enum ParameterCategory {
-  OSCILLATOR = 'oscillator',
-  SUB = 'sub',
-  MODULATION = 'modulation',
-  ENVELOPE = 'envelope',
-  MASTER = 'master',
+  VCO = 'vco',
+  VCF = 'vcf',
+  VCA = 'vca',
+  LFO1 = 'lfo1',
+  LFO2 = 'lfo2',
+  ADSR = 'adsr',
 }
 
 /**
@@ -23,15 +25,15 @@ export enum ParameterCategory {
  */
 export const PARAMETER_DEFINITIONS: ParameterMap = {
   // =========================================================================
-  // OSCILLATOR PARAMETERS
+  // VCO PARAMETERS
   // =========================================================================
 
   osc_waveform: {
     id: 'osc_waveform',
     name: 'Waveform',
     min: 0,
-    max: 3,
-    default: 2, // Saw
+    max: 2,
+    default: 1, // Saw
     step: 1,
   },
 
@@ -58,14 +60,10 @@ export const PARAMETER_DEFINITIONS: ParameterMap = {
   pulse_width: {
     id: 'pulse_width',
     name: 'Pulse Width',
-    min: 0,
-    max: 1,
+    min: 0.05,
+    max: 0.95,
     default: 0.5,
   },
-
-  // =========================================================================
-  // SUB OSCILLATOR
-  // =========================================================================
 
   sub_level: {
     id: 'sub_level',
@@ -75,37 +73,204 @@ export const PARAMETER_DEFINITIONS: ParameterMap = {
     default: 0,
   },
 
-  // =========================================================================
-  // MODULATION
-  // =========================================================================
+  glide_time: {
+    id: 'glide_time',
+    name: 'Glide',
+    min: 0,
+    max: 2,
+    default: 0,
+    unit: 's',
+  },
 
-  sync_enable: {
-    id: 'sync_enable',
-    name: 'Sync',
+  mono_mode: {
+    id: 'mono_mode',
+    name: 'Mono',
     min: 0,
     max: 1,
     default: 0,
     step: 1,
   },
 
-  fm_amount: {
-    id: 'fm_amount',
+  vco_fm_source: {
+    id: 'vco_fm_source',
+    name: 'FM Source',
+    min: 0,
+    max: 2,
+    default: 0,
+    step: 1,
+  },
+
+  vco_fm_amount: {
+    id: 'vco_fm_amount',
     name: 'FM Amount',
     min: 0,
     max: 1,
     default: 0,
   },
 
-  fm_ratio: {
-    id: 'fm_ratio',
-    name: 'FM Ratio',
-    min: 0.5,
-    max: 8,
-    default: 1,
+  vco_pwm_source: {
+    id: 'vco_pwm_source',
+    name: 'PWM Source',
+    min: 0,
+    max: 2,
+    default: 0,
+    step: 1,
+  },
+
+  vco_pwm_amount: {
+    id: 'vco_pwm_amount',
+    name: 'PWM Amount',
+    min: 0,
+    max: 1,
+    default: 0,
   },
 
   // =========================================================================
-  // AMPLITUDE ENVELOPE
+  // VCF PARAMETERS
+  // =========================================================================
+
+  vcf_cutoff: {
+    id: 'vcf_cutoff',
+    name: 'Cutoff',
+    min: 20,
+    max: 20000,
+    default: 5000,
+    unit: 'Hz',
+  },
+
+  vcf_resonance: {
+    id: 'vcf_resonance',
+    name: 'Resonance',
+    min: 0,
+    max: 1,
+    default: 0,
+  },
+
+  vcf_tracking: {
+    id: 'vcf_tracking',
+    name: 'Tracking',
+    min: 0,
+    max: 2,
+    default: 0,
+    step: 1,
+  },
+
+  vcf_mod_source: {
+    id: 'vcf_mod_source',
+    name: 'Mod Source',
+    min: 0,
+    max: 2,
+    default: 2, // ADSR
+    step: 1,
+  },
+
+  vcf_mod_amount: {
+    id: 'vcf_mod_amount',
+    name: 'Mod Amount',
+    min: -1,
+    max: 1,
+    default: 0.5,
+  },
+
+  vcf_lfm_amount: {
+    id: 'vcf_lfm_amount',
+    name: 'Linear FM',
+    min: 0,
+    max: 1,
+    default: 0,
+  },
+
+  // =========================================================================
+  // VCA PARAMETERS
+  // =========================================================================
+
+  vca_mod_source: {
+    id: 'vca_mod_source',
+    name: 'Mod Source',
+    min: 0,
+    max: 2,
+    default: 2, // ADSR
+    step: 1,
+  },
+
+  vca_initial_level: {
+    id: 'vca_initial_level',
+    name: 'Initial Level',
+    min: 0,
+    max: 1,
+    default: 0,
+  },
+
+  master_level: {
+    id: 'master_level',
+    name: 'Master',
+    min: 0,
+    max: 1,
+    default: 0.8,
+  },
+
+  // =========================================================================
+  // LFO1 PARAMETERS
+  // =========================================================================
+
+  lfo1_frequency: {
+    id: 'lfo1_frequency',
+    name: 'Frequency',
+    min: 0,
+    max: 1,
+    default: 0.5,
+  },
+
+  lfo1_waveform: {
+    id: 'lfo1_waveform',
+    name: 'Waveform',
+    min: 0,
+    max: 2,
+    default: 0, // Triangle
+    step: 1,
+  },
+
+  lfo1_range: {
+    id: 'lfo1_range',
+    name: 'Range',
+    min: 0,
+    max: 2,
+    default: 0, // Low
+    step: 1,
+  },
+
+  // =========================================================================
+  // LFO2 PARAMETERS
+  // =========================================================================
+
+  lfo2_frequency: {
+    id: 'lfo2_frequency',
+    name: 'Frequency',
+    min: 0,
+    max: 1,
+    default: 0.5,
+  },
+
+  lfo2_waveform: {
+    id: 'lfo2_waveform',
+    name: 'Waveform',
+    min: 0,
+    max: 2,
+    default: 0, // Triangle
+    step: 1,
+  },
+
+  lfo2_range: {
+    id: 'lfo2_range',
+    name: 'Range',
+    min: 0,
+    max: 2,
+    default: 0, // Low
+    step: 1,
+  },
+
+  // =========================================================================
+  // ADSR PARAMETERS
   // =========================================================================
 
   amp_attack: {
@@ -142,18 +307,6 @@ export const PARAMETER_DEFINITIONS: ParameterMap = {
     default: 0.3,
     unit: 's',
   },
-
-  // =========================================================================
-  // MASTER
-  // =========================================================================
-
-  master_level: {
-    id: 'master_level',
-    name: 'Level',
-    min: 0,
-    max: 1,
-    default: 0.8,
-  },
 };
 
 /**
@@ -161,11 +314,27 @@ export const PARAMETER_DEFINITIONS: ParameterMap = {
  */
 export function getParametersByCategory(category: ParameterCategory): ParameterDefinition[] {
   const categoryMap: Record<ParameterCategory, string[]> = {
-    [ParameterCategory.OSCILLATOR]: ['osc_waveform', 'osc_tune', 'osc_fine', 'pulse_width'],
-    [ParameterCategory.SUB]: ['sub_level'],
-    [ParameterCategory.MODULATION]: ['sync_enable', 'fm_amount', 'fm_ratio'],
-    [ParameterCategory.ENVELOPE]: ['amp_attack', 'amp_decay', 'amp_sustain', 'amp_release'],
-    [ParameterCategory.MASTER]: ['master_level'],
+    [ParameterCategory.VCO]: [
+      'osc_waveform', 'osc_tune', 'osc_fine', 'pulse_width', 'sub_level',
+      'glide_time', 'mono_mode',
+      'vco_fm_source', 'vco_fm_amount', 'vco_pwm_source', 'vco_pwm_amount'
+    ],
+    [ParameterCategory.VCF]: [
+      'vcf_cutoff', 'vcf_resonance', 'vcf_tracking',
+      'vcf_mod_source', 'vcf_mod_amount', 'vcf_lfm_amount'
+    ],
+    [ParameterCategory.VCA]: [
+      'vca_mod_source', 'vca_initial_level', 'master_level'
+    ],
+    [ParameterCategory.LFO1]: [
+      'lfo1_frequency', 'lfo1_waveform', 'lfo1_range'
+    ],
+    [ParameterCategory.LFO2]: [
+      'lfo2_frequency', 'lfo2_waveform', 'lfo2_range'
+    ],
+    [ParameterCategory.ADSR]: [
+      'amp_attack', 'amp_decay', 'amp_sustain', 'amp_release'
+    ],
   };
 
   return categoryMap[category]
