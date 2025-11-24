@@ -1,0 +1,15 @@
+services:
+  # Development: Build WASM with plain C exports (no Embind)
+  wasm-builder:
+    image: emscripten/emsdk:3.1.51
+    volumes:
+      - ./src/dsp:/app/src/dsp:ro
+      - ./public:/app/public
+    working_dir: /app
+    command: ["bash", "-c", "emcc -std=c++17 -O3 -s WASM=1 -s MODULARIZE=1 -s EXPORT_NAME='createDFAMModule' -s EXPORTED_FUNCTIONS='[\"_init\",\"_process\",\"_setRunning\",\"_isRunning\",\"_setTempo\",\"_setClockDivider\",\"_setStepPitch\",\"_setStepVelocity\",\"_getCurrentStep\",\"_setVCO1Frequency\",\"_setVCO2Frequency\",\"_setVCO1Level\",\"_setVCO2Level\",\"_setVCO1Waveform\",\"_setVCO2Waveform\",\"_setFMAmount\",\"_setNoiseLevel\",\"_setFilterCutoff\",\"_setFilterResonance\",\"_setFilterEnvAmount\",\"_setFilterMode\",\"_setFilterLfoRate\",\"_setFilterLfoClockSync\",\"_setFilterLfoAmount\",\"_setPitchEnvAttack\",\"_setPitchEnvDecay\",\"_setPitchEnvAmount\",\"_setVCFVCAEnvAttack\",\"_setVCFVCAEnvDecay\",\"_setSaturatorDrive\",\"_setSaturatorMix\",\"_setDelayTime\",\"_setDelayClockSync\",\"_setDelayFeedback\",\"_setDelayMix\",\"_setReverbDecay\",\"_setReverbDamping\",\"_setReverbMix\",\"_setMasterVolume\",\"_malloc\",\"_free\"]' -s EXPORTED_RUNTIME_METHODS='[\"ccall\",\"cwrap\",\"HEAPF32\"]' -s ALLOW_MEMORY_GROWTH=1 -s INITIAL_MEMORY=33554432 -s ENVIRONMENT='web,worker' -I src/dsp src/dsp/wasm_bindings.cpp -o public/dfam.js && echo 'WASM build complete!'"]
+
+  # Production: Full build and serve
+  dfam-web:
+    build: .
+    ports:
+      - "8080:8080"
