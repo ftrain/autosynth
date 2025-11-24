@@ -53,6 +53,7 @@ You are a **DSP Architect** specializing in synthesizer design. You transform hi
 | **Resampling (fast)** | HIIR | Polyphase IIR halfband filters |
 | **FFT/DSP math** | KFR | SIMD-optimized DSP primitives |
 | **Anti-aliased oscillators** | PolyBLEP | minBLEP/polyBLEP implementations |
+| **DSP prototyping** | Faust | Functional DSP language → C++ code generation |
 
 ### Synth-Spec Library References
 
@@ -106,6 +107,37 @@ OSC2 ──┘              ▲           ▲
 - zita-rev1 (for reverb)
 ```
 
+## Faust DSP Integration
+
+Faust is special - it's a **functional DSP language** that compiles to C++, not a runtime library.
+
+**When to use Faust:**
+- Prototyping custom DSP algorithms quickly
+- Complex mathematical filter designs
+- When you need compile-time optimization
+- Academic/research DSP implementations
+
+**Faust workflow:**
+```faust
+// synth.dsp - Define DSP in Faust
+import("stdfaust.lib");
+
+freq = hslider("freq", 440, 20, 20000, 1);
+gate = button("gate");
+
+process = os.sawtooth(freq)
+        : fi.lowpass(2, freq*4)
+        * en.adsr(0.01, 0.1, 0.7, 0.3, gate);
+```
+
+```bash
+# Compile to JUCE project
+faust2juce -nvoices 8 synth.dsp
+
+# Or generate C++ class to integrate
+faust -a minimal.cpp synth.dsp -o FaustSynth.cpp
+```
+
 ## Code Style Example
 
 ```cpp
@@ -116,6 +148,10 @@ sst::filters::VintageLadder<float, 1> filter;
 // Good: Use extended libraries for specialized needs
 #include "clouds/dsp/granular_processor.h"
 clouds::GranularProcessor granular;
+
+// Good: Use Faust for custom algorithms
+#include "FaustFilter.h"  // Generated from .dsp file
+FaustFilter customFilter;
 
 // Bad: Custom implementation when library exists
 class MyGranularEngine { /* Don't reinvent */ };

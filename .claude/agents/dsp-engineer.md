@@ -111,12 +111,51 @@ hiir::Downsampler2xFpu<12> downsampler;
 upsampler.process_block(output, input, numSamples);
 ```
 
+### Faust (DSP Language)
+```cpp
+// Faust compiles .dsp files to C++ classes
+// Use faust2api to generate embeddable code
+
+#include "DspFaust.h"  // Generated from .dsp file
+
+class FaustVoice {
+    std::unique_ptr<DspFaust> faust;
+
+    void init(double sampleRate) {
+        faust = std::make_unique<DspFaust>(sampleRate, 512);
+    }
+
+    void process(float** inputs, float** outputs, int numSamples) {
+        faust->compute(numSamples, inputs, outputs);
+    }
+
+    void setParameter(const char* path, float value) {
+        faust->setParamValue(path, value);
+    }
+};
+
+// Or use JIT compilation for runtime Faust code
+#include <faust/dsp/llvm-dsp.h>
+
+std::string faustCode = R"(
+    import("stdfaust.lib");
+    freq = hslider("freq", 440, 20, 20000, 1);
+    process = os.osc(freq);
+)";
+
+llvm_dsp_factory* factory = createDSPFactoryFromString(
+    "osc", faustCode, 0, nullptr, "", errorMsg);
+dsp* DSP = factory->createDSPInstance();
+DSP->init(sampleRate);
+DSP->compute(numSamples, inputs, outputs);
+```
+
 ## Library Selection Guide
 
 | Need | First Choice | Alternative |
 |------|--------------|-------------|
 | Oscillators | SST DPW/Elliptic | PolyBLEP |
-| Filters | SST (any) | - |
+| Filters | SST (any) | Faust (custom) |
 | Envelopes | SST ADSR | - |
 | Delay/Chorus | SST effects | - |
 | **Reverb (quality)** | zita-rev1 | SST Reverb2 |
@@ -125,6 +164,7 @@ upsampler.process_block(output, input, numSamples);
 | **Macro oscillator** | Mutable Plaits | - |
 | **Time stretch** | Signalsmith Stretch | Rubber Band |
 | **SRC (quality)** | libsamplerate | HIIR (speed) |
+| **DSP prototyping** | Faust | - |
 
 ## Code Style Example
 
@@ -155,6 +195,6 @@ class MyGranularEngine {
 
 ## Boundaries
 
-- **Always do:** Use SST first, then extended libraries; use `ScopedNoDenormals`; read parameters via atomics; pre-allocate all buffers; check `docs/OPEN_SOURCE_DSP_LIBRARIES.md` for API details
-- **Ask first:** Before implementing DSP not covered by any library, before choosing between library alternatives (e.g., zita vs SST reverb)
+- **Always do:** Use SST first, then extended libraries; use `ScopedNoDenormals`; read parameters via atomics; pre-allocate all buffers; check `docs/OPEN_SOURCE_DSP_LIBRARIES.md` for API details; consider Faust for custom DSP prototyping
+- **Ask first:** Before implementing DSP not covered by any library, before choosing between library alternatives (e.g., zita vs SST reverb), before using Faust JIT (prefer compile-time)
 - **Never do:** Allocate in processBlock, use mutexes in audio thread, write custom DSP when a library exists, skip library documentation

@@ -68,6 +68,7 @@ Tests: [measurable criteria]
 | **SRC (quality)** | libsamplerate | `src_process()` |
 | **Resampling (fast)** | HIIR | `Upsampler2xFpu`, `Downsampler2xFpu` |
 | **FFT/DSP math** | KFR | SIMD-optimized primitives |
+| **DSP prototyping** | Faust | `.dsp` file → C++ class generation |
 
 ## Code Style Example
 
@@ -79,6 +80,10 @@ sst::filters::CytomicSVF filter[2];
 // Good: Extended library for specialized needs
 #include "clouds/dsp/granular_processor.h"
 clouds::GranularProcessor granular;
+
+// Good: Faust for custom DSP algorithms
+#include "FaustReverb.h"  // Generated from reverb.dsp
+FaustReverb customReverb;
 
 // Bad: Custom DSP when library exists
 class MyGranularEngine { /* Don't reinvent */ };
