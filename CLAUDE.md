@@ -22,11 +22,15 @@ The fastest way to start building synths. JUCE and all dependencies are pre-inst
 ./scripts/dev.sh
 
 # Inside container: create a new synth (instant!)
-./scripts/new-plugin.sh "Warm Bass" "WarmBass" "WmBs"
+./scripts/new-plugin.sh synth "Warm Bass" "WarmBass" "WmBs"
 
 # Build immediately - no setup needed
-cd plugins/WarmBass
+cd plugins/synths/WarmBass
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+
+# Or build from repo root with monorepo CMake
+cmake -B build -DPLUGINS="WarmBass"
 cmake --build build
 ```
 
@@ -218,7 +222,7 @@ git commit -m "fix: Template improvement"
    - When SST has multiple implementations, understand the trade-offs
 
 2. **UI**: All interfaces use the **React component library**
-   - Use components from `templates/plugin-template/ui/src/components/`
+   - Use components from `core/ui/components/`
    - Compose from SynthKnob, SynthADSR, SynthSlider, Oscilloscope
    - Value normalization: useParameters stores 0-1, SynthKnob expects raw values
 
@@ -333,7 +337,7 @@ See `templates/synth-spec.schema.json` for full schema and `templates/synth-spec
 - `docs/DESIGNER_GUIDE.md` - UI/UX patterns for synths
 
 ### Component Library
-- `components/` - All React components
+- `core/ui/components/` - All React components
 - Run `npm run storybook` to browse components
 
 ### Templates & Scripts
@@ -347,26 +351,73 @@ See `templates/synth-spec.schema.json` for full schema and `templates/synth-spec
 
 ## Project Structure
 
-A typical synth project created by this system:
+### Monorepo Layout
 
 ```
-my-synth/
-├── CMakeLists.txt              # Build configuration
-├── JUCE/                       # JUCE framework
-├── libs/sst/                   # SST DSP libraries
+autosynth/
+├── CMakeLists.txt              # Root build configuration (monorepo)
+├── libs/                       # Shared dependencies
+│   ├── JUCE/                   # JUCE framework
+│   └── sst-*/                  # SST DSP libraries
+├── core/                       # Shared code across plugins
+│   ├── dsp/                    # Shared DSP components
+│   ├── effects/                # Shared effects
+│   ├── ui/                     # React component library
+│   │   ├── components/         # SynthKnob, SynthADSR, etc.
+│   │   ├── hooks/              # useJUCEBridge, useParameters
+│   │   └── themes/             # Theme system
+│   └── bridge/                 # JUCE-WebView communication
+├── plugins/
+│   ├── synths/                 # Synthesizer plugins
+│   │   ├── ModelD/
+│   │   ├── DFAM/
+│   │   └── ...
+│   ├── effects/                # Effect plugins
+│   └── midi/                   # MIDI utility plugins
+├── templates/
+│   ├── plugin-template/        # Plugin starter template
+│   ├── synth-spec.schema.json  # Spec validation schema
+│   └── dsp-libraries.json      # DSP library registry
+└── docs/                       # Documentation
+```
+
+### Individual Plugin Structure
+
+```
+plugins/synths/MySynth/
+├── CMakeLists.txt              # Plugin build configuration
+├── synth-spec.json             # Plugin specification
 ├── source/
 │   ├── PluginProcessor.cpp     # Main audio processor
 │   ├── PluginEditor.cpp        # WebView host
 │   └── dsp/                    # DSP components
+│       ├── Voice.h             # Voice implementation
+│       └── SynthEngine.h       # Polyphonic engine
 ├── ui/
 │   ├── src/                    # React UI source
 │   └── dist/                   # Built UI (embedded)
 ├── tests/                      # Unit & integration tests
 ├── presets/                    # Factory presets
-├── docs/
-│   ├── ARCHITECTURE.md         # Design documentation
-│   └── PARAMETERS.md           # Parameter reference
-└── .github/workflows/          # CI/CD
+└── docs/
+    ├── ARCHITECTURE.md         # Design documentation
+    └── PARAMETERS.md           # Parameter reference
+```
+
+### Build Options
+
+```bash
+# Build all plugins
+cmake -B build -DBUILD_ALL=ON
+cmake --build build
+
+# Build by category
+cmake -B build -DBUILD_SYNTHS=ON     # All synths
+cmake -B build -DBUILD_EFFECTS=ON    # All effects
+cmake -B build -DBUILD_MIDI=ON       # All MIDI plugins
+
+# Build specific plugins
+cmake -B build -DPLUGINS="ModelD;DFAM;TapeLoop"
+cmake --build build
 ```
 
 ## Key SST Libraries
@@ -924,7 +975,7 @@ Bad: "A general purpose synth"
 This is an evolving system. To improve it:
 
 1. **Add documentation**: Put new guides in `docs/`
-2. **Add components**: Extend the Storybook library in `components/`
+2. **Add components**: Extend the Storybook library in `core/ui/components/`
 3. **Update agents**: Modify agent definitions in `.claude/agents/`
 4. **Add presets**: Include example presets in `presets/`
 
