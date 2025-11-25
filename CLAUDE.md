@@ -1,1027 +1,776 @@
-# Studio - Collaborative Synth Building System
+# AutoSynth - Web Synthesizer Framework
 
 ## Overview
 
-Studio is a framework for building professional synthesizers using AI agent collaboration. Give it a high-level description like:
+AutoSynth is a web-native framework for building professional synthesizers that run entirely in the browser. Give it a high-level description like:
 
-> "Clone the Moog Model D but add tape processing with delay options on a per-oscillator basis pre-filter"
+> "Build me a Minimoog Model D clone with tape saturation"
 
-...and a team of specialized agents will collaborate to design, implement, and deliver a complete JUCE 8 VST/AU plugin with a React WebView frontend.
+...and the system will design, implement, and deliver a complete WebAssembly + React synth using industrial-strength DSP libraries (SST, Airwindows, ChowDSP).
+
+## Core Principles
+
+### 1. Web-First Architecture
+
+**No plugins. No native code. No JUCE.**
+
+Everything runs in the browser using:
+- **WebAssembly**: C++ DSP compiled with Emscripten
+- **AudioWorklet**: Real-time audio processing
+- **React**: Modern UI with shared component library
+- **Docker**: Reproducible builds
+
+### 2. Never Write Custom DSP
+
+**Always use existing, proven libraries:**
+- **SST** (sst-basic-blocks, sst-filters, sst-effects): Oscillators, filters, effects
+- **Airwindows**: High-end effects (reverbs, delays, saturation)
+- **ChowDSP**: Tape emulation, analog modeling
+
+The libraries are complex because real synthesis is complex. Embrace their APIs - they represent decades of research.
+
+### 3. Shared Component Library
+
+**Never create custom UI components.**
+
+All synths use the same React components from `core/ui/components/`:
+- `SynthKnob` - Rotary controls
+- `SynthADSR` - Envelope editors
+- `SynthLFO` - LFO visualizers
+- `SynthSequencer` - Step sequencers
+- `Oscilloscope` - Waveform displays
+
+**One codebase, one design language, zero duplication.**
+
+### 4. Docker-Based Development
+
+All builds happen in Docker with Emscripten pre-installed:
+```bash
+docker build -t autosynth .
+docker run -p 8080:80 autosynth
+```
+
+No "works on my machine" problems.
+
+---
 
 ## Quick Start
 
-### Recommended: Docker Development Environment
-
-The fastest way to start building synths. JUCE and all dependencies are pre-installed:
+### Create a New Synth
 
 ```bash
-# First time: build the image (~5-10 minutes, only once)
-./scripts/dev.sh build
-
-# Start development shell
-./scripts/dev.sh
-
-# Inside container: create a new synth (instant!)
-./scripts/new-plugin.sh synth "Warm Bass" "WarmBass" "WmBs"
-
-# Build immediately - no setup needed
-cd plugins/synths/WarmBass
-cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build
-
-# Or build from repo root with monorepo CMake
-cmake -B build -DPLUGINS="WarmBass"
-cmake --build build
+# Inside Docker container
+./scripts/new-synth.sh "My Synth" "MySynth"
 ```
 
-**What's pre-cached in Docker:**
-- JUCE 8.0.0 with juceaide pre-compiled (saves ~50 seconds per build)
-- All SST libraries (sst-basic-blocks, sst-filters, sst-effects, sst-waveshapers)
-- GTK3, WebKit, ALSA, PulseAudio, and all Linux dependencies
-- Node.js 20 for React UI development
-- Clang compiler for faster builds
+This creates `synths/MySynth/` with:
+- DSP template (`dsp/Engine.h`, `dsp/wasm_bindings.cpp`)
+- React UI template (`ui/App.tsx`, `ui/useAudioEngine.ts`)
+- AudioWorklet processor (`public/processor.js`)
+- Makefile for WASM build
 
-**Helper commands:**
-```bash
-./scripts/dev.sh                    # Interactive shell
-./scripts/dev.sh new "My Synth"     # Create plugin from host
-./scripts/dev.sh build-plugin dir   # Build a plugin
-./scripts/dev.sh claude             # Start Claude Code in container
-./scripts/dev.sh stop               # Stop container
-```
-
-### Alternative: Manual Setup (without Docker)
+### Build and Run
 
 ```bash
-./scripts/new-plugin.sh "My Synth Name" "MySynthName" "MySn"
+cd synths/MySynth
+
+# Build WASM
+make wasm
+
+# Start dev server
+cd ui
+npm install
+npm run dev
+
+# Open http://localhost:5173
 ```
 
-This creates a plugin structure but requires manual setup:
-- Git submodules for JUCE and SST libraries
-- System package installation (GTK3, WebKit, ALSA, etc.)
-- npm install for UI dependencies
+### Deploy
 
-See the script output for full instructions.
+```bash
+# Build everything (all synths + website)
+docker build -t autosynth .
 
-### Starting a New Synth Project
+# Run
+docker run -p 8080:80 autosynth
 
-Use the **project-coordinator** agent to begin any synth project:
+# Visit http://localhost:8080
+```
+
+---
+
+## Project Structure
+
+```
+autosynth/
+├── synths/                      # Individual synthesizers
+│   ├── TapeLoop/
+│   │   ├── dsp/                 # C++ DSP (uses SST/Airwindows)
+│   │   ├── ui/                  # React UI (uses core/ui/components)
+│   │   ├── public/processor.js  # AudioWorklet
+│   │   └── Makefile             # Emscripten build
+│   ├── DFAM/
+│   └── ...
+│
+├── core/                        # Shared across all synths
+│   ├── ui/
+│   │   ├── components/          # **THE COMPONENT LIBRARY**
+│   │   └── styles/              # Shared CSS
+│   └── dsp/                     # Shared DSP helpers
+│
+├── libs/                        # DSP libraries (git submodules)
+│   ├── sst-basic-blocks/        # Oscillators, envelopes, LFOs
+│   ├── sst-filters/             # Ladder, SVF, comb, formant filters
+│   ├── sst-effects/             # Delay, reverb, chorus, phaser
+│   ├── airwin2rack/             # Airwindows effects
+│   └── chowdsp_utils/           # Tape emulation
+│
+├── website/                     # Synth browser (home page)
+│   └── src/App.tsx              # Grid of all synths
+│
+├── docker/
+│   └── Dockerfile               # Emscripten + Node build env
+│
+├── scripts/
+│   ├── new-synth.sh             # Create new synth
+│   ├── build-synth.sh           # Build one synth
+│   └── build-all.sh             # Build all synths
+│
+├── templates/
+│   └── synth-template/          # Template for new synths
+│
+└── docs/
+    ├── WASM_ARCHITECTURE.md     # Complete architecture guide
+    ├── DSP_LIBRARIES.md         # SST/Airwindows/ChowDSP reference
+    ├── COMPONENT_LIBRARY.md     # UI component reference
+    └── GETTING_STARTED.md       # Tutorials
+```
+
+---
+
+## Development Workflow
+
+### Starting a New Synth
+
+**Use the project-coordinator agent:**
 
 ```
 @project-coordinator
 
-Build me a synthesizer that [describe your synth idea]
+Build me a [describe synth]
+
+Examples:
+- "Minimoog Model D clone with 3 oscillators and ladder filter"
+- "Tape loop drone synth with Airwindows Galactic reverb"
+- "FM synth with 4 operators inspired by DX7"
 ```
 
 The coordinator will:
-1. Analyze your request
-2. Ask clarifying questions if needed
-3. Create a project plan
-4. Delegate to specialist agents
-5. Integrate all deliverables
+1. Identify required DSP libraries (SST components, Airwindows effects)
+2. Create architecture document
+3. Delegate to specialist agents
+4. Deliver working synth
 
-### Example Prompts
+### Agent Team
 
-**Classic Clone:**
-```
-Create a Minimoog Model D clone with 3 oscillators, ladder filter, and classic modulation routing.
-```
+| Agent | Purpose | Tools |
+|-------|---------|-------|
+| **project-coordinator** | Orchestrate project | Plans, delegates |
+| **synth-architect** | Design signal flow | SST library selection |
+| **dsp-engineer** | Implement DSP | C++, WASM bindings |
+| **ui-developer** | Build React UI | Component library |
+| **qa-engineer** | Test & validate | Browser testing |
+| **sound-designer** | Define sonic goals | Presets |
 
-**Hybrid Synth:**
-```
-Build a wavetable synth with FM capabilities, inspired by the Waldorf Blofeld but with a simpler interface.
-```
-
-**Effect-Heavy:**
-```
-Design a mono synth optimized for bass with built-in tape saturation, spring reverb, and tempo-synced delay.
-```
-
-**Experimental:**
-```
-Create a granular synthesis engine with real-time spectral processing and generative modulation.
-```
-
-## Agent Team
-
-### The Agents
-
-| Agent | Purpose | When to Use |
-|-------|---------|-------------|
-| **project-coordinator** | Orchestrates the team, manages workflow | Starting any new project |
-| **synth-architect** | Designs architecture, signal flow | Major design decisions |
-| **dsp-engineer** | Implements audio processing | Writing DSP code |
-| **ui-developer** | Builds React interfaces | UI implementation |
-| **systems-engineer** | Build system, CI/CD | Project setup, builds |
-| **qa-engineer** | Testing, validation | Quality assurance |
-| **sound-designer** | Sonic direction, presets | Sound goals, presets |
-| **audio-component-spec-writer** | Component specifications | Detailed specs |
-
-### Orchestration Flow
+### Example Workflow
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         USER PROMPT                                  │
-│  "Clone the Moog Model D with tape saturation per oscillator"       │
-└─────────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                    PROJECT-COORDINATOR                               │
-│  - Analyzes request                                                  │
-│  - Creates project plan                                              │
-│  - Delegates to specialists                                          │
-└─────────────────────────────────────────────────────────────────────┘
-                                │
-         ┌──────────────────────┼──────────────────────┐
-         │                      │                      │
-         ▼                      ▼                      ▼
-┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
-│ SYNTH-ARCHITECT │  │ SOUND-DESIGNER  │  │ SYSTEMS-ENGINEER│
-│ Architecture doc │  │ Sonic goals     │  │ Project setup   │
-└─────────────────┘  └─────────────────┘  └─────────────────┘
-         │                      │                      │
-         └──────────────────────┼──────────────────────┘
-                                │
-                                ▼
-                    ┌─────────────────────┐
-                    │    DSP-ENGINEER     │
-                    │ Implement DSP code  │
-                    └─────────────────────┘
-                                │
-                                ▼
-                    ┌─────────────────────┐
-                    │    UI-DEVELOPER     │
-                    │ Build React UI      │
-                    └─────────────────────┘
-                                │
-                                ▼
-                    ┌─────────────────────┐
-                    │    QA-ENGINEER      │
-                    │ Test & validate     │
-                    └─────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                      DELIVERABLES                                    │
-│  - JUCE 8 plugin (VST3, AU, Standalone)                             │
-│  - React WebView UI                                                  │
-│  - Factory presets                                                   │
-│  - Documentation                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+User: "Build a bass synth with tape saturation"
+  ↓
+project-coordinator:
+  - Identifies: sst-basic-blocks (oscillator), sst-filters (ladder)
+  - Identifies: chowdsp_utils (tape emulation)
+  - Creates plan, delegates
+  ↓
+synth-architect:
+  - Designs: OSC → FILTER → TAPE → OUTPUT
+  - Writes architecture doc
+  ↓
+dsp-engineer:
+  - Implements Engine.h using SST + ChowDSP
+  - Writes wasm_bindings.cpp
+  - Builds with: make wasm
+  ↓
+ui-developer:
+  - Builds App.tsx using SynthKnob, SynthADSR
+  - Hooks up useAudioEngine
+  ↓
+qa-engineer:
+  - Tests in browser
+  - Validates audio output
+  ↓
+DONE: Visit http://localhost:5173
 ```
 
-## Git Workflow
+---
 
-### Branch-per-Plugin Strategy
+## DSP Implementation
 
-The `main` branch is the **meta-template** - it contains the framework, templates, and shared infrastructure. Each plugin lives on its own branch:
+### Rule: Never Write Custom DSP
 
-```
-main                          <- Framework, templates, shared code
-├── plugin/model-d            <- Minimoog Model D clone
-├── plugin/warm-bass          <- Bass synth
-├── plugin/tape-delay         <- Delay effect
-└── plugin/granular-pad       <- Granular synth
-```
-
-**Why this approach:**
-1. **Clean separation**: Each plugin is isolated, no conflicts
-2. **Shared improvements**: Template fixes on `main` benefit all plugins
-3. **Easy experimentation**: Create branches, discard if needed
-4. **Parallel development**: Multiple synths can be developed simultaneously
-
-**Creating a new plugin automatically creates its branch:**
-```bash
-./scripts/new-plugin.sh "Model D" "ModelD" "ModD"
-# Creates branch: plugin/model-d
-```
-
-**Merging improvements back to main:**
-When you discover fixes or improvements that apply to all plugins (template bugs, new test utilities, documentation), commit them to `main`:
-```bash
-git checkout main
-# Make changes to templates/
-git commit -m "fix: Template improvement"
-```
-
-## Core Philosophy
-
-### Embrace SST Complexity
-
-**SST libraries are complex because real synthesis is complex.** The Moog ladder filter models thermal drift, transistor nonlinearities, and capacitor tolerances. The DPW oscillators implement sophisticated anti-aliasing. This complexity is not accidental—it's essential for accurate modeling of real analog behavior.
-
-**Do NOT simplify away from SST complexity.** When you encounter complex SST APIs, study them. The complexity exists because the original hardware behavior is complex. A "simpler" approach is almost always a worse-sounding approach. SST represents the most thorough thinking about synthesis available.
-
-### Minimal Code, Maximum Reuse
-
-1. **DSP**: All audio processing uses **SST libraries** (sst-basic-blocks, sst-filters, sst-effects)
-   - Use SST components directly—they model real analog behavior
-   - Thin JUCE wrappers around SST components
-   - Study SST source code to understand parameter ranges
-   - When SST has multiple implementations, understand the trade-offs
-
-2. **UI**: All interfaces use the **React component library**
-   - Use components from `core/ui/components/`
-   - Compose from SynthKnob, SynthADSR, SynthSlider, Oscilloscope
-   - Value normalization: useParameters stores 0-1, SynthKnob expects raw values
-
-3. **Build**: Standard **JUCE 8 + CMake** project structure
-   - Cross-platform from day one
-   - CI/CD via GitHub Actions
-
-### What This Means
-
-**Good**: "Use the VintageLadder filter from sst-filters"
-**Bad**: "Implement a custom ladder filter algorithm"
-
-**Good**: "Compose the UI from SynthKnob and SynthADSR components"
-**Bad**: "Create a custom knob component"
-
-## Spec-First Architecture
-
-### The Problem with TODO-Driven Development
-
-Traditional approach: Templates with TODO comments require agents to interpret context and make decisions. This is error-prone and non-deterministic.
-
-### The Solution: Single Source of Truth
-
-**Every synth starts with a `synth-spec.json` file** that defines:
-- Oscillators (count, types, SST components)
-- Filters (types, modes, SST components)
-- Envelopes and LFOs
-- Every parameter (with exact ranges, defaults, units)
-- UI layout
-
-This spec is validated against a JSON Schema, then **code generators produce working code** - not TODO placeholders.
-
-### Workflow Comparison
-
-| Old Approach | Spec-First Approach |
-|--------------|---------------------|
-| Agent reads docs, makes decisions | Spec defines everything upfront |
-| TODO comments in templates | Generated working code |
-| Parameters defined 3 places | Single source (spec.json) |
-| Sequential agent handoffs | Parallel work from spec |
-| Errors compound through phases | Validation at each gate |
-
-### How It Works
-
-```
-1. SPEC CREATION
-   User prompt → project-coordinator → synth-spec.json (validated)
-
-2. CODE GENERATION (deterministic)
-   synth-spec.json → generate-from-spec.js →
-   - source/dsp/Voice.h (with SST components wired up)
-   - source/Parameters.h (JUCE APVTS)
-   - ui/src/types/parameters.ts
-
-3. CUSTOMIZATION (parallel)
-   - dsp-engineer: Adds custom DSP logic to Voice.h
-   - ui-developer: Builds UI from generated parameter types
-
-4. VALIDATION
-   - Schema validation (spec)
-   - Build check (C++)
-   - Type check (TypeScript)
-   - Unit tests
-```
-
-### Using the Spec System
-
-```bash
-# 1. Create spec (by hand or via project-coordinator)
-cp templates/synth-spec.example.json my-synth/synth-spec.json
-# Edit to match your design
-
-# 2. Generate code
-node scripts/generate-from-spec.js my-synth/synth-spec.json my-synth/
-
-# 3. Customize generated code
-# DSP engineer adds custom logic to Voice.h
-# UI developer builds interface from parameters.ts
-
-# 4. Build and test
-cd my-synth && cmake -B build && cmake --build build
-```
-
-### Spec File Structure
-
-```json
-{
-  "meta": { "name": "Warm Bass", "type": "subtractive", "voices": 4 },
-  "voice": {
-    "oscillators": [{ "id": "osc1", "sst": "DPWSawOscillator" }],
-    "filters": [{ "id": "filter1", "sst": "VintageLadder" }],
-    "envelopes": [{ "id": "env1", "type": "ADSR", "target": "amp" }]
-  },
-  "parameters": [
-    { "id": "filter_cutoff", "name": "Cutoff", "min": 20, "max": 20000, "default": 2000 }
-  ],
-  "ui": { "layout": [...] }
+**Wrong:**
+```cpp
+// DON'T DO THIS
+float oscillator(float phase) {
+  return sin(2.0 * M_PI * phase);
 }
 ```
 
-See `templates/synth-spec.schema.json` for full schema and `templates/synth-spec.example.json` for a complete example.
+**Right:**
+```cpp
+// USE SST LIBRARIES
+#include "sst/basic-blocks/dsp/DPWSawOscillator.h"
+
+sst::basic_blocks::dsp::DPWSawOscillator osc;
+osc.init(sampleRate);
+float sample = osc.process();
+```
+
+### Common DSP Patterns
+
+#### Oscillators (sst-basic-blocks)
+
+```cpp
+#include "sst/basic-blocks/dsp/DPWSawOscillator.h"
+#include "sst/basic-blocks/dsp/DPWPulseOscillator.h"
+
+sst::basic_blocks::dsp::DPWSawOscillator saw;
+sst::basic_blocks::dsp::DPWPulseOscillator pulse;
+
+saw.init(sampleRate);
+pulse.init(sampleRate);
+
+float sawSample = saw.process();
+float pulseSample = pulse.process();
+```
+
+#### Filters (sst-filters)
+
+```cpp
+#include "sst/filters/VintageLadder.h"
+
+sst::filters::VintageLadder filter;
+filter.init(sampleRate);
+filter.setCutoff(1000.0f);
+filter.setResonance(0.7f);
+
+float output = filter.process(input);
+```
+
+#### Envelopes (sst-basic-blocks)
+
+```cpp
+#include "sst/basic-blocks/dsp/ADSREnvelope.h"
+
+sst::basic_blocks::dsp::ADSREnvelope env;
+env.setAttack(0.01);   // 10ms
+env.setDecay(0.1);     // 100ms
+env.setSustain(0.7);   // 70%
+env.setRelease(0.2);   // 200ms
+
+env.trigger();
+float level = env.process();
+```
+
+#### Effects (Airwindows)
+
+```cpp
+#include "airwin2rack/Galactic3.h"
+
+Galactic3 reverb;
+reverb.setSampleRate(48000);
+reverb.setParameter(0, 0.5);  // Replace
+reverb.setParameter(1, 0.5);  // Brightness
+reverb.setParameter(4, 0.5);  // Size
+
+reverb.processReplacing(inL, inR, outL, outR, numSamples);
+```
+
+#### Tape Emulation (ChowDSP)
+
+```cpp
+#include "chowdsp_utils/TapeModel.h"
+
+chowdsp::TapeModel tape;
+tape.prepare(sampleRate);
+tape.setDrive(0.5);
+tape.setWow(0.1);
+
+float output = tape.processSample(input);
+```
+
+### WASM Bindings Pattern
+
+**Always use extern "C" with simple exports:**
+
+```cpp
+#include "Engine.h"
+
+static Engine* g_engine = nullptr;
+
+extern "C" {
+  void init(int sampleRate) {
+    g_engine = new Engine(sampleRate);
+  }
+
+  void process(float* outL, float* outR, int samples) {
+    if (!g_engine) return;
+    g_engine->render(outL, outR, samples);
+  }
+
+  void setParameter(int id, float value) {
+    if (!g_engine) return;
+    g_engine->setParam(id, value);
+  }
+
+  void noteOn(int note, float velocity) {
+    if (!g_engine) return;
+    g_engine->noteOn(note, velocity);
+  }
+
+  void noteOff(int note) {
+    if (!g_engine) return;
+    g_engine->noteOff(note);
+  }
+}
+```
+
+---
+
+## UI Implementation
+
+### Rule: Never Create Custom Components
+
+**Use components from `core/ui/components/`:**
+
+```typescript
+import {
+  SynthKnob,
+  SynthSlider,
+  SynthADSR,
+  SynthLFO,
+  SynthSequencer,
+  SynthRow,
+  Oscilloscope,
+} from '../../../core/ui/components';
+```
+
+### Example UI
+
+```typescript
+import React from 'react';
+import { useAudioEngine } from './useAudioEngine';
+import { SynthKnob, SynthRow, SynthADSR } from '../../../core/ui/components';
+
+const App: React.FC = () => {
+  const { isReady, initialize, setParameter } = useAudioEngine();
+
+  return (
+    <div style={{ background: '#0a0a0a', minHeight: '100vh', padding: '20px' }}>
+      {/* Header */}
+      <header>
+        <h1>MY SYNTH</h1>
+        {!isReady && <button onClick={initialize}>START</button>}
+      </header>
+
+      {/* Oscillator */}
+      <SynthRow label="OSCILLATOR">
+        <SynthKnob
+          label="FREQ"
+          min={20}
+          max={20000}
+          value={440}
+          onChange={(v) => setParameter(0, v)}
+        />
+        <SynthKnob
+          label="LEVEL"
+          min={0}
+          max={1}
+          value={0.5}
+          onChange={(v) => setParameter(1, v)}
+        />
+      </SynthRow>
+
+      {/* Filter */}
+      <SynthRow label="FILTER">
+        <SynthKnob
+          label="CUTOFF"
+          min={20}
+          max={20000}
+          value={2000}
+          onChange={(v) => setParameter(2, v)}
+        />
+        <SynthKnob
+          label="RES"
+          min={0}
+          max={1}
+          value={0.5}
+          onChange={(v) => setParameter(3, v)}
+        />
+      </SynthRow>
+
+      {/* Envelope */}
+      <SynthADSR
+        label="AMP ENV"
+        attack={10}
+        decay={100}
+        sustain={70}
+        release={200}
+        onAttackChange={(v) => setParameter(4, v)}
+        onDecayChange={(v) => setParameter(5, v)}
+        onSustainChange={(v) => setParameter(6, v / 100)}
+        onReleaseChange={(v) => setParameter(7, v)}
+        maxAttack={5000}
+        maxDecay={5000}
+        maxRelease={10000}
+      />
+    </div>
+  );
+};
+
+export default App;
+```
+
+### Web Audio Bridge Pattern
+
+```typescript
+import { useState, useCallback, useRef } from 'react';
+
+export const useAudioEngine = () => {
+  const [isReady, setIsReady] = useState(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const workletNodeRef = useRef<AudioWorkletNode | null>(null);
+
+  const initialize = useCallback(async () => {
+    const ctx = new AudioContext({ sampleRate: 48000 });
+    audioContextRef.current = ctx;
+
+    // Load WASM
+    const wasmResponse = await fetch('/synth.wasm');
+    const wasmModule = await WebAssembly.compileStreaming(wasmResponse);
+
+    // Register AudioWorklet
+    await ctx.audioWorklet.addModule('/processor.js');
+
+    // Create worklet node
+    const worklet = new AudioWorkletNode(ctx, 'synth-processor');
+    worklet.connect(ctx.destination);
+    workletNodeRef.current = worklet;
+
+    // Initialize WASM in worklet
+    worklet.port.postMessage({ type: 'init', wasmModule, sampleRate: ctx.sampleRate });
+
+    worklet.port.onmessage = (e) => {
+      if (e.data.type === 'ready') setIsReady(true);
+    };
+  }, []);
+
+  const setParameter = useCallback((id: number, value: number) => {
+    workletNodeRef.current?.port.postMessage({ type: 'setParameter', id, value });
+  }, []);
+
+  return { isReady, initialize, setParameter };
+};
+```
+
+---
+
+## Component Library Reference
+
+### SynthKnob
+
+Rotary control for continuous parameters.
+
+```typescript
+<SynthKnob
+  label="CUTOFF"
+  min={20}
+  max={20000}
+  value={1000}
+  onChange={(value) => setParameter('cutoff', value)}
+  step={1}  // optional
+  options={['LOW', 'MID', 'HIGH']}  // optional for stepped knobs
+/>
+```
+
+### SynthSlider
+
+Linear fader.
+
+```typescript
+<SynthSlider
+  label="VOLUME"
+  min={0}
+  max={1}
+  value={0.8}
+  onChange={(value) => setParameter('volume', value)}
+  vertical={true}  // optional
+/>
+```
+
+### SynthADSR
+
+Visual ADSR envelope editor.
+
+```typescript
+<SynthADSR
+  label="FILTER ENV"
+  attack={50}       // ms
+  decay={200}       // ms
+  sustain={60}      // %
+  release={500}     // ms
+  onAttackChange={(v) => setParameter('attack', v)}
+  onDecayChange={(v) => setParameter('decay', v)}
+  onSustainChange={(v) => setParameter('sustain', v / 100)}
+  onReleaseChange={(v) => setParameter('release', v)}
+  maxAttack={5000}
+  maxDecay={5000}
+  maxRelease={10000}
+/>
+```
+
+### SynthLFO
+
+LFO with waveform selection and rate control.
+
+```typescript
+<SynthLFO
+  label="MOD LFO"
+  waveform={0}  // 0=sine, 1=saw, 2=square, 3=triangle
+  rate={2.0}    // Hz
+  onWaveformChange={(w) => setParameter('lfo_wave', w)}
+  onRateChange={(r) => setParameter('lfo_rate', r)}
+  minRate={0.1}
+  maxRate={20}
+/>
+```
+
+### SynthSequencer
+
+Step sequencer with pitch and gate per step.
+
+```typescript
+<SynthSequencer
+  steps={8}
+  pitchValues={[60, 62, 64, 65, 67, 69, 71, 72]}  // MIDI notes
+  gateValues={[true, true, false, true, true, false, true, false]}
+  currentStep={activeStep}
+  onPitchChange={(step, pitch) => setStepPitch(step, pitch)}
+  onGateChange={(step, gate) => setStepGate(step, gate)}
+  minPitch={36}
+  maxPitch={84}
+/>
+```
+
+### Oscilloscope
+
+Real-time waveform display.
+
+```typescript
+<Oscilloscope
+  label="OUTPUT"
+  audioData={waveformData}  // Float32Array
+  width={600}
+  height={120}
+  color="#00ff88"
+  showGrid={true}
+/>
+```
+
+### SynthRow
+
+Layout container for grouping controls.
+
+```typescript
+<SynthRow label="OSCILLATOR 1">
+  <SynthKnob label="WAVE" ... />
+  <SynthKnob label="TUNE" ... />
+  <SynthKnob label="LEVEL" ... />
+</SynthRow>
+```
+
+**See `core/ui/COMPONENT_LIBRARY.md` for complete API reference.**
+
+---
+
+## Docker Build System
+
+### Dockerfile Structure
+
+Multi-stage build:
+1. **Emscripten stage**: Compile all synths to WASM
+2. **Node stage**: Build React apps
+3. **Nginx stage**: Serve everything
+
+```dockerfile
+FROM emscripten/emsdk:3.1.51 AS wasm-builder
+# Build all WASM modules
+
+FROM node:20-slim AS react-builder
+# Build all React UIs
+
+FROM nginx:alpine
+# Serve website + WASM modules
+```
+
+### Building
+
+```bash
+# Build all synths + website
+docker build -t autosynth .
+
+# Run
+docker run -p 8080:80 autosynth
+
+# Visit http://localhost:8080
+```
+
+### Development
+
+For faster iteration during development:
+
+```bash
+# Build WASM locally
+cd synths/MySynth
+make wasm
+
+# Run dev server
+cd ui
+npm run dev
+
+# Hot reload at http://localhost:5173
+```
+
+---
 
 ## Documentation Index
 
-### Architecture & DSP
-- `docs/LLM_SYNTH_PROGRAMMING_GUIDE.md` - Complete synth design manual
-- `docs/SST_LIBRARIES_INDEX.md` - All SST library components
-- `docs/INDEX.md` - Complete documentation navigation
+### Core Guides
 
-### UI Development
-- `docs/TYPESCRIPT_COMPONENT_DEVELOPER_GUIDE.md` - React component guide
-- `docs/DESIGNER_GUIDE.md` - UI/UX patterns for synths
-
-### Component Library ⚠️ **READ THIS FIRST WHEN BUILDING UIs**
-- **`core/ui/COMPONENT_LIBRARY.md`** - **ALWAYS READ THIS BEFORE BUILDING ANY UI**
-  - Complete reference for all 12+ UI components (SynthKnob, SynthADSR, SynthLFO, etc.)
-  - Includes props, examples, and critical parameter normalization patterns
-  - Single source of truth for component usage
-- `core/ui/components/index.js` - Component exports and quick reference
-- `core/ui/components/` - All React component source files
-- Run `npm run storybook` to browse components interactively
-
-### Templates & Scripts
-- `templates/plugin-template/` - Complete plugin starter
-- `templates/docs/` - Documentation templates (architecture, sonic goals, parameters)
-- `templates/presets/` - Preset schema and examples
-- `scripts/new-plugin.sh` - Create new plugin from template
+- **`docs/WASM_ARCHITECTURE.md`** - Complete architecture reference
+- **`docs/DSP_LIBRARIES.md`** - SST, Airwindows, ChowDSP library index
+- **`core/ui/COMPONENT_LIBRARY.md`** - UI component reference
+- **`docs/GETTING_STARTED.md`** - Tutorials and examples
 
 ### Agent References
-- `.claude/agents/` - All agent definitions
 
-## Project Structure
+- `.claude/agents/project-coordinator.md` - Project orchestration
+- `.claude/agents/synth-architect.md` - DSP architecture design
+- `.claude/agents/dsp-engineer.md` - C++ implementation
+- `.claude/agents/ui-developer.md` - React UI development
 
-### Monorepo Layout
+### Templates
 
-```
-autosynth/
-├── CMakeLists.txt              # Root build configuration (monorepo)
-├── libs/                       # Shared dependencies
-│   ├── JUCE/                   # JUCE framework
-│   └── sst-*/                  # SST DSP libraries
-├── core/                       # Shared code across plugins
-│   ├── dsp/                    # Shared DSP components
-│   ├── effects/                # Shared effects
-│   ├── ui/                     # React component library
-│   │   ├── components/         # SynthKnob, SynthADSR, etc.
-│   │   ├── hooks/              # useJUCEBridge, useParameters
-│   │   └── themes/             # Theme system
-│   └── bridge/                 # JUCE-WebView communication
-├── plugins/
-│   ├── synths/                 # Synthesizer plugins
-│   │   ├── ModelD/
-│   │   ├── DFAM/
-│   │   └── ...
-│   ├── effects/                # Effect plugins
-│   └── midi/                   # MIDI utility plugins
-├── templates/
-│   ├── plugin-template/        # Plugin starter template
-│   ├── synth-spec.schema.json  # Spec validation schema
-│   └── dsp-libraries.json      # DSP library registry
-└── docs/                       # Documentation
-```
+- `templates/synth-template/` - New synth scaffold
+- `templates/docs/` - Documentation templates
 
-### Individual Plugin Structure
-
-```
-plugins/synths/MySynth/
-├── CMakeLists.txt              # Plugin build configuration
-├── synth-spec.json             # Plugin specification
-├── source/
-│   ├── PluginProcessor.cpp     # Main audio processor
-│   ├── PluginEditor.cpp        # WebView host
-│   └── dsp/                    # DSP components
-│       ├── Voice.h             # Voice implementation
-│       └── SynthEngine.h       # Polyphonic engine
-├── ui/
-│   ├── src/                    # React UI source
-│   └── dist/                   # Built UI (embedded)
-├── tests/                      # Unit & integration tests
-├── presets/                    # Factory presets
-└── docs/
-    ├── ARCHITECTURE.md         # Design documentation
-    └── PARAMETERS.md           # Parameter reference
-```
-
-### Build Options
-
-```bash
-# Build all plugins
-cmake -B build -DBUILD_ALL=ON
-cmake --build build
-
-# Build by category
-cmake -B build -DBUILD_SYNTHS=ON     # All synths
-cmake -B build -DBUILD_EFFECTS=ON    # All effects
-cmake -B build -DBUILD_MIDI=ON       # All MIDI plugins
-
-# Build specific plugins
-cmake -B build -DPLUGINS="ModelD;DFAM;TapeLoop"
-cmake --build build
-```
-
-## Key SST Libraries
-
-| Library | Purpose | Key Components |
-|---------|---------|----------------|
-| sst-basic-blocks | Core DSP | Oscillators, envelopes, LFOs, math |
-| sst-filters | Filters | Ladder, SVF, diode, comb, formant |
-| sst-effects | Effects | Delay, reverb, chorus, phaser |
-| sst-waveshapers | Distortion | Soft/hard clip, wavefold |
-
-## Component Library
-
-| Component | Purpose |
-|-----------|---------|
-| `SynthKnob` | Rotary control for continuous params |
-| `SynthSlider` | Linear fader |
-| `SynthADSR` | 4-stage envelope editor |
-| `SynthDAHDSR` | 6-stage envelope editor |
-| `SynthLFO` | LFO with waveform selection |
-| `Oscilloscope` | Real-time waveform display |
-| `SynthVUMeter` | Level meter |
-| `SynthLCD` | Text display |
-| `SynthLED` | Status indicator |
-| `SynthSequencer` | Step sequencer |
-
-## JUCE 8 WebView Integration
-
-### How React UI Communicates with JUCE
-
-JUCE 8's WebBrowserComponent uses a specific pattern for JavaScript-to-C++ communication:
-
-**C++ Side (PluginEditor.cpp):**
-```cpp
-auto options = juce::WebBrowserComponent::Options{}
-    .withNativeIntegrationEnabled()
-    .withNativeFunction("setParameter",
-        [this](const juce::Array<juce::var>& args, auto completion) {
-            juce::String paramId = args[0].toString();
-            float value = static_cast<float>(args[1]);
-            handleParameterFromWebView(paramId, value);
-            completion({});
-        });
-```
-
-**JavaScript Side - CRITICAL:**
-Native functions registered with `withNativeFunction` are NOT directly on `window.__JUCE__.backend`.
-They must be called via `emitEvent("__juce__invoke", ...)`:
-
-```typescript
-// CORRECT way to call native functions in JUCE 8:
-window.__JUCE__?.backend?.emitEvent?.("__juce__invoke", {
-  name: "setParameter",    // Function name registered in C++
-  params: [paramId, value], // Arguments as array
-  resultId: 0,              // For async responses (0 if not needed)
-});
-
-// WRONG - these do NOT work:
-window.__JUCE__.backend.setParameter(...)  // undefined
-window.setParameter(...)                    // undefined
-```
-
-### Checking Registered Functions
-
-The list of registered native functions is available at:
-```typescript
-window.__JUCE__?.initialisationData?.__juce__functions
-// Returns: ["noteOff", "noteOn", "requestState", "setParameter"]
-```
-
-### The useJUCEBridge Hook
-
-The `useJUCEBridge` hook in `ui/src/hooks/useJUCEBridge.ts` handles this:
-
-```typescript
-// Helper to call native JUCE functions via emitEvent
-const callNativeFunction = useCallback((name: string, params: unknown[]) => {
-  if (!isConnected) return;
-  window.__JUCE__?.backend?.emitEvent?.("__juce__invoke", {
-    name,
-    params,
-    resultId: 0,
-  });
-}, [isConnected]);
-
-// Send parameter to JUCE
-const setParameter = useCallback((paramId: string, value: number) => {
-  const clampedValue = Math.max(0, Math.min(1, value));
-  callNativeFunction("setParameter", [paramId, clampedValue]);
-}, [callNativeFunction]);
-```
-
-### JUCE -> React Communication
-
-JUCE sends data to React via `evaluateJavascript`:
-
-```cpp
-// C++ sends parameter updates
-juce::String script = "if (window.onParameterUpdate) window.onParameterUpdate('"
-                    + paramId + "', " + juce::String(value) + ");";
-webView->evaluateJavascript(script, nullptr);
-
-// C++ sends audio data for oscilloscope
-juce::String script = "if (window.onAudioData) window.onAudioData(" + json + ");";
-webView->evaluateJavascript(script, nullptr);
-```
-
-React registers handlers in `useJUCEBridge`:
-```typescript
-window.onParameterUpdate = (paramId: string, value: number) => { ... };
-window.onStateUpdate = (state: Record<string, number>) => { ... };
-window.onAudioData = (samples: number[]) => { ... };
-```
-
-### CRITICAL: Resource Provider Pattern for Embedded HTML
-
-**The ONLY reliable way to load embedded HTML in WebView is using `withResourceProvider()` callback with `getResourceProviderRoot()`.**
-
-Other approaches that **DO NOT WORK** reliably:
-- `data:text/html;base64,...` URLs (white screen on Linux WebKit)
-- `resource://index.html` custom URL scheme (white screen)
-- `file://` URLs (security restrictions)
-- Custom origins like `http://plugin.local` (fails on Linux)
-
-**The working pattern in PluginEditor.cpp:**
-
-```cpp
-// Build WebView options with resource provider
-// URL schemes by platform:
-//   Linux:   juce://juce.backend/
-//   Windows: https://juce.backend/
-//   macOS:   juce://juce.backend/
-auto options = juce::WebBrowserComponent::Options{}
-    .withNativeIntegrationEnabled()
-    .withResourceProvider(
-        [this](const juce::String& url) -> std::optional<juce::WebBrowserComponent::Resource>
-        {
-            return getResource(url);
-        }
-    )
-    // ... native functions ...
-
-webView = std::make_unique<juce::WebBrowserComponent>(options);
-addAndMakeVisible(*webView);
-
-// CRITICAL: Use getResourceProviderRoot(), NOT a custom URL
-#ifdef HAS_UI_RESOURCES
-    webView->goToURL(juce::WebBrowserComponent::getResourceProviderRoot());
-#else
-    webView->goToURL("http://localhost:5173");  // Dev server
-#endif
-```
-
-**The getResource() implementation:**
-
-```cpp
-std::optional<juce::WebBrowserComponent::Resource> PluginEditor::getResource(const juce::String& url)
-{
-    DBG("Resource request: " + url);
-
-#ifdef HAS_UI_RESOURCES
-    juce::String path = url;
-    auto root = juce::WebBrowserComponent::getResourceProviderRoot();
-    if (path.startsWith(root))
-        path = path.substring(root.length());
-
-    if (path.isEmpty() || path == "/" || path == "index.html")
-    {
-        juce::WebBrowserComponent::Resource resource;
-        resource.data = std::vector<std::byte>(
-            reinterpret_cast<const std::byte*>(UIResources::index_html),
-            reinterpret_cast<const std::byte*>(UIResources::index_html) + UIResources::index_htmlSize
-        );
-        resource.mimeType = "text/html";
-        return resource;
-    }
-#else
-    juce::ignoreUnused(url);
-#endif
-    return std::nullopt;
-}
-```
-
-### CRITICAL: DOMContentLoaded in main.tsx
-
-When using `vite-plugin-singlefile` with IIFE format, the inline script executes in `<head>` **before** the `<body>` is parsed. This means `document.getElementById('root')` returns `null` and React cannot mount.
-
-**The fix - ALWAYS wrap React mounting in DOMContentLoaded handler:**
-
-```tsx
-// ui/src/main.tsx
-const mount = () => {
-  const root = document.getElementById('root');
-  if (root) {
-    ReactDOM.createRoot(root).render(
-      <React.StrictMode>
-        <App />
-      </React.StrictMode>,
-    );
-  } else {
-    console.error('Could not find #root element');
-  }
-};
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', mount);
-} else {
-  mount();
-}
-```
-
-### CRITICAL: Vite IIFE Format
-
-The Vite config **MUST** use IIFE format, not ES modules:
-
-```typescript
-// ui/vite.config.ts
-rollupOptions: {
-  output: {
-    format: 'iife',  // NOT 'es' - ES modules don't work inline
-    inlineDynamicImports: true,
-  },
-},
-```
-
-### Troubleshooting WebView Issues
-
-| Symptom | Cause | Fix |
-|---------|-------|-----|
-| White screen | Wrong URL scheme or resource provider | Use `getResourceProviderRoot()` |
-| Black screen | CSS loads, JS doesn't execute | Add DOMContentLoaded wrapper |
-| React not mounting | Script runs before `#root` exists | Add DOMContentLoaded wrapper |
-| Nothing loads | `HAS_UI_RESOURCES` not defined | Check CMakeLists.txt |
-
-## DSP Implementation Notes
-
-### WebAssembly AudioWorklet with WASI Stubs
-
-When compiling DSP code to WebAssembly for AudioWorklet processors, you may need WASI stubs even if not using filesystem features. Some runtime functions implicitly require these imports.
-
-**WASI stub implementation in AudioWorklet processor:**
-```javascript
-const imports = {
-  wasi_snapshot_preview1: {
-    random_get: (buffer, size) => {
-      const heap = new Uint8Array(self.memory.buffer);
-      for (let i = 0; i < size; i++) {
-        heap[buffer + i] = Math.floor(Math.random() * 256);
-      }
-      return 0;
-    },
-    fd_close: () => 0,
-    fd_write: () => 0,
-    fd_seek: () => 0,
-  },
-  env: {
-    emscripten_notify_memory_growth: (memoryIndex) => {
-      console.log('[DSP] Memory grew');
-      self.updateHeapViews();
-    },
-  }
-};
-
-// Instantiate WASM with stubs
-const wasmInstance = await WebAssembly.instantiate(wasmModule, imports);
-```
-
-**Emscripten build flags to minimize WASI dependencies:**
-```bash
-em++ -O2 -fno-exceptions -s FILESYSTEM=0 -s ENVIRONMENT="worker" --no-entry \
-  -s EXPORTED_FUNCTIONS="['_init','_process','_noteOn','_noteOff']" \
-  -o dsp.wasm dsp.cpp
-```
-
-### Negative Filter Envelope Amount
-
-When implementing filter envelope modulation with a bipolar amount (positive and negative):
-
-```cpp
-float filterEnvOut = filterEnv.process();
-float modCutoff;
-
-if (filterEnvAmount >= 0.0f) {
-    // Positive: envelope opens filter (sweep up from base)
-    modCutoff = filterCutoff + filterEnvAmount * filterEnvOut * 10000.0f;
-} else {
-    // Negative: inverted - filter starts open, closes at envelope peak
-    // At env=0: cutoff = base + |amt| * 10000 (bright)
-    // At env=1: cutoff = base (dark)
-    modCutoff = filterCutoff + std::abs(filterEnvAmount) * (1.0f - filterEnvOut) * 10000.0f;
-}
-```
-
-**Why invert the envelope for negative amounts?**
-- Simply subtracting would cause the filter to hit the minimum cutoff (20Hz), making everything silent
-- Inverting creates the classic "reversed envelope" effect where the filter starts open and closes
-
-### Linear Envelope Time Ranges
-
-**IMPORTANT:** Use linear time ranges for ADSR parameters so that UI millisecond values match actual times:
-
-```cpp
-// CORRECT - linear range, UI ms values match actual times
-auto timeRange = juce::NormalisableRange<float>(0.001f, 5.0f, 0.001f);
-
-// WRONG - skew factor makes UI values misleading
-auto timeRange = juce::NormalisableRange<float>(0.001f, 10.0f, 0.001f, 0.3f);
-```
-
-### Stepped Knob Options with Negative Ranges
-
-When using `SynthKnob` with options array for ranges like octave (-2 to +2):
-
-```typescript
-// The knob's displayValue must offset by min to get correct array index
-if (options && options.length > 0) {
-  const index = Math.round(handleValue - min);  // Offset by min!
-  return options[Math.max(0, Math.min(index, options.length - 1))];
-}
-```
-
-This ensures octave values like [-2, -1, 0, 1, 2] map correctly to labels ["32'", "16'", "8'", "4'", "2'"].
-
-### Preventing Clicks at Note Attack
-
-Clicks at note onset come from three sources. Fix all three:
-
-**1. Oscillator Phase Reset**
-Reset oscillator phase to 0 when triggered so waveforms start at a known point:
-
-```cpp
-void trigger(float vel = 1.0f)
-{
-    vco1.resetPhase();  // Start at zero-crossing
-    vco2.resetPhase();
-    // ... trigger envelopes
-}
-```
-
-**2. Exponential Envelope Attack (not linear)**
-Linear attack ramps create clicks because the derivative is discontinuous at the start. Use exponential:
-
-```cpp
-// BAD - linear attack creates click
-value += attackRate;
-
-// GOOD - exponential approach (smooth start)
-value += attackCoef * (1.0f - value);
-```
-
-Full exponential AD envelope:
-```cpp
-void updateCoefficients()
-{
-    float attackSamples = attackTime * sampleRate;
-    attackCoef = 1.0f - std::exp(-4.0f / attackSamples);
-
-    float decaySamples = decayTime * sampleRate;
-    decayCoef = std::exp(-4.0f / decaySamples);
-}
-
-float process()
-{
-    switch (stage) {
-        case ATTACK:
-            value += attackCoef * (1.0f - value);  // Exponential rise
-            if (value >= 0.999f) { value = 1.0f; stage = DECAY; }
-            break;
-        case DECAY:
-            value *= decayCoef;  // Exponential fall
-            if (value <= 0.001f) { value = 0.0f; stage = IDLE; }
-            break;
-    }
-    return value;
-}
-```
-
-**3. Anti-Click Ramp (~2ms fade-in)**
-As a safety net, apply a short linear ramp at note onset:
-
-```cpp
-// In trigger():
-antiClickRamp = 0.0f;
-antiClickActive = true;
-
-// In render():
-if (antiClickActive) {
-    antiClickRamp += 1.0f / 88.0f;  // ~2ms at 44.1kHz
-    if (antiClickRamp >= 1.0f) {
-        antiClickRamp = 1.0f;
-        antiClickActive = false;
-    }
-    output *= antiClickRamp;
-}
-```
-
-### Clock-Synced LFOs and Delays
-
-For tempo-synced modulation, use musical clock dividers instead of Hz:
-
-```cpp
-// Clock divider values (musical divisions)
-static const float clockDividerValues[] = {
-    0.0625f,    // 1/16 (4 bars)
-    0.0833333f, // 1/12 (3 bars) - triplet
-    0.125f,     // 1/8 (2 bars)
-    0.1666667f, // 1/6 - triplet
-    0.2f,       // 1/5 - quintuplet
-    0.25f,      // 1/4 (1 bar)
-    0.3333333f, // 1/3 - triplet
-    0.5f,       // 1/2 (half note)
-    1.0f,       // 1x (quarter note)
-    1.5f,       // 3/2 (dotted quarter)
-    2.0f,       // 2x (8th note)
-    3.0f,       // 3x (8th triplet)
-    4.0f,       // 4x (16th note)
-    6.0f,       // 6x (16th triplet)
-    8.0f,       // 8x (32nd note)
-};
-
-// LFO rate from tempo
-void setClockSyncRate(float bpm, float divider)
-{
-    float beatsPerSecond = bpm / 60.0f;
-    float cyclesPerSecond = beatsPerSecond * divider;
-    phaseIncrement = cyclesPerSecond / sampleRate;
-}
-
-// Delay time from tempo
-void setClockSyncTime(float bpm, float divider)
-{
-    float secondsPerBeat = 60.0f / bpm;
-    float syncedTime = secondsPerBeat / divider;
-    delaySamples = syncedTime * sampleRate;
-}
-```
-
-Use `AudioParameterChoice` for the UI:
-```cpp
-params.push_back(std::make_unique<juce::AudioParameterChoice>(
-    juce::ParameterID{"lfo_rate", 1},
-    "LFO Rate",
-    juce::StringArray{"1/16", "1/12", "1/8", "1/6", "1/5", "1/4", "1/3", "1/2",
-                      "1x", "3/2", "2x", "3x", "4x", "5x", "6x", "8x"},
-    8  // default to 1x
-));
-```
-
-### Gradual Effect Mix Curves
-
-For effects like reverb where subtle amounts matter most, use power curves:
-
-```cpp
-void setMix(float m)
-{
-    float linear = std::clamp(m, 0.0f, 1.0f);
-    // 4th power: 50% knob = 6.25% actual mix
-    mix = linear * linear * linear * linear;
-}
-```
-
-This gives much more control in the low range where you want subtle room ambience.
-
-### Sending Sequencer State to WebView
-
-For step sequencers, send state via timer callback:
-
-```cpp
-// In PluginEditor::timerCallback()
-void sendSequencerStateToWebView()
-{
-    auto state = processorRef.getSequencerState();
-
-    juce::DynamicObject::Ptr stateObj = new juce::DynamicObject();
-    stateObj->setProperty("currentStep", state.currentStep);
-    stateObj->setProperty("running", state.running);
-
-    juce::String json = juce::JSON::toString(juce::var(stateObj.get()));
-    juce::String script = "if (window.onSequencerState) window.onSequencerState(" + json + ");";
-    webView->evaluateJavascript(script, nullptr);
-}
-```
-
-React side:
-```typescript
-useEffect(() => {
-    window.onSequencerState = (state: { currentStep: number; running: boolean }) => {
-        setCurrentStep(state.currentStep);
-    };
-    return () => { window.onSequencerState = null; };
-}, []);
-```
-
-## Development Workflow
-
-### 0. Scaffold Phase
-```bash
-./scripts/new-plugin.sh "My Synth" "MySynth" "MySy"
-```
-Result: Complete plugin structure from template
-
-### 1. Spec Phase (THE CRITICAL STEP)
-```
-User prompt → project-coordinator → synth-spec.json
-```
-Result: Validated spec defining all oscillators, filters, parameters, UI
-**This is where all design decisions are made and locked in.**
-
-### 2. Generation Phase (DETERMINISTIC)
-```bash
-node scripts/generate-from-spec.js synth-spec.json ./
-```
-Result: Generated Voice.h, Parameters.h, parameters.ts - working code, not TODOs
-
-### 3. Customization Phase (PARALLEL)
-```
-Generated code → dsp-engineer (Voice.h) + ui-developer (App.tsx) in parallel
-```
-Result: Custom DSP logic and polished UI added to generated scaffolding
-
-### 4. Validation Gates
-```
-- [ ] Spec validates against schema
-- [ ] C++ builds without errors
-- [ ] TypeScript type checks
-- [ ] Unit tests pass
-- [ ] Integration tests pass
-```
-
-### 5. Quality Phase
-```
-Implementation → qa-engineer → sound-designer (presets)
-Result: Tested plugin with factory presets
-```
-
-### 6. Delivery
-```
-All deliverables → project-coordinator → packaging
-Result: Release-ready plugin
-```
+---
 
 ## Tips for Best Results
 
 ### Be Specific About Sound
+
 ```
-Good: "Warm, Moog-style bass with punchy attack and long decay"
-Bad: "A bass synth"
+✅ Good: "Warm, Moog-style bass with punchy attack and long decay"
+❌ Bad: "A bass synth"
 ```
 
 ### Reference Known Synths
+
 ```
-Good: "Like the Prophet-5's polysynth character but with a TB-303 filter"
-Bad: "A good sounding synth"
+✅ Good: "Like the Prophet-5's polysynth character but with a TB-303 filter"
+❌ Bad: "A good sounding synth"
 ```
 
-### Specify Key Features
+### Specify DSP Components
+
 ```
-Good: "3 oscillators, each with independent tape saturation pre-filter"
-Bad: "Some oscillators with effects"
+✅ Good: "Use SST VintageLadder filter and Airwindows Galactic reverb"
+❌ Bad: "Add a filter and reverb"
 ```
 
 ### Describe Use Cases
+
 ```
-Good: "Optimized for live performance with macro controls"
-Bad: "A general purpose synth"
+✅ Good: "Optimized for drone music with long evolving textures"
+❌ Bad: "A general purpose synth"
 ```
-
-## Troubleshooting
-
-### Agent Not Responding as Expected
-- Make sure to invoke `project-coordinator` first for new projects
-- Provide clear, specific requirements
-- Ask for clarification if output seems off-target
-
-### Missing Components
-- Check SST library reference in `docs/SST_LIBRARIES_INDEX.md`
-- Check component library in Storybook
-- If truly missing, note as a requirement for future implementation
-
-### Build Issues
-- Run `git submodule update --init --recursive`
-- Ensure JUCE and SST libraries are properly cloned
-- Check `docs/LLM_SYNTH_PROGRAMMING_GUIDE.md` Section 17 for CI/CD
-
-### Docker Issues
-- **X11 not working on macOS**: Ensure XQuartz is installed and running, then log out and back in
-- **Audio not working**: Linux only; ensure PulseAudio is running (`pulseaudio --start`)
-- **Login not persisting**: Check `.docker-state/claude/` directory exists and is writable
-- **Build fails**: Run `./scripts/docker-run.sh build` to rebuild the image
-
-## Contributing
-
-This is an evolving system. To improve it:
-
-1. **Add documentation**: Put new guides in `docs/`
-2. **Add components**: Extend the Storybook library in `core/ui/components/`
-3. **Update agents**: Modify agent definitions in `.claude/agents/`
-4. **Add presets**: Include example presets in `presets/`
 
 ---
 
-**Studio** - Build professional synthesizers with AI collaboration.
+## Troubleshooting
+
+### WASM Build Fails
+
+```bash
+# Check Emscripten is installed
+emcc --version
+
+# Verify include paths in Makefile
+-I ../../libs/sst-basic-blocks/include
+-I ../../libs/sst-filters/include
+```
+
+### Audio Not Working
+
+```bash
+# Check browser console for errors
+# Ensure HTTPS or localhost (required for AudioWorklet)
+# Verify WASM module loads: Network tab in DevTools
+```
+
+### Components Not Found
+
+```bash
+# Check import paths
+import { SynthKnob } from '../../../core/ui/components';
+
+# Verify core/ui/components/ exists
+ls core/ui/components/
+```
+
+### Docker Issues
+
+```bash
+# Rebuild image
+docker build --no-cache -t autosynth .
+
+# Check logs
+docker logs <container-id>
+```
+
+---
+
+## Philosophy
+
+### Embrace Existing Libraries
+
+SST, Airwindows, and ChowDSP represent decades of research and development. Their complexity is intentional - they model real analog behavior accurately. Don't simplify away from this complexity.
+
+### Shared Components Drive Consistency
+
+One component library means:
+- Consistent UX across all synths
+- No duplicate code
+- Faster development
+- Easier maintenance
+
+### Web-Native Is the Future
+
+No installers, no plugin hosts, no compatibility hell. Just a URL.
+
+---
+
+**AutoSynth** - Build professional synthesizers for the web.
+
+For questions or issues: https://github.com/autosynth/autosynth/issues
