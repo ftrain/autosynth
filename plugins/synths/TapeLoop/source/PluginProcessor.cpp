@@ -36,6 +36,9 @@ PluginProcessor::PluginProcessor()
     tapeHissParam = apvts.getRawParameterValue("tape_hiss");
     tapeAgeParam = apvts.getRawParameterValue("tape_age");
     tapeDegradeParam = apvts.getRawParameterValue("tape_degrade");
+    tapeModelParam = apvts.getRawParameterValue("tape_model");
+    tapeDriveParam = apvts.getRawParameterValue("tape_drive");
+    tapeBumpParam = apvts.getRawParameterValue("tape_bump");
 
     recAttackParam = apvts.getRawParameterValue("rec_attack");
     recDecayParam = apvts.getRawParameterValue("rec_decay");
@@ -56,9 +59,12 @@ PluginProcessor::PluginProcessor()
     delayFeedbackParam = apvts.getRawParameterValue("delay_feedback");
     delayMixParam = apvts.getRawParameterValue("delay_mix");
 
-    reverbDecayParam = apvts.getRawParameterValue("reverb_decay");
+    reverbReplaceParam = apvts.getRawParameterValue("reverb_replace");
+    reverbBrightnessParam = apvts.getRawParameterValue("reverb_brightness");
+    reverbDetuneParam = apvts.getRawParameterValue("reverb_detune");
+    reverbBignessParam = apvts.getRawParameterValue("reverb_bigness");
+    reverbSizeParam = apvts.getRawParameterValue("reverb_size");
     reverbMixParam = apvts.getRawParameterValue("reverb_mix");
-    reverbDampingParam = apvts.getRawParameterValue("reverb_damping");
 
     compThresholdParam = apvts.getRawParameterValue("comp_threshold");
     compRatioParam = apvts.getRawParameterValue("comp_ratio");
@@ -259,6 +265,31 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParam
     ));
 
     // =========================================================================
+    // TAPE MODEL SELECTION
+    // =========================================================================
+
+    params.push_back(std::make_unique<juce::AudioParameterChoice>(
+        juce::ParameterID{"tape_model", 1},
+        "Tape Model",
+        juce::StringArray{"Bypass", "TapeDust", "Airwindows", "Both"},
+        3  // Default: Both
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"tape_drive", 1},
+        "Tape Drive",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.5f  // 0dB default (0.5 = 0dB, full range is ±24dB)
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"tape_bump", 1},
+        "Head Bump",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f
+    ));
+
+    // =========================================================================
     // RECORDING ENVELOPE
     // =========================================================================
 
@@ -374,15 +405,42 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParam
     ));
 
     // =========================================================================
-    // REVERB
+    // REVERB (Airwindows Galactic3)
     // =========================================================================
 
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
-        juce::ParameterID{"reverb_decay", 1},
-        "Reverb Decay",
-        juce::NormalisableRange<float>(0.1f, 10.0f, 0.1f),
-        2.0f,
-        juce::AudioParameterFloatAttributes().withLabel("s")
+        juce::ParameterID{"reverb_replace", 1},
+        "Reverb Replace",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.5f
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"reverb_brightness", 1},
+        "Reverb Brightness",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.5f
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"reverb_detune", 1},
+        "Reverb Detune",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.2f
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"reverb_bigness", 1},
+        "Reverb Bigness",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.5f
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"reverb_size", 1},
+        "Reverb Size",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.5f
     ));
 
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
@@ -390,13 +448,6 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParam
         "Reverb Mix",
         juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
         0.0f
-    ));
-
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(
-        juce::ParameterID{"reverb_damping", 1},
-        "Reverb Damping",
-        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
-        0.5f
     ));
 
     // =========================================================================
@@ -660,6 +711,9 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     engine.setTapeHiss(tapeHissParam->load());
     engine.setTapeAge(tapeAgeParam->load());
     engine.setTapeDegrade(tapeDegradeParam->load());
+    engine.setTapeModel(static_cast<int>(tapeModelParam->load()));
+    engine.setTapeDrive(tapeDriveParam->load());
+    engine.setTapeBump(tapeBumpParam->load());
 
     engine.setRecAttack(recAttackParam->load());
     engine.setRecDecay(recDecayParam->load());
@@ -680,9 +734,12 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     engine.setDelayFeedback(delayFeedbackParam->load());
     engine.setDelayMix(delayMixParam->load());
 
-    engine.setReverbDecay(reverbDecayParam->load());
+    engine.setReverbReplace(reverbReplaceParam->load());
+    engine.setReverbBrightness(reverbBrightnessParam->load());
+    engine.setReverbDetune(reverbDetuneParam->load());
+    engine.setReverbBigness(reverbBignessParam->load());
+    engine.setReverbSize(reverbSizeParam->load());
     engine.setReverbMix(reverbMixParam->load());
-    engine.setReverbDamping(reverbDampingParam->load());
 
     engine.setCompThreshold(compThresholdParam->load());
     engine.setCompRatio(compRatioParam->load());

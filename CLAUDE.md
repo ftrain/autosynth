@@ -336,9 +336,14 @@ See `templates/synth-spec.schema.json` for full schema and `templates/synth-spec
 - `docs/TYPESCRIPT_COMPONENT_DEVELOPER_GUIDE.md` - React component guide
 - `docs/DESIGNER_GUIDE.md` - UI/UX patterns for synths
 
-### Component Library
-- `core/ui/components/` - All React components
-- Run `npm run storybook` to browse components
+### Component Library ⚠️ **READ THIS FIRST WHEN BUILDING UIs**
+- **`core/ui/COMPONENT_LIBRARY.md`** - **ALWAYS READ THIS BEFORE BUILDING ANY UI**
+  - Complete reference for all 12+ UI components (SynthKnob, SynthADSR, SynthLFO, etc.)
+  - Includes props, examples, and critical parameter normalization patterns
+  - Single source of truth for component usage
+- `core/ui/components/index.js` - Component exports and quick reference
+- `core/ui/components/` - All React component source files
+- Run `npm run storybook` to browse components interactively
 
 ### Templates & Scripts
 - `templates/plugin-template/` - Complete plugin starter

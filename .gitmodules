@@ -34,3 +34,9 @@
 [submodule "plugins/DFAM/JUCE"]
 	path = plugins/DFAM/JUCE
 	url = https://github.com/juce-framework/JUCE.git
+[submodule "libs/chowdsp_utils"]
+	path = libs/chowdsp_utils
+	url = https://github.com/Chowdhury-DSP/chowdsp_utils
+[submodule "libs/airwin2rack"]
+	path = libs/airwin2rack
+	url = https://github.com/baconpaul/airwin2rack

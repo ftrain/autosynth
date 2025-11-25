@@ -43,11 +43,21 @@ add_subdirectory(JUCE)
 # ============================================================================
 add_library(sst-libraries INTERFACE)
 target_include_directories(sst-libraries INTERFACE
-    ${CMAKE_SOURCE_DIR}/libs/sst/sst-basic-blocks/include
-    ${CMAKE_SOURCE_DIR}/libs/sst/sst-filters/include
-    ${CMAKE_SOURCE_DIR}/libs/sst/sst-effects/include
-    ${CMAKE_SOURCE_DIR}/libs/sst/sst-waveshapers/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/sst-basic-blocks/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/sst-filters/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/sst-effects/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/sst-waveshapers/include
 )
+
+# ============================================================================
+# AIRWINDOWS LIBRARY (MIT)
+# ============================================================================
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/airwin2rack ${CMAKE_CURRENT_BINARY_DIR}/airwin2rack)
+
+# ============================================================================
+# CHOWDSP LIBRARIES (GPL-3)
+# ============================================================================
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/chowdsp_utils ${CMAKE_CURRENT_BINARY_DIR}/chowdsp)
 
 # ============================================================================
 # PLUGIN TARGET
@@ -98,6 +108,8 @@ endif()
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
         sst-libraries
+        airwin-registry
+        chowdsp::chowdsp_dsp_utils
         juce::juce_audio_utils
         juce::juce_dsp
         juce::juce_gui_extra
