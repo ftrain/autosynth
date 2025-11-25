@@ -36,6 +36,9 @@ PluginProcessor::PluginProcessor()
     tapeHissParam = apvts.getRawParameterValue("tape_hiss");
     tapeAgeParam = apvts.getRawParameterValue("tape_age");
     tapeDegradeParam = apvts.getRawParameterValue("tape_degrade");
+    tapeModelParam = apvts.getRawParameterValue("tape_model");
+    tapeDriveParam = apvts.getRawParameterValue("tape_drive");
+    tapeBumpParam = apvts.getRawParameterValue("tape_bump");
 
     recAttackParam = apvts.getRawParameterValue("rec_attack");
     recDecayParam = apvts.getRawParameterValue("rec_decay");
@@ -257,6 +260,31 @@ juce::AudioProcessorValueTreeState::ParameterLayout PluginProcessor::createParam
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{"tape_degrade", 1},
         "Tape Degrade",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f
+    ));
+
+    // =========================================================================
+    // TAPE MODEL SELECTION
+    // =========================================================================
+
+    params.push_back(std::make_unique<juce::AudioParameterChoice>(
+        juce::ParameterID{"tape_model", 1},
+        "Tape Model",
+        juce::StringArray{"Bypass", "TapeDust", "Airwindows", "Both"},
+        3  // Default: Both
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"tape_drive", 1},
+        "Tape Drive",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.5f  // 0dB default (0.5 = 0dB, full range is ±24dB)
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{"tape_bump", 1},
+        "Head Bump",
         juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
         0.0f
     ));
@@ -683,6 +711,9 @@ void PluginProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     engine.setTapeHiss(tapeHissParam->load());
     engine.setTapeAge(tapeAgeParam->load());
     engine.setTapeDegrade(tapeDegradeParam->load());
+    engine.setTapeModel(static_cast<int>(tapeModelParam->load()));
+    engine.setTapeDrive(tapeDriveParam->load());
+    engine.setTapeBump(tapeBumpParam->load());
 
     engine.setRecAttack(recAttackParam->load());
     engine.setRecDecay(recDecayParam->load());

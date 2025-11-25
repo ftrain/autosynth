@@ -310,6 +310,12 @@ private:
 // Forward declare Galactic3Reverb (defined in separate header)
 #include "Galactic3Reverb.h"
 
+// TapeDust for authentic slew-dependent tape hiss
+#include "TapeDust.h"
+
+// Airwindows Tape for saturation and head bump
+#include "AirwindowsTape.h"
+
 /**
  * @brief Simple compressor with dry/wet mix
  */
@@ -684,6 +690,8 @@ public:
         delay.prepare(sr);
         reverb.prepare(sr);
         compressor.prepare(sr);
+        tapeDust.prepare(sr);
+        airwindowsTape.prepare(sr);
 
         (void)maxBlockSize;
     }
@@ -943,10 +951,22 @@ public:
             tapeL = ageFilterStateL;
             tapeR = ageFilterStateR;
 
-            // Tape hiss (filtered noise)
-            float noise = noiseDist(rng) * tapeHiss * 0.02f;
-            tapeL += noise;
-            tapeR += noise;
+            // ================================================================
+            // TAPE MODEL PROCESSING
+            // ================================================================
+            // 0 = Bypass, 1 = TapeDust only, 2 = Airwindows only, 3 = Both
+
+            if (tapeModel == 1 || tapeModel == 3)  // TapeDust
+            {
+                tapeDust.setRange(tapeHiss);
+                tapeDust.setMix(tapeHiss * 0.3f);
+                tapeDust.process(tapeL, tapeR);
+            }
+
+            if (tapeModel == 2 || tapeModel == 3)  // Airwindows Tape
+            {
+                airwindowsTape.process(tapeL, tapeR);
+            }
 
             // ================================================================
             // SELF-RE-RECORDING DEGRADATION
@@ -1069,6 +1089,11 @@ public:
 
     // Tape Degradation
     void setTapeDegrade(float degrade) { tapeDegrade = std::clamp(degrade, 0.0f, 1.0f); }
+
+    // Tape Model Selection
+    void setTapeModel(int model) { tapeModel = std::clamp(model, 0, 3); }
+    void setTapeDrive(float drive) { tapeDrive = std::clamp(drive, 0.0f, 1.0f); airwindowsTape.setInputGain(drive); }
+    void setTapeBump(float bump) { tapeBump = std::clamp(bump, 0.0f, 1.0f); airwindowsTape.setHeadBump(bump); }
 
     // Tape Character LFO
     void setLFORate(float hz) { tapeCharLFO.setRate(hz); }
@@ -1244,6 +1269,11 @@ private:
     float degradeFilterStateL = 0.0f;
     float degradeFilterStateR = 0.0f;
 
+    // Tape Model Selection
+    int tapeModel = 3;  // 0=bypass, 1=TapeDust, 2=Airwindows, 3=both
+    float tapeDrive = 0.5f;  // Airwindows input gain (0.5 = 0dB)
+    float tapeBump = 0.0f;   // Airwindows head bump
+
     // Tape Character LFO
     SimpleLFO tapeCharLFO;
     float lfoDepth = 0.0f;
@@ -1296,4 +1326,6 @@ private:
     StereoDelay delay;
     Galactic3Reverb reverb;
     Compressor compressor;
+    TapeDust tapeDust;  // Slew-dependent tape hiss
+    AirwindowsTape airwindowsTape;  // Tape saturation and head bump
 };

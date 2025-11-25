@@ -165,6 +165,35 @@ export const PARAMETER_DEFINITIONS: ParameterMap = {
   },
 
   // =========================================================================
+  // TAPE MODEL SELECTION
+  // =========================================================================
+
+  tape_model: {
+    id: 'tape_model',
+    name: 'Tape Model',
+    min: 0,
+    max: 3,
+    default: 3,
+    step: 1,
+  },
+
+  tape_drive: {
+    id: 'tape_drive',
+    name: 'Tape Drive',
+    min: 0,
+    max: 1,
+    default: 0.5,
+  },
+
+  tape_bump: {
+    id: 'tape_bump',
+    name: 'Head Bump',
+    min: 0,
+    max: 1,
+    default: 0,
+  },
+
+  // =========================================================================
   // RECORDING ENVELOPE
   // =========================================================================
 

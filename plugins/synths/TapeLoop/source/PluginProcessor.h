@@ -109,6 +109,9 @@ private:
     std::atomic<float>* tapeHissParam = nullptr;
     std::atomic<float>* tapeAgeParam = nullptr;
     std::atomic<float>* tapeDegradeParam = nullptr;
+    std::atomic<float>* tapeModelParam = nullptr;
+    std::atomic<float>* tapeDriveParam = nullptr;
+    std::atomic<float>* tapeBumpParam = nullptr;
 
     std::atomic<float>* recAttackParam = nullptr;
     std::atomic<float>* recDecayParam = nullptr;
