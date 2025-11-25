@@ -47,8 +47,9 @@ This ensures each project is self-contained and can be deployed independently.
 |-----------|---------|
 | `SynthKnob` | Rotary controls (cutoff, resonance, levels, waveform selection with options array) |
 | `SynthSlider` | Linear faders (volume, mix) |
-| `SynthADSR` | Envelope editors |
+| `SynthADSR` | Visual ADSR envelope editor with drag-to-edit |
 | `SynthDAHDSR` | 6-stage envelope editors |
+| `SynthLFO` | Visual LFO with waveform selector knob and rate slider |
 | `SynthRow` | Grouping controls with labels and themes |
 | `SynthSequencer` | Step sequencers with pitch bars and gate toggles |
 | `Oscilloscope` | Waveform display |
@@ -87,7 +88,7 @@ The shared.ts file provides ready-to-use style objects:
 
 ```tsx
 // Good: Uses existing components with themes
-<SynthRow label="FILTER" theme="blue" icon="~">
+<SynthRow label="FILTER" theme="orange" icon="~">
   <SynthKnob label="Cutoff" value={params.filter_cutoff}
              onChange={(v) => setParameter('filter_cutoff', v)}
              min={20} max={20000} />
@@ -102,15 +103,57 @@ The shared.ts file provides ready-to-use style objects:
 </div>
 ```
 
+## SynthADSR Usage
+
+The SynthADSR component provides an interactive visual envelope editor. Use `showTabs={false}` for single envelope instances:
+
+```tsx
+<SynthADSR
+  label="OSC ENV"
+  attack={attackMs}
+  decay={decayMs}
+  sustain={sustainPercent}  // 0-100
+  release={releaseMs}
+  onAttackChange={(v) => { setAttack(v); updateParam('attack', v); }}
+  onDecayChange={(v) => { setDecay(v); updateParam('decay', v); }}
+  onSustainChange={(v) => { setSustain(v); updateParam('sustain', v / 100); }}
+  onReleaseChange={(v) => { setRelease(v); updateParam('release', v); }}
+  maxAttack={2000}
+  maxDecay={2000}
+  maxRelease={5000}
+  showTabs={false}  // Hide tab interface for single envelope
+/>
+```
+
+## SynthLFO Usage
+
+The SynthLFO component provides a visual LFO with waveform selector knob and rate slider:
+
+```tsx
+<SynthLFO
+  label="MOD LFO"
+  waveform={lfoWaveform}  // 0-6: Triangle, Square, Sine, Sawtooth, Ramp, Stepped S&H, Smooth S&H
+  rate={lfoRate}          // Hz
+  onWaveformChange={(v) => { setLfoWaveform(v); updateParam('lfoWaveform', v); }}
+  onRateChange={(v) => { setLfoRate(v); updateParam('lfoRate', v); }}
+  minRate={0.01}
+  maxRate={20}
+/>
+```
+
 ## SynthRow Themes
 
 | Theme | Use For |
 |-------|---------|
+| `orange` | **Recommended default** - Clean bottom-border style, works for all sections |
 | `amber` | Oscillators, tone generation |
 | `blue` | Filters, frequency shaping |
 | `green` | Envelopes, timing |
 | `magenta` | Sequencers, modulation |
 | `pink` | Effects (delay, reverb) |
+| `cyan` | LFO, modulation sources |
+
+**Tip:** For a consistent, professional look, use `theme="orange"` on all SynthRow components. This gives a clean bottom-border accent style that works well across all control types.
 
 ## Boundaries
 

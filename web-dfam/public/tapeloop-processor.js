@@ -1,6 +1,8 @@
 /**
  * TapeLoop AudioWorklet Processor
  * Runs the WASM DSP in the audio thread
+ *
+ * Full-featured TapeLoop with Airwindows, Galactic3 reverb, ADSR, and more.
  */
 
 class TapeLoopProcessor extends AudioWorkletProcessor {
@@ -27,11 +29,11 @@ class TapeLoopProcessor extends AudioWorkletProcessor {
     } else if (data.type === 'param' && this.wasmReady) {
       this.setParam(data.name, data.value);
     } else if (data.type === 'noteOn' && this.wasmReady) {
-      this.wasmExports.i(data.note, data.velocity);
+      this.wasmExports.noteOn(data.note, data.velocity);
     } else if (data.type === 'noteOff' && this.wasmReady) {
-      this.wasmExports.j(data.note);
+      this.wasmExports.noteOff(data.note);
     } else if (data.type === 'clearTape' && this.wasmReady) {
-      this.wasmExports.k();
+      this.wasmExports.clearTape();
     }
   }
 
@@ -39,24 +41,24 @@ class TapeLoopProcessor extends AudioWorkletProcessor {
     try {
       const self = this;
 
-      // TapeLoop WASM imports: module "a" with keys a, b, c, d
+      // WASM imports for emscripten with WASI stubs
       const imports = {
-        a: {
-          a: (ptr, type, destructor) => { // ___cxa_throw
-            console.error('[TapeLoop] C++ exception thrown');
-            throw new Error('C++ exception');
-          },
-          b: () => { // _abort
-            console.error('[TapeLoop] WASM abort called');
-            throw new Error('abort');
-          },
-          c: (dest, src, num) => { // _emscripten_memcpy_js
-            if (!self.memory) return;
+        wasi_snapshot_preview1: {
+          random_get: (buffer, size) => {
             const heap = new Uint8Array(self.memory.buffer);
-            heap.copyWithin(dest, src, src + num);
-          },
-          d: (requestedSize) => { // _emscripten_resize_heap
+            for (let i = 0; i < size; i++) {
+              heap[buffer + i] = Math.floor(Math.random() * 256);
+            }
             return 0;
+          },
+          fd_close: () => 0,
+          fd_write: () => 0,
+          fd_seek: () => 0,
+        },
+        env: {
+          emscripten_notify_memory_growth: (memoryIndex) => {
+            console.log('[TapeLoop] Memory grew');
+            self.updateHeapViews();
           },
         }
       };
@@ -67,30 +69,29 @@ class TapeLoopProcessor extends AudioWorkletProcessor {
 
       this.wasmExports = instance.exports;
 
-      // Memory is exported at 'e'
-      this.memory = this.wasmExports.e;
+      // Memory export
+      this.memory = this.wasmExports.memory;
       if (!this.memory) {
         throw new Error('No memory export found');
       }
       console.log('[TapeLoop] Memory acquired, buffer size:', this.memory.buffer.byteLength);
 
-      // Call __wasm_call_ctors if it exists (export 'f')
-      if (this.wasmExports.f) {
-        console.log('[TapeLoop] Calling __wasm_call_ctors...');
-        this.wasmExports.f();
+      // Call _initialize if it exists (emscripten startup)
+      if (this.wasmExports._initialize) {
+        console.log('[TapeLoop] Calling _initialize...');
+        this.wasmExports._initialize();
       }
 
       this.updateHeapViews();
 
-      // Initialize the synth engine (_init is export 'g')
+      // Initialize the synth engine
       console.log('[TapeLoop] Initializing synth at', sr, 'Hz...');
-      this.wasmExports.g(sr);
+      this.wasmExports.init(sr);
 
       // Allocate output buffers (128 samples * 4 bytes per float)
-      // _malloc is export 'da'
       const bufferSize = 128 * 4;
-      this.outputPtrL = this.wasmExports.da(bufferSize);
-      this.outputPtrR = this.wasmExports.da(bufferSize);
+      this.outputPtrL = this.wasmExports.malloc(bufferSize);
+      this.outputPtrR = this.wasmExports.malloc(bufferSize);
       console.log('[TapeLoop] Output buffers allocated at:', this.outputPtrL, this.outputPtrR);
 
       if (this.outputPtrL === 0 || this.outputPtrR === 0) {
@@ -115,102 +116,116 @@ class TapeLoopProcessor extends AudioWorkletProcessor {
   setParam(name, value) {
     if (!this.wasmExports) return;
 
-    // TapeLoop WASM export mapping:
-    // g=init, h=process, i=noteOn, j=noteOff, k=clearTape
-    // l=setOsc1Waveform, m=setOsc1Tune, n=setOsc1Level
-    // o=setOsc2Waveform, p=setOsc2Tune, q=setOsc2Detune, r=setOsc2Level
-    // s=setFMAmount
-    // t=setLoopLength, u=setLoopFeedback, v=setRecordLevel
-    // w=setSaturation, x=setWobbleRate, y=setWobbleDepth
-    // z=setTapeHiss, A=setTapeAge, B=setTapeDegrade
-    // C=setLFORate, D=setLFODepth, E=setLFOWaveform, F=setLFOTarget
-    // G=setDryLevel, H=setLoopLevel, I=setMasterLevel
-    // J=setRecAttack, K=setRecDecay
-    // L=setDelayTime, M=setDelayFeedback, N=setDelayMix
-    // O=setReverbDecay, P=setReverbDamping, Q=setReverbMix
-    // R=setSeqEnabled, S=setSeqBPM
-    // T=setSeq1Division, U=setSeq1StepPitch, V=setSeq1StepGate
-    // W=setSeq2Division, X=setSeq2StepPitch, Y=setSeq2StepGate
-    // Z=setVoiceLoopFM, _=setPanSpeed, $=setPanDepth
-    // aa=getSeq1CurrentStep, ba=getSeq2CurrentStep
-    // da=malloc, ca=free
-
     const e = this.wasmExports;
     try {
       switch (name) {
-        // Oscillators
-        case 'osc1Wave': e.l(Math.round(value)); break;
-        case 'osc1Tune': e.m(value); break;
-        case 'osc1Level': e.n(value); break;
-        case 'osc2Wave': e.o(Math.round(value)); break;
-        case 'osc2Tune': e.p(value); break;
-        case 'osc2Detune': e.q(value); break;
-        case 'osc2Level': e.r(value); break;
-        case 'fmAmount': e.s(value); break;
+        // Oscillator 1
+        case 'osc1Wave': e.setOsc1Waveform(Math.round(value)); break;
+        case 'osc1Tune': e.setOsc1Tune(value); break;
+        case 'osc1Level': e.setOsc1Level(value); break;
+        case 'osc1Attack': e.setOsc1Attack(value); break;
+        case 'osc1Decay': e.setOsc1Decay(value); break;
+        case 'osc1Sustain': e.setOsc1Sustain(value); break;
+        case 'osc1Release': e.setOsc1Release(value); break;
+
+        // Oscillator 2
+        case 'osc2Wave': e.setOsc2Waveform(Math.round(value)); break;
+        case 'osc2Tune': e.setOsc2Tune(value); break;
+        case 'osc2Detune': e.setOsc2Detune(value); break;
+        case 'osc2Level': e.setOsc2Level(value); break;
+        case 'osc2Attack': e.setOsc2Attack(value); break;
+        case 'osc2Decay': e.setOsc2Decay(value); break;
+        case 'osc2Sustain': e.setOsc2Sustain(value); break;
+        case 'osc2Release': e.setOsc2Release(value); break;
+
+        // FM
+        case 'fmAmount': e.setFMAmount(value); break;
 
         // Tape Loop
-        case 'loopLength': e.t(value); break;
-        case 'loopFeedback': e.u(value); break;
-        case 'recordLevel': e.v(value); break;
+        case 'loopLength': e.setLoopLength(value); break;
+        case 'loopFeedback': e.setLoopFeedback(value); break;
+        case 'recordLevel': e.setRecordLevel(value); break;
 
         // Tape Character
-        case 'saturation': e.w(value); break;
-        case 'wobbleRate': e.x(value); break;
-        case 'wobbleDepth': e.y(value); break;
-        case 'tapeHiss': e.z(value); break;
-        case 'tapeAge': e.A(value); break;
-        case 'tapeDegrade': e.B(value); break;
+        case 'saturation': e.setSaturation(value); break;
+        case 'wobbleRate': e.setWobbleRate(value); break;
+        case 'wobbleDepth': e.setWobbleDepth(value); break;
+        case 'tapeHiss': e.setTapeHiss(value); break;
+        case 'tapeAge': e.setTapeAge(value); break;
+        case 'tapeDegrade': e.setTapeDegrade(value); break;
+
+        // Tape Model (Airwindows)
+        case 'tapeModel': e.setTapeModel(Math.round(value)); break;
+        case 'tapeDrive': e.setTapeDrive(value); break;
+        case 'tapeBump': e.setTapeBump(value); break;
 
         // LFO
-        case 'lfoRate': e.C(value); break;
-        case 'lfoDepth': e.D(value); break;
-        case 'lfoWaveform': e.E(Math.round(value)); break;
-        case 'lfoTarget': e.F(Math.round(value)); break;
+        case 'lfoRate': e.setLFORate(value); break;
+        case 'lfoDepth': e.setLFODepth(value); break;
+        case 'lfoWaveform': e.setLFOWaveform(Math.round(value)); break;
+        case 'lfoTarget': e.setLFOTarget(Math.round(value)); break;
 
         // Mix
-        case 'dryLevel': e.G(value); break;
-        case 'loopLevel': e.H(value); break;
-        case 'masterLevel': e.I(value); break;
+        case 'dryLevel': e.setDryLevel(value); break;
+        case 'loopLevel': e.setLoopLevel(value); break;
+        case 'masterLevel': e.setMasterLevel(value); break;
 
-        // Envelope
-        case 'recAttack': e.J(value); break;
-        case 'recDecay': e.K(value); break;
+        // Record Envelope
+        case 'recAttack': e.setRecAttack(value); break;
+        case 'recDecay': e.setRecDecay(value); break;
 
-        // Effects
-        case 'delayTime': e.L(value); break;
-        case 'delayFeedback': e.M(value); break;
-        case 'delayMix': e.N(value); break;
-        case 'reverbDecay': e.O(value); break;
-        case 'reverbDamping': e.P(value); break;
-        case 'reverbMix': e.Q(value); break;
+        // Delay
+        case 'delayTime': e.setDelayTime(value); break;
+        case 'delayFeedback': e.setDelayFeedback(value); break;
+        case 'delayMix': e.setDelayMix(value); break;
+
+        // Reverb (Galactic3)
+        case 'reverbReplace': e.setReverbReplace(value); break;
+        case 'reverbBrightness': e.setReverbBrightness(value); break;
+        case 'reverbDetune': e.setReverbDetune(value); break;
+        case 'reverbBigness': e.setReverbBigness(value); break;
+        case 'reverbSize': e.setReverbSize(value); break;
+        case 'reverbMix': e.setReverbMix(value); break;
+
+        // Legacy reverb (mapped)
+        case 'reverbDecay': e.setReverbDecay(value); break;
+        case 'reverbDamping': e.setReverbDamping(value); break;
+
+        // Compressor
+        case 'compThreshold': e.setCompThreshold(value); break;
+        case 'compRatio': e.setCompRatio(value); break;
+        case 'compAttack': e.setCompAttack(value); break;
+        case 'compRelease': e.setCompRelease(value); break;
+        case 'compMakeup': e.setCompMakeup(value); break;
+        case 'compMix': e.setCompMix(value); break;
 
         // Sequencer
-        case 'seqEnabled': e.R(value ? 1 : 0); break;
-        case 'seqBPM': e.S(value); break;
-        case 'seq1Division': e.T(Math.round(value)); break;
-        case 'seq2Division': e.W(Math.round(value)); break;
+        case 'seqEnabled': e.setSeqEnabled(value ? 1 : 0); break;
+        case 'seqBPM': e.setSeqBPM(value); break;
+        case 'seq1Division': e.setSeq1Division(Math.round(value)); break;
+        case 'seq2Division': e.setSeq2Division(Math.round(value)); break;
 
         // Voice to Loop FM
-        case 'voiceLoopFM': e.Z(value); break;
+        case 'voiceLoopFM': e.setVoiceLoopFM(value); break;
 
         // Pan
-        case 'panSpeed': e._(value); break;
-        case 'panDepth': e.$(value); break;
+        case 'panSpeed': e.setPanSpeed(value); break;
+        case 'panDepth': e.setPanDepth(value); break;
 
         default:
           // Sequencer step pitches and gates
           if (name.startsWith('seq1Pitch_')) {
             const step = parseInt(name.split('_')[1]);
-            e.U(step, Math.round(value));
+            e.setSeq1StepPitch(step, Math.round(value));
           } else if (name.startsWith('seq1Gate_')) {
             const step = parseInt(name.split('_')[1]);
-            e.V(step, value ? 1 : 0);
+            e.setSeq1StepGate(step, value ? 1 : 0);
           } else if (name.startsWith('seq2Pitch_')) {
             const step = parseInt(name.split('_')[1]);
-            e.X(step, Math.round(value));
+            e.setSeq2StepPitch(step, Math.round(value));
           } else if (name.startsWith('seq2Gate_')) {
             const step = parseInt(name.split('_')[1]);
-            e.Y(step, value ? 1 : 0);
+            e.setSeq2StepGate(step, value ? 1 : 0);
           }
           break;
       }
@@ -237,8 +252,8 @@ class TapeLoopProcessor extends AudioWorkletProcessor {
         this.updateHeapViews();
       }
 
-      // Call WASM process function: _process (export 'h')
-      this.wasmExports.h(this.outputPtrL, this.outputPtrR, numSamples);
+      // Call WASM process function
+      this.wasmExports.process(this.outputPtrL, this.outputPtrR, numSamples);
 
       // Copy from WASM heap to output buffers
       const offsetL = this.outputPtrL >> 2;
@@ -253,8 +268,8 @@ class TapeLoopProcessor extends AudioWorkletProcessor {
       this.frameCount += numSamples;
       if (this.frameCount >= 4410) { // ~10 times per second
         this.frameCount = 0;
-        const newStep1 = this.wasmExports.aa(); // getSeq1CurrentStep
-        const newStep2 = this.wasmExports.ba(); // getSeq2CurrentStep
+        const newStep1 = this.wasmExports.getSeq1CurrentStep();
+        const newStep2 = this.wasmExports.getSeq2CurrentStep();
         if (newStep1 !== this.seq1Step || newStep2 !== this.seq2Step) {
           this.seq1Step = newStep1;
           this.seq2Step = newStep2;

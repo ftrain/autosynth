@@ -659,6 +659,44 @@ rollupOptions: {
 
 ## DSP Implementation Notes
 
+### WebAssembly AudioWorklet with WASI Stubs
+
+When compiling DSP code to WebAssembly for AudioWorklet processors, you may need WASI stubs even if not using filesystem features. Some runtime functions implicitly require these imports.
+
+**WASI stub implementation in AudioWorklet processor:**
+```javascript
+const imports = {
+  wasi_snapshot_preview1: {
+    random_get: (buffer, size) => {
+      const heap = new Uint8Array(self.memory.buffer);
+      for (let i = 0; i < size; i++) {
+        heap[buffer + i] = Math.floor(Math.random() * 256);
+      }
+      return 0;
+    },
+    fd_close: () => 0,
+    fd_write: () => 0,
+    fd_seek: () => 0,
+  },
+  env: {
+    emscripten_notify_memory_growth: (memoryIndex) => {
+      console.log('[DSP] Memory grew');
+      self.updateHeapViews();
+    },
+  }
+};
+
+// Instantiate WASM with stubs
+const wasmInstance = await WebAssembly.instantiate(wasmModule, imports);
+```
+
+**Emscripten build flags to minimize WASI dependencies:**
+```bash
+em++ -O2 -fno-exceptions -s FILESYSTEM=0 -s ENVIRONMENT="worker" --no-entry \
+  -s EXPORTED_FUNCTIONS="['_init','_process','_noteOn','_noteOff']" \
+  -o dsp.wasm dsp.cpp
+```
+
 ### Negative Filter Envelope Amount
 
 When implementing filter envelope modulation with a bipolar amount (positive and negative):

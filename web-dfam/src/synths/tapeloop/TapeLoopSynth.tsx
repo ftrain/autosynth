@@ -3,11 +3,11 @@
  * @brief TapeLoop web synthesizer UI using core/ui component library
  *
  * Tape loop drone engine with:
- * - 2 oscillators with FM
+ * - Single oscillator with ADSR
  * - Tape loop buffer with recording/playback
  * - Tape degradation effects (wobble, hiss, age)
  * - LFO with multiple targets
- * - Dual step sequencers
+ * - 4-step sequencer
  * - Delay and reverb effects
  */
 
@@ -16,6 +16,8 @@ import { useAudioEngine } from './useAudioEngine';
 import { SynthKnob } from '../../components/SynthKnob';
 import { SynthSequencer } from '../../components/SynthSequencer';
 import { SynthRow } from '../../components/SynthRow';
+import { SynthADSR } from '../../components/SynthADSR';
+import { SynthLFO } from '../../components/SynthLFO';
 import { synthStyles } from '../../styles/shared';
 
 interface TapeLoopSynthProps {
@@ -78,6 +80,13 @@ const lfoTargetOptions = [
   { value: 3, label: 'PAN' },
 ];
 
+const tapeModelOptions = [
+  { value: 0, label: 'BYPASS' },
+  { value: 1, label: 'DUST' },
+  { value: 2, label: 'AIRWIN' },
+  { value: 3, label: 'BOTH' },
+];
+
 const divisionOptions = [
   { value: 0, label: '1/8' },
   { value: 1, label: '1/4' },
@@ -88,17 +97,16 @@ const divisionOptions = [
 ];
 
 const TapeLoopSynth: React.FC<TapeLoopSynthProps> = ({ onBack }) => {
-  const { isReady, seq1Step, seq2Step, error, initialize, setParam, noteOn, noteOff, clearTape } = useAudioEngine();
+  const { isReady, seq1Step, error, initialize, setParam, noteOn, noteOff, clearTape } = useAudioEngine();
 
-  // Parameters - Oscillators
+  // Parameters - Oscillator
   const [osc1Wave, setOsc1Wave] = useState(1);
   const [osc1Tune, setOsc1Tune] = useState(0);
   const [osc1Level, setOsc1Level] = useState(70);
-  const [osc2Wave, setOsc2Wave] = useState(1);
-  const [osc2Tune, setOsc2Tune] = useState(0);
-  const [osc2Detune, setOsc2Detune] = useState(5);
-  const [osc2Level, setOsc2Level] = useState(50);
-  const [fmAmount, setFmAmount] = useState(0);
+  const [osc1Attack, setOsc1Attack] = useState(10);
+  const [osc1Decay, setOsc1Decay] = useState(200);
+  const [osc1Sustain, setOsc1Sustain] = useState(70);
+  const [osc1Release, setOsc1Release] = useState(300);
 
   // Parameters - Tape Loop
   const [loopLength, setLoopLength] = useState(2.0);
@@ -112,6 +120,11 @@ const TapeLoopSynth: React.FC<TapeLoopSynthProps> = ({ onBack }) => {
   const [tapeHiss, setTapeHiss] = useState(10);
   const [tapeAge, setTapeAge] = useState(20);
   const [tapeDegrade, setTapeDegrade] = useState(10);
+
+  // Parameters - Tape Model (Airwindows)
+  const [tapeModel, setTapeModel] = useState(3); // BOTH by default
+  const [tapeDrive, setTapeDrive] = useState(30);
+  const [tapeBump, setTapeBump] = useState(50);
 
   // Parameters - LFO
   const [lfoRate, setLfoRate] = useState(0.5);
@@ -128,38 +141,40 @@ const TapeLoopSynth: React.FC<TapeLoopSynthProps> = ({ onBack }) => {
   const [recAttack, setRecAttack] = useState(10);
   const [recDecay, setRecDecay] = useState(1000);
 
-  // Parameters - Effects
+  // Parameters - Effects (Delay)
   const [delayTime, setDelayTime] = useState(300);
   const [delayFeedback, setDelayFeedback] = useState(40);
   const [delayMix, setDelayMix] = useState(20);
-  const [reverbDecay, setReverbDecay] = useState(70);
-  const [reverbDamping, setReverbDamping] = useState(50);
+
+  // Parameters - Reverb (Galactic3)
+  const [reverbReplace, setReverbReplace] = useState(50);
+  const [reverbBrightness, setReverbBrightness] = useState(50);
+  const [reverbDetune, setReverbDetune] = useState(30);
+  const [reverbBigness, setReverbBigness] = useState(50);
+  const [reverbSize, setReverbSize] = useState(70);
   const [reverbMix, setReverbMix] = useState(20);
+
+  // Parameters - Compressor
+  const [compThreshold, setCompThreshold] = useState(-12);
+  const [compRatio, setCompRatio] = useState(4);
+  const [compAttack, setCompAttack] = useState(10);
+  const [compRelease, setCompRelease] = useState(100);
+  const [compMakeup, setCompMakeup] = useState(0);
+  const [compMix, setCompMix] = useState(50);
 
   // Parameters - Sequencer
   const [seqEnabled, setSeqEnabled] = useState(true);
   const [seqBPM, setSeqBPM] = useState(120);
   const [seq1Division, setSeq1Division] = useState(3);
-  const [seq2Division, setSeq2Division] = useState(2);
 
   // Parameters - Modulation
   const [voiceLoopFM, setVoiceLoopFM] = useState(0);
   const [panSpeed, setPanSpeed] = useState(0.2);
   const [panDepth, setPanDepth] = useState(30);
 
-  // Sequencer step data
-  const [seq1Pitches, setSeq1Pitches] = useState<number[]>(
-    [48, 53, 48, 55, 52, 48, 55, 60]
-  );
-  const [seq1Gates, setSeq1Gates] = useState<boolean[]>(
-    [true, true, false, true, true, false, true, true]
-  );
-  const [seq2Pitches, setSeq2Pitches] = useState<number[]>(
-    [60, 64, 67, 60, 65, 69, 64, 72]
-  );
-  const [seq2Gates, setSeq2Gates] = useState<boolean[]>(
-    [true, false, true, true, false, true, false, true]
-  );
+  // Sequencer step data - 4 steps
+  const [seq1Pitches, setSeq1Pitches] = useState<number[]>([48, 53, 48, 55]);
+  const [seq1Gates, setSeq1Gates] = useState<boolean[]>([true, true, false, true]);
 
   // Keyboard state
   const [activeKeys, setActiveKeys] = useState<Set<string>>(new Set());
@@ -174,42 +189,64 @@ const TapeLoopSynth: React.FC<TapeLoopSynthProps> = ({ onBack }) => {
     if (!isReady) return;
 
     // Send all initial parameters (convert percentages to 0-1 range where needed)
+    // Oscillator 1
     updateParam('osc1Wave', osc1Wave);
     updateParam('osc1Tune', osc1Tune);
     updateParam('osc1Level', osc1Level / 100);
-    updateParam('osc2Wave', osc2Wave);
-    updateParam('osc2Tune', osc2Tune);
-    updateParam('osc2Detune', osc2Detune);
-    updateParam('osc2Level', osc2Level / 100);
-    updateParam('fmAmount', fmAmount / 100);
+    updateParam('osc1Attack', osc1Attack);
+    updateParam('osc1Decay', osc1Decay);
+    updateParam('osc1Sustain', osc1Sustain / 100);
+    updateParam('osc1Release', osc1Release);
+    // Tape Loop
     updateParam('loopLength', loopLength);
     updateParam('loopFeedback', loopFeedback / 100);
     updateParam('recordLevel', recordLevel / 100);
+    // Tape Character
     updateParam('saturation', saturation / 100);
     updateParam('wobbleRate', wobbleRate);
     updateParam('wobbleDepth', wobbleDepth / 100);
     updateParam('tapeHiss', tapeHiss / 100);
     updateParam('tapeAge', tapeAge / 100);
     updateParam('tapeDegrade', tapeDegrade / 100);
+    // Tape Model (Airwindows)
+    updateParam('tapeModel', tapeModel);
+    updateParam('tapeDrive', tapeDrive / 100);
+    updateParam('tapeBump', tapeBump / 100);
+    // LFO
     updateParam('lfoRate', lfoRate);
     updateParam('lfoDepth', lfoDepth / 100);
     updateParam('lfoWaveform', lfoWaveform);
     updateParam('lfoTarget', lfoTarget);
+    // Mix
     updateParam('dryLevel', dryLevel / 100);
     updateParam('loopLevel', loopLevel / 100);
     updateParam('masterLevel', masterLevel / 100);
+    // Record Envelope
     updateParam('recAttack', recAttack / 1000);
     updateParam('recDecay', recDecay / 1000);
+    // Delay
     updateParam('delayTime', delayTime / 1000);
     updateParam('delayFeedback', delayFeedback / 100);
     updateParam('delayMix', delayMix / 100);
-    updateParam('reverbDecay', reverbDecay / 100);
-    updateParam('reverbDamping', reverbDamping / 100);
+    // Reverb (Galactic3)
+    updateParam('reverbReplace', reverbReplace / 100);
+    updateParam('reverbBrightness', reverbBrightness / 100);
+    updateParam('reverbDetune', reverbDetune / 100);
+    updateParam('reverbBigness', reverbBigness / 100);
+    updateParam('reverbSize', reverbSize / 100);
     updateParam('reverbMix', reverbMix / 100);
+    // Compressor
+    updateParam('compThreshold', compThreshold);
+    updateParam('compRatio', compRatio);
+    updateParam('compAttack', compAttack);
+    updateParam('compRelease', compRelease);
+    updateParam('compMakeup', compMakeup);
+    updateParam('compMix', compMix / 100);
+    // Sequencer
     updateParam('seqEnabled', seqEnabled);
     updateParam('seqBPM', seqBPM);
     updateParam('seq1Division', seq1Division);
-    updateParam('seq2Division', seq2Division);
+    // Modulation
     updateParam('voiceLoopFM', voiceLoopFM / 100);
     updateParam('panSpeed', panSpeed);
     updateParam('panDepth', panDepth / 100);
@@ -218,10 +255,6 @@ const TapeLoopSynth: React.FC<TapeLoopSynthProps> = ({ onBack }) => {
     seq1Pitches.forEach((pitch, i) => {
       updateParam(`seq1Pitch_${i}`, pitch);
       updateParam(`seq1Gate_${i}`, seq1Gates[i]);
-    });
-    seq2Pitches.forEach((pitch, i) => {
-      updateParam(`seq2Pitch_${i}`, pitch);
-      updateParam(`seq2Gate_${i}`, seq2Gates[i]);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isReady]);
@@ -332,6 +365,38 @@ const TapeLoopSynth: React.FC<TapeLoopSynthProps> = ({ onBack }) => {
         </div>
       </div>
 
+      {/* Sequencer at top - compact */}
+      <div style={{
+        maxWidth: '600px',
+        margin: '0 auto var(--synth-space-lg)',
+      }}>
+        <SynthRow label="SEQUENCER" theme="orange" icon="▶">
+          <Toggle label="ON" value={seqEnabled} onChange={(v) => { setSeqEnabled(v); updateParam('seqEnabled', v); }} />
+          <SynthKnob label="BPM" value={seqBPM} min={30} max={300} step={1} onChange={(v) => { setSeqBPM(v); updateParam('seqBPM', v); }} />
+          <Select label="DIV" value={seq1Division} options={divisionOptions} onChange={(v) => { setSeq1Division(v); updateParam('seq1Division', v); }} />
+          <div style={{ minWidth: '200px' }}>
+            <SynthSequencer
+              steps={4}
+              pitchValues={seq1Pitches}
+              gateValues={seq1Gates}
+              currentStep={seq1Step}
+              onPitchChange={(i, pitch) => {
+                const newPitches = [...seq1Pitches];
+                newPitches[i] = pitch;
+                setSeq1Pitches(newPitches);
+                updateParam(`seq1Pitch_${i}`, pitch);
+              }}
+              onGateChange={(i, gate) => {
+                const newGates = [...seq1Gates];
+                newGates[i] = gate;
+                setSeq1Gates(newGates);
+                updateParam(`seq1Gate_${i}`, gate);
+              }}
+            />
+          </div>
+        </SynthRow>
+      </div>
+
       {/* Main controls grid */}
       <div style={{
         display: 'grid',
@@ -340,24 +405,30 @@ const TapeLoopSynth: React.FC<TapeLoopSynthProps> = ({ onBack }) => {
         maxWidth: '1400px',
         margin: '0 auto',
       }}>
-        {/* Oscillator 1 */}
-        <SynthRow label="OSCILLATOR 1" theme="amber" icon="~">
+        {/* Oscillator */}
+        <SynthRow label="OSCILLATOR" theme="orange" icon="~">
           <Select label="WAVE" value={osc1Wave} options={waveformOptions} onChange={(v) => { setOsc1Wave(v); updateParam('osc1Wave', v); }} />
           <SynthKnob label="TUNE" value={osc1Tune} min={-24} max={24} step={1} onChange={(v) => { setOsc1Tune(v); updateParam('osc1Tune', v); }} />
           <SynthKnob label="LEVEL" value={osc1Level} min={0} max={100} onChange={(v) => { setOsc1Level(v); updateParam('osc1Level', v / 100); }} />
-        </SynthRow>
-
-        {/* Oscillator 2 */}
-        <SynthRow label="OSCILLATOR 2" theme="amber" icon="~">
-          <Select label="WAVE" value={osc2Wave} options={waveformOptions} onChange={(v) => { setOsc2Wave(v); updateParam('osc2Wave', v); }} />
-          <SynthKnob label="TUNE" value={osc2Tune} min={-24} max={24} step={1} onChange={(v) => { setOsc2Tune(v); updateParam('osc2Tune', v); }} />
-          <SynthKnob label="DETUNE" value={osc2Detune} min={0} max={100} onChange={(v) => { setOsc2Detune(v); updateParam('osc2Detune', v); }} />
-          <SynthKnob label="LEVEL" value={osc2Level} min={0} max={100} onChange={(v) => { setOsc2Level(v); updateParam('osc2Level', v / 100); }} />
+          <SynthADSR
+            label="OSC ENV"
+            attack={osc1Attack}
+            decay={osc1Decay}
+            sustain={osc1Sustain}
+            release={osc1Release}
+            onAttackChange={(v) => { setOsc1Attack(v); updateParam('osc1Attack', v); }}
+            onDecayChange={(v) => { setOsc1Decay(v); updateParam('osc1Decay', v); }}
+            onSustainChange={(v) => { setOsc1Sustain(v); updateParam('osc1Sustain', v / 100); }}
+            onReleaseChange={(v) => { setOsc1Release(v); updateParam('osc1Release', v); }}
+            maxAttack={2000}
+            maxDecay={2000}
+            maxRelease={5000}
+            showTabs={false}
+          />
         </SynthRow>
 
         {/* Modulation */}
-        <SynthRow label="MODULATION" theme="magenta" icon="◊">
-          <SynthKnob label="FM AMT" value={fmAmount} min={0} max={100} onChange={(v) => { setFmAmount(v); updateParam('fmAmount', v / 100); }} />
+        <SynthRow label="MODULATION" theme="orange" icon="◊">
           <SynthKnob label="VOICE>LOOP" value={voiceLoopFM} min={0} max={100} onChange={(v) => { setVoiceLoopFM(v); updateParam('voiceLoopFM', v / 100); }} />
         </SynthRow>
 
@@ -378,110 +449,72 @@ const TapeLoopSynth: React.FC<TapeLoopSynthProps> = ({ onBack }) => {
           <SynthKnob label="DEGRADE" value={tapeDegrade} min={0} max={100} onChange={(v) => { setTapeDegrade(v); updateParam('tapeDegrade', v / 100); }} />
         </SynthRow>
 
+        {/* Tape Model (Airwindows) */}
+        <SynthRow label="TAPE MODEL" theme="orange" icon="⊞">
+          <Select label="MODEL" value={tapeModel} options={tapeModelOptions} onChange={(v) => { setTapeModel(v); updateParam('tapeModel', v); }} />
+          <SynthKnob label="DRIVE" value={tapeDrive} min={0} max={100} onChange={(v) => { setTapeDrive(v); updateParam('tapeDrive', v / 100); }} />
+          <SynthKnob label="BUMP" value={tapeBump} min={0} max={100} onChange={(v) => { setTapeBump(v); updateParam('tapeBump', v / 100); }} />
+        </SynthRow>
+
         {/* LFO */}
-        <SynthRow label="LFO" theme="cyan" icon="∿">
-          <SynthKnob label="RATE" value={lfoRate} min={0.01} max={20} onChange={(v) => { setLfoRate(v); updateParam('lfoRate', v); }} />
+        <SynthRow label="LFO" theme="orange" icon="∿">
+          <SynthLFO
+            label="MOD LFO"
+            waveform={lfoWaveform}
+            rate={lfoRate}
+            onWaveformChange={(v) => { setLfoWaveform(v); updateParam('lfoWaveform', v); }}
+            onRateChange={(v) => { setLfoRate(v); updateParam('lfoRate', v); }}
+            minRate={0.01}
+            maxRate={20}
+          />
           <SynthKnob label="DEPTH" value={lfoDepth} min={0} max={100} onChange={(v) => { setLfoDepth(v); updateParam('lfoDepth', v / 100); }} />
-          <Select label="WAVE" value={lfoWaveform} options={waveformOptions} onChange={(v) => { setLfoWaveform(v); updateParam('lfoWaveform', v); }} />
           <Select label="TARGET" value={lfoTarget} options={lfoTargetOptions} onChange={(v) => { setLfoTarget(v); updateParam('lfoTarget', v); }} />
         </SynthRow>
 
         {/* Envelope */}
-        <SynthRow label="RECORD ENVELOPE" theme="green" icon="⊢">
+        <SynthRow label="RECORD ENVELOPE" theme="orange" icon="⊢">
           <SynthKnob label="ATTACK" value={recAttack} min={1} max={2000} onChange={(v) => { setRecAttack(v); updateParam('recAttack', v / 1000); }} />
           <SynthKnob label="DECAY" value={recDecay} min={10} max={5000} onChange={(v) => { setRecDecay(v); updateParam('recDecay', v / 1000); }} />
         </SynthRow>
 
-        {/* Mix */}
-        <SynthRow label="MIX" theme="blue" icon="≡">
-          <SynthKnob label="DRY" value={dryLevel} min={0} max={100} onChange={(v) => { setDryLevel(v); updateParam('dryLevel', v / 100); }} />
-          <SynthKnob label="LOOP" value={loopLevel} min={0} max={100} onChange={(v) => { setLoopLevel(v); updateParam('loopLevel', v / 100); }} />
-          <SynthKnob label="MASTER" value={masterLevel} min={0} max={100} onChange={(v) => { setMasterLevel(v); updateParam('masterLevel', v / 100); }} />
-        </SynthRow>
-
         {/* Auto Pan */}
-        <SynthRow label="AUTO PAN" theme="cyan" icon="↔">
+        <SynthRow label="AUTO PAN" theme="orange" icon="↔">
           <SynthKnob label="SPEED" value={panSpeed} min={0} max={5} onChange={(v) => { setPanSpeed(v); updateParam('panSpeed', v); }} />
           <SynthKnob label="DEPTH" value={panDepth} min={0} max={100} onChange={(v) => { setPanDepth(v); updateParam('panDepth', v / 100); }} />
         </SynthRow>
 
         {/* Delay */}
-        <SynthRow label="DELAY" theme="pink" icon="⊙">
+        <SynthRow label="DELAY" theme="orange" icon="⊙">
           <SynthKnob label="TIME" value={delayTime} min={10} max={1000} onChange={(v) => { setDelayTime(v); updateParam('delayTime', v / 1000); }} />
           <SynthKnob label="FDBK" value={delayFeedback} min={0} max={95} onChange={(v) => { setDelayFeedback(v); updateParam('delayFeedback', v / 100); }} />
           <SynthKnob label="MIX" value={delayMix} min={0} max={100} onChange={(v) => { setDelayMix(v); updateParam('delayMix', v / 100); }} />
         </SynthRow>
 
-        {/* Reverb */}
-        <SynthRow label="REVERB" theme="pink" icon="◌">
-          <SynthKnob label="DECAY" value={reverbDecay} min={10} max={99} onChange={(v) => { setReverbDecay(v); updateParam('reverbDecay', v / 100); }} />
-          <SynthKnob label="DAMP" value={reverbDamping} min={0} max={100} onChange={(v) => { setReverbDamping(v); updateParam('reverbDamping', v / 100); }} />
+        {/* Reverb (Galactic3) */}
+        <SynthRow label="GALACTIC REVERB" theme="orange" icon="◌">
+          <SynthKnob label="REPLACE" value={reverbReplace} min={0} max={100} onChange={(v) => { setReverbReplace(v); updateParam('reverbReplace', v / 100); }} />
+          <SynthKnob label="BRIGHT" value={reverbBrightness} min={0} max={100} onChange={(v) => { setReverbBrightness(v); updateParam('reverbBrightness', v / 100); }} />
+          <SynthKnob label="DETUNE" value={reverbDetune} min={0} max={100} onChange={(v) => { setReverbDetune(v); updateParam('reverbDetune', v / 100); }} />
+          <SynthKnob label="BIGNESS" value={reverbBigness} min={0} max={100} onChange={(v) => { setReverbBigness(v); updateParam('reverbBigness', v / 100); }} />
+          <SynthKnob label="SIZE" value={reverbSize} min={0} max={100} onChange={(v) => { setReverbSize(v); updateParam('reverbSize', v / 100); }} />
           <SynthKnob label="MIX" value={reverbMix} min={0} max={100} onChange={(v) => { setReverbMix(v); updateParam('reverbMix', v / 100); }} />
         </SynthRow>
-      </div>
 
-      {/* Sequencer Section */}
-      <div style={{
-        marginTop: 'var(--synth-space-xl)',
-        maxWidth: '1400px',
-        margin: 'var(--synth-space-xl) auto 0',
-      }}>
-        <SynthRow label="SEQUENCER" theme="magenta" icon="▶">
-          {/* Global controls */}
-          <div style={synthStyles.column('var(--synth-space-md)')}>
-            <Toggle label="ENABLE" value={seqEnabled} onChange={(v) => { setSeqEnabled(v); updateParam('seqEnabled', v); }} />
-            <SynthKnob label="BPM" value={seqBPM} min={30} max={300} step={1} onChange={(v) => { setSeqBPM(v); updateParam('seqBPM', v); }} />
-          </div>
+        {/* Compressor */}
+        <SynthRow label="COMPRESSOR" theme="orange" icon="⊟">
+          <SynthKnob label="THRESH" value={compThreshold} min={-60} max={0} onChange={(v) => { setCompThreshold(v); updateParam('compThreshold', v); }} />
+          <SynthKnob label="RATIO" value={compRatio} min={1} max={20} step={0.5} onChange={(v) => { setCompRatio(v); updateParam('compRatio', v); }} />
+          <SynthKnob label="ATK" value={compAttack} min={0.1} max={100} onChange={(v) => { setCompAttack(v); updateParam('compAttack', v); }} />
+          <SynthKnob label="REL" value={compRelease} min={10} max={1000} onChange={(v) => { setCompRelease(v); updateParam('compRelease', v); }} />
+          <SynthKnob label="MAKEUP" value={compMakeup} min={-12} max={24} onChange={(v) => { setCompMakeup(v); updateParam('compMakeup', v); }} />
+          <SynthKnob label="MIX" value={compMix} min={0} max={100} onChange={(v) => { setCompMix(v); updateParam('compMix', v / 100); }} />
+        </SynthRow>
 
-          {/* Division selectors */}
-          <div style={synthStyles.column('var(--synth-space-md)')}>
-            <Select label="SEQ 1 DIV" value={seq1Division} options={divisionOptions} onChange={(v) => { setSeq1Division(v); updateParam('seq1Division', v); }} />
-            <Select label="SEQ 2 DIV" value={seq2Division} options={divisionOptions} onChange={(v) => { setSeq2Division(v); updateParam('seq2Division', v); }} />
-          </div>
-
-          {/* Sequencer 1 */}
-          <div style={{ flex: 1, minWidth: '400px' }}>
-            <SynthSequencer
-              steps={8}
-              pitchValues={seq1Pitches}
-              gateValues={seq1Gates}
-              currentStep={seq1Step}
-              onPitchChange={(i, pitch) => {
-                const newPitches = [...seq1Pitches];
-                newPitches[i] = pitch;
-                setSeq1Pitches(newPitches);
-                updateParam(`seq1Pitch_${i}`, pitch);
-              }}
-              onGateChange={(i, gate) => {
-                const newGates = [...seq1Gates];
-                newGates[i] = gate;
-                setSeq1Gates(newGates);
-                updateParam(`seq1Gate_${i}`, gate);
-              }}
-            />
-          </div>
-
-          {/* Sequencer 2 */}
-          <div style={{ flex: 1, minWidth: '400px' }}>
-            <SynthSequencer
-              steps={8}
-              pitchValues={seq2Pitches}
-              gateValues={seq2Gates}
-              currentStep={seq2Step}
-              onPitchChange={(i, pitch) => {
-                const newPitches = [...seq2Pitches];
-                newPitches[i] = pitch;
-                setSeq2Pitches(newPitches);
-                updateParam(`seq2Pitch_${i}`, pitch);
-              }}
-              onGateChange={(i, gate) => {
-                const newGates = [...seq2Gates];
-                newGates[i] = gate;
-                setSeq2Gates(newGates);
-                updateParam(`seq2Gate_${i}`, gate);
-              }}
-            />
-          </div>
+        {/* Mix - at the end */}
+        <SynthRow label="MIX" theme="orange" icon="≡">
+          <SynthKnob label="DRY" value={dryLevel} min={0} max={100} onChange={(v) => { setDryLevel(v); updateParam('dryLevel', v / 100); }} />
+          <SynthKnob label="LOOP" value={loopLevel} min={0} max={100} onChange={(v) => { setLoopLevel(v); updateParam('loopLevel', v / 100); }} />
+          <SynthKnob label="MASTER" value={masterLevel} min={0} max={100} onChange={(v) => { setMasterLevel(v); updateParam('masterLevel', v / 100); }} />
         </SynthRow>
       </div>
 

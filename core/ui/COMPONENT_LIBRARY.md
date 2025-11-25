@@ -7,15 +7,22 @@
 ### Layout & Structure
 
 #### `SynthRow`
-**Purpose:** Layout container for horizontal rows of controls
+**Purpose:** Layout container for horizontal rows of controls with theming
 **Location:** `core/ui/components/SynthRow.jsx`
 **Props:**
-- `label` (string): Section label
+- `label?` (string): Section label
+- `icon?` (string): Icon/symbol before label
+- `theme?` (string): `'default'`, `'amber'`, `'blue'`, `'green'`, `'magenta'`, `'cyan'`, `'pink'`, `'orange'`
+- `gap?` (string): Space between children (default: '24px')
+- `wrap?` (boolean): Allow wrapping (default: true)
 - `children` (ReactNode): Child controls
+
+**Theme Recommendation:**
+For a clean, consistent look across your synth, use `theme="orange"` on all SynthRow components. The orange theme has a minimal bottom-border accent style that works well across all control types.
 
 **Example:**
 ```tsx
-<SynthRow label="OSCILLATOR">
+<SynthRow label="OSCILLATOR" theme="orange" icon="~">
   <SynthKnob label="FREQ" min={20} max={20000} value={440} />
   <SynthKnob label="LEVEL" min={0} max={1} value={0.8} />
 </SynthRow>
@@ -76,9 +83,10 @@
 - `onDecayChange` (function): `(ms: number) => void`
 - `onSustainChange` (function): `(percent: number) => void`
 - `onReleaseChange` (function): `(ms: number) => void`
-- `maxAttack?` (number): Max attack time (default: 5000ms)
-- `maxDecay?` (number): Max decay time (default: 5000ms)
-- `maxRelease?` (number): Max release time (default: 10000ms)
+- `maxAttack?` (number): Max attack time (default: 60000ms)
+- `maxDecay?` (number): Max decay time (default: 60000ms)
+- `maxRelease?` (number): Max release time (default: 60000ms)
+- `showTabs?` (boolean): Show tab interface for multiple envelopes (default: true). Set to `false` for single envelope use.
 
 **Example:**
 ```tsx
@@ -92,9 +100,10 @@
   onDecayChange={(ms) => setParameter('env_decay', ms / 1000)}
   onSustainChange={(pct) => setParameter('env_sustain', pct / 100)}
   onReleaseChange={(ms) => setParameter('env_release', ms / 1000)}
-  maxAttack={5000}
-  maxDecay={5000}
-  maxRelease={10000}
+  maxAttack={2000}
+  maxDecay={2000}
+  maxRelease={5000}
+  showTabs={false}  // Hide tabs for single envelope
 />
 ```
 
