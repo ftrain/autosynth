@@ -17,6 +17,7 @@ AutoSynth is a web-native framework for building professional synthesizers that 
 Everything runs in the browser using:
 - **WebAssembly**: C++ DSP compiled with Emscripten
 - **AudioWorklet**: Real-time audio processing
+- **Web MIDI API**: MIDI input/output for controllers and hardware
 - **React**: Modern UI with shared component library
 - **Docker**: Reproducible builds
 
@@ -441,13 +442,15 @@ const App: React.FC = () => {
 export default App;
 ```
 
-### Web Audio Bridge Pattern
+### Web Audio Bridge with MIDI Support
 
 ```typescript
 import { useState, useCallback, useRef } from 'react';
 
 export const useAudioEngine = () => {
   const [isReady, setIsReady] = useState(false);
+  const [midiInputs, setMidiInputs] = useState<MIDIInput[]>([]);
+  const [midiOutputs, setMidiOutputs] = useState<MIDIOutput[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
   const workletNodeRef = useRef<AudioWorkletNode | null>(null);
 
@@ -473,13 +476,32 @@ export const useAudioEngine = () => {
     worklet.port.onmessage = (e) => {
       if (e.data.type === 'ready') setIsReady(true);
     };
+
+    // Initialize Web MIDI
+    if (navigator.requestMIDIAccess) {
+      const midi = await navigator.requestMIDIAccess();
+      setMidiInputs(Array.from(midi.inputs.values()));
+      setMidiOutputs(Array.from(midi.outputs.values()));
+
+      // Connect MIDI inputs
+      Array.from(midi.inputs.values()).forEach((input) => {
+        input.onmidimessage = (msg) => {
+          const [status, data1, data2] = msg.data;
+          worklet.port.postMessage({ type: 'midi', status, data1, data2 });
+        };
+      });
+    }
   }, []);
 
   const setParameter = useCallback((id: number, value: number) => {
     workletNodeRef.current?.port.postMessage({ type: 'setParameter', id, value });
   }, []);
 
-  return { isReady, initialize, setParameter };
+  const sendMidiOut = useCallback((status: number, data1: number, data2: number) => {
+    midiOutputs.forEach((output) => output.send([status, data1, data2]));
+  }, [midiOutputs]);
+
+  return { isReady, midiInputs, midiOutputs, initialize, setParameter, sendMidiOut };
 };
 ```
 
@@ -600,6 +622,36 @@ Layout container for grouping controls.
 ```
 
 **See `core/ui/COMPONENT_LIBRARY.md` for complete API reference.**
+
+---
+
+## Web MIDI Support
+
+### MIDI Input
+
+All synths automatically support MIDI input:
+- **MIDI keyboards and controllers** - Play notes, control parameters
+- **USB MIDI interfaces** - Connect hardware gear
+- **Virtual MIDI ports** - Route from DAWs
+- **MIDI learn** - Map CC messages to any parameter
+
+### MIDI Output
+
+Send MIDI to external devices:
+- **Sequencer output** - Drive hardware synths
+- **MIDI clock** - Sync to external gear
+- **Parameter automation** - Control DAWs
+- **Chain synths** - Build complex setups
+
+### Browser Support
+
+Web MIDI API works in:
+- Chrome/Edge (full support)
+- Opera (full support)
+- Firefox (experimental flag)
+- Safari (no support - falls back to on-screen keyboard)
+
+**See `docs/WASM_ARCHITECTURE.md#web-midi-api-integration` for implementation details.**
 
 ---
 

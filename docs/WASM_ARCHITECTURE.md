@@ -28,7 +28,14 @@ AutoSynth is a **web-native synthesizer framework** that runs entirely in the br
 │  │  - Shared component library (core/ui/components/)     │ │
 │  │  - Shared styles (core/ui/styles/)                    │ │
 │  └────────────────────────────────────────────────────────┘ │
-│                           ↓ ↑ (Parameters)                   │
+│                    ↓ ↑ (Parameters)   ↓ ↑ (MIDI)            │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │  Web MIDI API (Main Thread)                           │ │
+│  │  - MIDI input from controllers/keyboards              │ │
+│  │  - MIDI output to external devices                    │ │
+│  │  - MIDI learn for parameter mapping                   │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                           ↓ ↑ (MIDI Messages)                │
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │  Web Audio API (Main Thread)                          │ │
 │  │  - AudioContext                                        │ │
@@ -41,6 +48,7 @@ AutoSynth is a **web-native synthesizer framework** that runs entirely in the br
 │  │  - Real-time audio processing                          │ │
 │  │  - WASM DSP engine                                     │ │
 │  │  - 128-sample blocks at 48kHz                          │ │
+│  │  - MIDI event handling                                 │ │
 │  └────────────────────────────────────────────────────────┘ │
 │                           ↓ ↑ (WASM calls)                   │
 │  ┌────────────────────────────────────────────────────────┐ │
@@ -256,7 +264,7 @@ class SynthProcessor extends AudioWorkletProcessor {
 registerProcessor('synth-processor', SynthProcessor);
 ```
 
-### 4. Web Audio Bridge (TypeScript)
+### 4. Web Audio Bridge with MIDI Support (TypeScript)
 
 **Location**: `synths/{SynthName}/ui/useAudioEngine.ts`
 
@@ -265,6 +273,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 export const useAudioEngine = () => {
   const [isReady, setIsReady] = useState(false);
+  const [midiAccess, setMidiAccess] = useState<MIDIAccess | null>(null);
+  const [midiInputs, setMidiInputs] = useState<MIDIInput[]>([]);
+  const [midiOutputs, setMidiOutputs] = useState<MIDIOutput[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
   const workletNodeRef = useRef<AudioWorkletNode | null>(null);
 
@@ -298,7 +309,72 @@ export const useAudioEngine = () => {
         setIsReady(true);
       }
     };
+
+    // Initialize Web MIDI
+    if (navigator.requestMIDIAccess) {
+      try {
+        const midi = await navigator.requestMIDIAccess({ sysex: false });
+        setMidiAccess(midi);
+
+        // Get MIDI inputs
+        const inputs = Array.from(midi.inputs.values());
+        setMidiInputs(inputs);
+
+        // Get MIDI outputs
+        const outputs = Array.from(midi.outputs.values());
+        setMidiOutputs(outputs);
+
+        // Listen to all MIDI inputs
+        inputs.forEach((input) => {
+          input.onmidimessage = handleMidiMessage;
+        });
+
+        // Listen for device changes
+        midi.onstatechange = () => {
+          setMidiInputs(Array.from(midi.inputs.values()));
+          setMidiOutputs(Array.from(midi.outputs.values()));
+        };
+      } catch (err) {
+        console.warn('MIDI access denied:', err);
+      }
+    }
   }, []);
+
+  const handleMidiMessage = useCallback((message: MIDIMessageEvent) => {
+    if (!workletNodeRef.current) return;
+
+    const [status, data1, data2] = message.data;
+    const command = status & 0xf0;
+    const channel = status & 0x0f;
+
+    // Send MIDI to AudioWorklet
+    workletNodeRef.current.port.postMessage({
+      type: 'midi',
+      status,
+      data1,
+      data2,
+      timestamp: message.timeStamp,
+    });
+
+    // Parse common MIDI messages
+    if (command === 0x90 && data2 > 0) {
+      // Note On
+      noteOn(data1, data2 / 127);
+    } else if (command === 0x80 || (command === 0x90 && data2 === 0)) {
+      // Note Off
+      noteOff(data1);
+    } else if (command === 0xb0) {
+      // CC (can be used for MIDI learn)
+      // TODO: Implement MIDI learn
+    }
+  }, []);
+
+  const sendMidiOut = useCallback((status: number, data1: number, data2: number) => {
+    // Send to all MIDI outputs
+    midiOutputs.forEach((output) => {
+      output.send([status, data1, data2]);
+    });
+  }, [midiOutputs]);
 
   const setParameter = useCallback((id: number, value: number) => {
     if (!workletNodeRef.current) return;
@@ -318,7 +394,24 @@ export const useAudioEngine = () => {
     });
   }, []);
 
-  return { isReady, initialize, setParameter, noteOn };
+  const noteOff = useCallback((note: number) => {
+    if (!workletNodeRef.current) return;
+    workletNodeRef.current.port.postMessage({
+      type: 'noteOff',
+      note,
+    });
+  }, []);
+
+  return {
+    isReady,
+    midiInputs,
+    midiOutputs,
+    initialize,
+    setParameter,
+    noteOn,
+    noteOff,
+    sendMidiOut,
+  };
 };
 ```
 
@@ -612,6 +705,114 @@ sound-designer: Creates presets
 | **Distribution** | Plugin installers | Website URL |
 | **Dependencies** | JUCE 8, GTK, WebKit | Browser only |
 | **Deployment** | Download + install | Visit URL |
+
+---
+
+## Web MIDI API Integration
+
+### MIDI Input
+
+**Automatically connects to all MIDI devices:**
+- MIDI keyboards and controllers
+- USB MIDI interfaces
+- Virtual MIDI ports
+- Bluetooth MIDI devices (with browser support)
+
+**Supported MIDI messages:**
+- Note On/Off (0x90, 0x80)
+- Control Change (0xB0) - for MIDI learn
+- Pitch Bend (0xE0)
+- Aftertouch (0xD0)
+- Program Change (0xC0)
+
+### MIDI Output
+
+**Send MIDI to external devices:**
+```typescript
+// Send note on to all connected MIDI outputs
+sendMidiOut(0x90, 60, 100); // Note C4, velocity 100
+
+// Send CC
+sendMidiOut(0xB0, 1, 64); // Mod wheel
+
+// Send to specific output
+midiOutputs[0].send([0x90, 60, 100]);
+```
+
+**Use cases:**
+- Send sequencer output to hardware synths
+- MIDI clock sync to external gear
+- Control DAW parameters
+- Chain multiple synths together
+
+### MIDI Learn
+
+**Map hardware controllers to parameters:**
+
+```typescript
+const [midiLearnMode, setMidiLearnMode] = useState(false);
+const [midiMappings, setMidiMappings] = useState<Map<string, number>>(new Map());
+
+const handleMidiCC = (cc: number, value: number) => {
+  if (midiLearnMode && selectedParameter) {
+    // Store mapping
+    setMidiMappings(prev => new Map(prev).set(`cc${cc}`, selectedParameter.id));
+    setMidiLearnMode(false);
+  } else {
+    // Use existing mapping
+    const paramId = midiMappings.get(`cc${cc}`);
+    if (paramId !== undefined) {
+      setParameter(paramId, value / 127);
+    }
+  }
+};
+```
+
+### Browser Support
+
+**Web MIDI API is supported in:**
+- Chrome/Edge (desktop)
+- Chromium-based browsers
+- Opera
+
+**Not yet supported:**
+- Firefox (experimental flag required)
+- Safari (no support)
+
+**Graceful degradation:**
+```typescript
+if (!navigator.requestMIDIAccess) {
+  // Fall back to on-screen keyboard or mouse input
+  console.warn('Web MIDI not supported - using virtual keyboard');
+}
+```
+
+### Example: Full MIDI Integration
+
+```typescript
+// Component with MIDI device selector
+const MIDIDeviceSelector: React.FC = () => {
+  const { midiInputs, midiOutputs } = useAudioEngine();
+
+  return (
+    <div>
+      <h3>MIDI Inputs</h3>
+      {midiInputs.map(input => (
+        <div key={input.id}>
+          {input.name} - {input.manufacturer}
+        </div>
+      ))}
+
+      <h3>MIDI Outputs</h3>
+      {midiOutputs.map(output => (
+        <div key={output.id}>
+          {output.name} - {output.manufacturer}
+        </div>
+      ))}
+    </div>
+  );
+};
+```
 
 ---
 
