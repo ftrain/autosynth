@@ -1,6 +1,6 @@
 # Core UI Component Library
 
-> Central component library for all Studio synthesizer plugins
+> Central component library for all AutoSynth web-native synthesizers
 
 ## Available Components
 
@@ -339,6 +339,153 @@ Opens at `http://localhost:6006` with all components documented and interactive.
 
 ---
 
+## Web Audio Integration
+
+### Using Components with WASM Synths
+
+All components work seamlessly with Web Audio + WASM engines. Use the `useAudioEngine` hook to bridge UI controls to your WASM DSP:
+
+```tsx
+import React from 'react';
+import { useAudioEngine } from './hooks/useAudioEngine';
+import {
+  SynthKnob,
+  SynthRow,
+  SynthADSR,
+  Oscilloscope,
+} from '../../../core/ui/components';
+
+const App: React.FC = () => {
+  const { isReady, initialize, setParameter, midiInputs } = useAudioEngine();
+
+  return (
+    <div style={{ background: '#0a0a0a', minHeight: '100vh', padding: '20px' }}>
+      {/* Initialize button */}
+      {!isReady && (
+        <button onClick={initialize} style={{ padding: '20px', fontSize: '16px' }}>
+          START SYNTH
+        </button>
+      )}
+
+      {/* UI controls */}
+      {isReady && (
+        <>
+          <SynthRow label="OSCILLATOR" theme="orange">
+            <SynthKnob
+              label="FREQ"
+              min={20}
+              max={20000}
+              value={440}
+              onChange={(v) => setParameter(0, v)}  // Parameter ID 0
+            />
+            <SynthKnob
+              label="LEVEL"
+              min={0}
+              max={1}
+              value={0.5}
+              onChange={(v) => setParameter(1, v)}  // Parameter ID 1
+            />
+          </SynthRow>
+
+          <SynthRow label="FILTER" theme="orange">
+            <SynthKnob
+              label="CUTOFF"
+              min={20}
+              max={20000}
+              value={1000}
+              onChange={(v) => setParameter(2, v)}  // Parameter ID 2
+            />
+          </SynthRow>
+
+          <SynthADSR
+            label="AMP ENV"
+            attack={10}
+            decay={100}
+            sustain={70}
+            release={200}
+            onAttackChange={(ms) => setParameter(3, ms)}
+            onDecayChange={(ms) => setParameter(4, ms)}
+            onSustainChange={(pct) => setParameter(5, pct / 100)}
+            onReleaseChange={(ms) => setParameter(6, ms)}
+            maxAttack={5000}
+            maxDecay={5000}
+            maxRelease={10000}
+            showTabs={false}
+          />
+
+          {/* MIDI indicator */}
+          {midiInputs.length > 0 && (
+            <div style={{ color: '#00ff88', marginTop: '20px' }}>
+              ✓ MIDI: {midiInputs[0].name}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+export default App;
+```
+
+### Parameter IDs
+
+Components communicate with WASM via numeric parameter IDs. Define your parameter mapping:
+
+```typescript
+// Parameter IDs for your WASM engine
+enum ParamID {
+  OSC_FREQ = 0,
+  OSC_LEVEL = 1,
+  FILTER_CUTOFF = 2,
+  ENV_ATTACK = 3,
+  ENV_DECAY = 4,
+  ENV_SUSTAIN = 5,
+  ENV_RELEASE = 6,
+}
+
+// Use in components
+<SynthKnob
+  label="CUTOFF"
+  min={20}
+  max={20000}
+  value={cutoffValue}
+  onChange={(v) => setParameter(ParamID.FILTER_CUTOFF, v)}
+/>
+```
+
+### Web MIDI Support
+
+The `useAudioEngine` hook automatically initializes Web MIDI:
+
+```typescript
+const {
+  isReady,
+  midiInputs,       // Available MIDI input devices
+  midiOutputs,      // Available MIDI output devices
+  initialize,
+  setParameter,
+  sendMidiOut,      // Send MIDI to external devices
+} = useAudioEngine();
+
+// MIDI input is automatically routed to WASM engine
+// MIDI output can be sent to hardware:
+sendMidiOut(0x90, 60, 100);  // Note On, C4, velocity 100
+```
+
+### Browser Compatibility
+
+| Feature | Chrome/Edge | Firefox | Safari |
+|---------|-------------|---------|--------|
+| Components | ✅ | ✅ | ✅ |
+| AudioWorklet | ✅ | ✅ | ⚠️ Limited |
+| Web MIDI | ✅ | ❌ | ❌ |
+| WASM | ✅ | ✅ | ✅ |
+
+**Recommendation:** Target Chrome/Edge for full MIDI support. Provide on-screen keyboard fallback for Firefox/Safari.
+
+---
+
 ## File Locations
 
 All components are in `/home/user/autosynth/core/ui/components/`:
@@ -365,15 +512,26 @@ core/ui/components/
 ## Import Examples
 
 ```tsx
-// From plugin UI (relative path)
-import { SynthKnob } from '../../../../../core/ui/components/SynthKnob';
-import { SynthRow } from '../../../../../core/ui/components/SynthRow';
-import { SynthADSR } from '../../../../../core/ui/components/SynthADSR';
-import { SynthLFO } from '../../../../../core/ui/components/SynthLFO';
+// From synth UI (synths/{Name}/ui/App.tsx)
+import { SynthKnob } from '../../../core/ui/components/SynthKnob';
+import { SynthRow } from '../../../core/ui/components/SynthRow';
+import { SynthADSR } from '../../../core/ui/components/SynthADSR';
+import { SynthLFO } from '../../../core/ui/components/SynthLFO';
+import { Oscilloscope } from '../../../core/ui/components/Oscilloscope';
+
+// Or import from index
+import {
+  SynthKnob,
+  SynthRow,
+  SynthADSR,
+  SynthLFO,
+  Oscilloscope,
+} from '../../../core/ui/components';
 ```
 
 ---
 
-**Last Updated:** 2024-11-24
-**Component Count:** 12+ core components
+**Last Updated:** 2025-11-25
+**Component Count:** 15+ core components
 **Storybook:** Available at `core/ui`
+**Architecture:** WebAssembly + Web Audio API + Web MIDI API

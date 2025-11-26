@@ -1,208 +1,371 @@
 # AutoSynth
 
-**Build professional synthesizer plugins using AI agent collaboration.**
+**Build professional web-native synthesizers using AI agent collaboration.**
 
 Describe a synth in plain English:
 
-> "Clone the Moog Model D but add tape saturation with delay options on a per-oscillator basis pre-filter"
+> "Clone the Moog Model D with tape saturation and Airwindows reverb"
 
-...and a team of specialized AI agents will design, implement, and deliver a complete JUCE 8 VST/AU plugin with a React WebView frontend.
+...and a team of specialized AI agents will design, implement, and deliver a complete WebAssembly synthesizer running in your browser with Web Audio API and Web MIDI support.
 
-## Quick Start
+---
 
-### Prerequisites
+## ⚡ Quick Start
 
-- Docker (recommended) or native build tools
-- Claude Pro/Max subscription (for OAuth login) or API key
-
-### Using Docker (Recommended)
+### Create Your First Synth
 
 ```bash
-# Build the development container
-./scripts/docker-run.sh build
+# Create a new synth from template
+./scripts/new-synth.sh "My Synth" "MySynth"
 
-# Start Claude Code with full permissions
-./scripts/docker-run.sh claude
+# Build WASM module
+cd synths/MySynth
+make wasm
+
+# Start development server
+cd ui
+npm install
+npm run dev
+
+# Open http://localhost:5173
 ```
 
-### Creating a Synth
+### Using AI Agents
 
-Once inside Claude Code, invoke the project coordinator:
+Invoke the project coordinator:
 
 ```
 @project-coordinator
 
-Build me a Minimoog Model D clone with 3 oscillators, ladder filter,
-and classic modulation routing. Optimize for bass sounds.
+Build me a bass synth with SST sawtooth oscillator, VintageLadder filter,
+and ChowDSP tape saturation. Optimize for deep bass sounds.
 ```
 
-The coordinator analyzes your request, delegates to specialist agents, and delivers:
-- JUCE 8 plugin (VST3, AU, Standalone)
-- React WebView UI
-- Factory presets
+The coordinator analyzes your request, selects appropriate DSP libraries, and delegates to specialist agents to deliver:
+- WebAssembly DSP engine (SST/Airwindows/ChowDSP)
+- React UI with Web Audio bridge
+- Web MIDI support
 - Documentation
 
-## How It Works
+---
+
+## 🌐 Web-First Architecture
 
 ```
-USER PROMPT
-    │
-    ▼
-PROJECT-COORDINATOR ──────────────────────────────────
-    │                                                 │
-    ├──► SYNTH-ARCHITECT (architecture doc)          │
-    ├──► SOUND-DESIGNER (sonic goals)                │
-    └──► SYSTEMS-ENGINEER (project setup)            │
-              │                                       │
-              ▼                                       │
-         DSP-ENGINEER (C++ audio code)               │
-              │                                       │
-              ▼                                       │
-         UI-DEVELOPER (React interface)              │
-              │                                       │
-              ▼                                       │
-         QA-ENGINEER (tests & validation)            │
-              │                                       │
-              ▼                                       │
-         DELIVERABLES ◄───────────────────────────────
+Browser
+├── React UI (controls, MIDI routing)
+├── Web MIDI API (hardware controllers)
+├── Web Audio API (AudioContext)
+└── AudioWorklet (audio thread)
+    └── WASM Module (C++ DSP)
+        ├── SST libraries (oscillators, filters, effects)
+        ├── Airwindows (reverb, saturation)
+        └── ChowDSP (tape emulation)
 ```
 
-### Spec-First Architecture
+**No plugins. No downloads. No installation. Just a URL.**
 
-Every synth starts with a `synth-spec.json` that defines oscillators, filters, envelopes, parameters, and UI layout. Code generators produce working C++ and TypeScript from the spec—no TODO placeholders.
+---
 
-```bash
-# Generate code from spec
-node scripts/generate-from-spec.js my-synth/synth-spec.json my-synth/
+## 🎛️ Features
 
-# Build the plugin
-cd my-synth && cmake -B build && cmake --build build
-```
+- **WebAssembly** - C++ DSP compiled to WASM for native performance
+- **Web Audio API** - Low-latency audio processing in the browser
+- **Web MIDI API** - Connect hardware MIDI keyboards and controllers
+- **Shared Component Library** - Professional UI components for all synths
+- **SST/Airwindows/ChowDSP** - Industrial-strength DSP libraries
+- **Docker Build System** - Reproducible builds with Emscripten
+- **One Codebase** - All synths share components and styles
 
-## The Agent Team
+---
 
-| Agent | Role |
-|-------|------|
-| **project-coordinator** | Orchestrates workflow, delegates tasks, integrates deliverables |
-| **synth-architect** | Designs signal flow, selects DSP algorithms, creates architecture docs |
-| **dsp-engineer** | Implements C++ audio processing using SST libraries |
-| **ui-developer** | Builds React interfaces from the component library |
-| **sound-designer** | Defines sonic goals, creates factory presets |
-| **systems-engineer** | Sets up CMake, CI/CD, cross-platform builds |
-| **qa-engineer** | Writes tests, validates signal flow, ensures plugin compliance |
+## 🤖 The Agent Team
 
-## Project Structure
+| Agent | Role | Deliverables |
+|-------|------|--------------|
+| **project-coordinator** | Orchestrates workflow, selects DSP libraries | Project plan, architecture doc |
+| **synth-architect** | Designs signal flow, selects SST components | Architecture doc, signal diagrams |
+| **dsp-engineer** | Implements C++ DSP using SST/Airwindows/ChowDSP | Engine.h, Voice.h, wasm_bindings.cpp |
+| **ui-developer** | Builds React UI from shared component library | App.tsx, useAudioEngine.ts |
+| **sound-designer** | Defines sonic goals, creates presets | Preset library, sonic specs |
+| **qa-engineer** | Browser testing, MIDI validation | Test reports, compatibility matrix |
+
+---
+
+## 📁 Project Structure
 
 ```
 autosynth/
-├── .claude/agents/     # Agent definitions
-├── components/         # React UI primitives (knobs, sliders, envelopes)
-├── templates/          # Plugin scaffolding + synth spec schema
-├── scripts/            # new-plugin.sh, generate-from-spec.js, docker-run.sh
-├── docs/               # DSP guides, SST library index
-├── themes/             # UI theme system (6 built-in themes)
-├── hooks/              # React hooks (useParameters, useJUCEBridge)
-└── docker/             # Container configuration
+├── synths/              # Individual synthesizers
+│   └── MySynth/
+│       ├── dsp/         # C++ DSP (Engine.h, Voice.h, wasm_bindings.cpp)
+│       ├── ui/          # React UI (uses core/ui/components/)
+│       ├── public/      # processor.js (AudioWorklet)
+│       └── Makefile     # Emscripten build
+│
+├── core/
+│   └── ui/
+│       ├── components/  # Shared React components (SynthKnob, SynthADSR, etc.)
+│       └── styles/      # Shared CSS
+│
+├── libs/                # DSP libraries (git submodules)
+│   ├── sst-basic-blocks/
+│   ├── sst-filters/
+│   ├── sst-effects/
+│   ├── airwin2rack/
+│   └── chowdsp_utils/
+│
+├── website/             # Synth browser (home page)
+├── templates/           # synth-template/ (scaffold for new synths)
+├── scripts/             # new-synth.sh, build-all.sh
+├── docker/              # Production Dockerfile, nginx config
+└── docs/                # Architecture guides, DSP library reference
 ```
 
-## UI Component Library
+---
 
-The React component library provides all UI primitives for synth interfaces:
+## 🎨 UI Component Library
+
+All synths use the same professional React components:
 
 | Component | Purpose |
 |-----------|---------|
-| `SynthKnob` | Rotary control |
+| `SynthKnob` | Rotary control for continuous parameters |
 | `SynthSlider` | Linear fader |
-| `SynthADSR` | 4-stage envelope editor |
-| `SynthDAHDSR` | 6-stage envelope editor |
-| `SynthLFO` | LFO with waveform selection |
+| `SynthADSR` | 4-stage ADSR envelope editor with visualization |
+| `SynthDAHDSR` | 6-stage DAHDSR envelope editor |
+| `SynthLFO` | LFO with waveform selection and rate control |
+| `SynthSequencer` | Step sequencer with pitch and gate per step |
 | `Oscilloscope` | Real-time waveform display |
-| `SynthVUMeter` | Level meter |
-| `SynthSequencer` | Step sequencer |
+| `SynthRow` | Layout container with theming |
 
-Browse components:
+See `core/ui/COMPONENT_LIBRARY.md` for complete API reference.
+
+---
+
+## 🔊 DSP Libraries
+
+**Rule: Never write custom DSP. Always use existing libraries.**
+
+| Library | Components | Use For |
+|---------|-----------|---------|
+| **SST sst-basic-blocks** | DPWSawOscillator, DPWPulseOscillator, SineOscillator, ADSREnvelope, LFO | Oscillators, envelopes, modulation |
+| **SST sst-filters** | VintageLadder, CytomicSVF, DiodeLadder, Comb | Filters (Moog-style, clean SVF, TB-303 style) |
+| **SST sst-effects** | Delay, Chorus, Phaser, Flanger | Time-based effects |
+| **Airwindows** | Galactic3, ToTape6, Density, Tube2 | Reverb, tape saturation, tube distortion |
+| **ChowDSP** | TapeModel | Authentic tape emulation with wow/flutter |
+
+See `docs/DSP_LIBRARIES.md` for complete API reference with code examples.
+
+---
+
+## 🚀 Build & Deploy
+
+### Development
+
 ```bash
-npm install
-npm run storybook
+# Create new synth
+./scripts/new-synth.sh "My Synth" "MySynth"
+
+# Build WASM
+cd synths/MySynth && make wasm
+
+# Start dev server (with hot reload)
+cd ui && npm run dev
+
+# Open http://localhost:5173
 ```
 
-### Theming
+### Production
 
-Six built-in themes (vintage, cyberpunk, analog, minimal, nord, solarized) plus easy customization via CSS tokens or theme objects.
+```bash
+# Build all synths + website
+docker build -f Dockerfile.production -t autosynth .
 
-## DSP Libraries
+# Run
+docker run -p 8080:80 autosynth
 
-All audio processing uses **Surge Synth Team (SST)** libraries:
+# Open http://localhost:8080
+```
 
-| Library | Components |
-|---------|------------|
-| sst-basic-blocks | Oscillators, envelopes, LFOs |
-| sst-filters | Ladder, SVF, diode, comb, formant |
-| sst-effects | Delay, reverb, chorus, phaser |
-| sst-waveshapers | Soft/hard clip, wavefold |
+The production build:
+1. Compiles all synths to WASM (Emscripten stage)
+2. Builds all React UIs (Node stage)
+3. Builds synth browser website
+4. Serves everything with Nginx
 
-## Example Prompts
+---
+
+## 🎹 Web MIDI Support
+
+All synths automatically support Web MIDI:
+
+- **MIDI Input** - Play with hardware keyboards/controllers
+- **MIDI Output** - Send MIDI to external devices
+- **Hot-plug** - Dynamic device connection/disconnection
+- **Browser Support:**
+  - Chrome/Edge: ✅ Full MIDI support
+  - Firefox: ⚠️ No MIDI (on-screen keyboard fallback)
+  - Safari: ⚠️ No MIDI (on-screen keyboard fallback)
+
+---
+
+## 📝 Example Prompts
 
 **Classic Clone:**
 ```
-Create a Minimoog Model D clone with 3 oscillators, ladder filter,
+Create a Minimoog Model D clone with 3 SST oscillators, VintageLadder filter,
 and classic modulation routing.
 ```
 
-**Hybrid Synth:**
+**Bass Synth with Effects:**
 ```
-Build a wavetable synth with FM capabilities, inspired by the
-Waldorf Blofeld but with a simpler interface.
-```
-
-**Effect-Heavy:**
-```
-Design a mono synth for bass with built-in tape saturation,
-spring reverb, and tempo-synced delay.
+Build a bass synth with SST sawtooth oscillator, VintageLadder filter,
+and ChowDSP tape saturation. Add Airwindows Galactic3 reverb.
 ```
 
 **Experimental:**
 ```
-Create a granular synthesis engine with real-time spectral
-processing and generative modulation.
+Design a granular synthesis engine using SST oscillators with
+Airwindows ToTape6 for analog warmth.
 ```
 
-## Development
+---
 
-### Docker Environment
+## 🛠️ Development Workflow
 
-```bash
-./scripts/docker-run.sh build      # Build image
-./scripts/docker-run.sh run        # Interactive shell
-./scripts/docker-run.sh claude     # Claude Code with full permissions
-./scripts/docker-run.sh test-x11   # Test X11 display
-./scripts/docker-run.sh test-audio # Test audio (Linux)
+### 1. Design Phase
+
+```
+@project-coordinator
+
+Describe your synth in plain English...
 ```
 
-### Native Development
+The coordinator creates an architecture document identifying:
+- Required SST components (oscillators, filters, envelopes)
+- Airwindows effects (reverb, saturation)
+- ChowDSP emulations (tape, analog modeling)
+- Parameter mappings
+- UI layout
 
-```bash
-npm install                        # Install dependencies
-npm run storybook                  # Browse UI components
-npm run dev                        # Development server
-npm run build                      # Production build
-npm run typecheck                  # Type check
-npm test                           # Run tests
+### 2. Implementation
+
+Agents work in parallel:
+- `dsp-engineer` implements C++ using SST/Airwindows/ChowDSP
+- `ui-developer` builds React UI with shared components
+- Both integrate via WASM bindings and AudioWorklet
+
+### 3. Testing
+
+- Build WASM: `make wasm`
+- Start dev server: `npm run dev`
+- Test in Chrome/Edge (full MIDI support)
+- Validate audio quality, MIDI routing, parameter control
+
+### 4. Deploy
+
+- Add to production build
+- Docker builds all synths
+- Nginx serves at `/synths/{Name}/`
+
+---
+
+## 📚 Documentation
+
+- **`CLAUDE.md`** - Complete development workflow guide
+- **`docs/WASM_ARCHITECTURE.md`** - Technical architecture reference
+- **`docs/DSP_LIBRARIES.md`** - SST/Airwindows/ChowDSP API reference
+- **`core/ui/COMPONENT_LIBRARY.md`** - UI component reference
+- **`templates/synth-template/README.md`** - Template customization guide
+
+---
+
+## 🎯 Key Principles
+
+### 1. Web-First
+No plugins, no native code, no JUCE. Everything runs in the browser.
+
+### 2. Never Write Custom DSP
+Always use SST/Airwindows/ChowDSP libraries. They're battle-tested and professional-grade.
+
+### 3. Shared Components
+All synths use the same React component library. One codebase, one design language.
+
+### 4. Docker Everything
+Reproducible builds with Emscripten, Node, and Nginx in multi-stage Docker.
+
+---
+
+## 🌟 Why AutoSynth?
+
+**Traditional Approach:**
+- Install development tools (JUCE, Xcode, Visual Studio)
+- Build native plugins (VST, AU, AAX)
+- Distribute installers
+- Handle platform-specific bugs
+- Users download and install
+
+**AutoSynth Approach:**
+- Write C++ DSP with SST/Airwindows/ChowDSP
+- Compile to WASM with Emscripten
+- Build React UI with shared components
+- Deploy to web with Docker + Nginx
+- Users click a URL
+
+**Result:** Professional synthesizers accessible to anyone with a browser.
+
+---
+
+## 🔧 Browser Support
+
+| Feature | Chrome/Edge | Firefox | Safari |
+|---------|-------------|---------|--------|
+| AudioWorklet | ✅ | ✅ | ⚠️ Limited |
+| Web MIDI | ✅ | ❌ | ❌ |
+| WASM | ✅ | ✅ | ✅ |
+
+**Recommendation:** Target Chrome/Edge for full experience. Provide on-screen keyboard fallback for Firefox/Safari.
+
+---
+
+## 📦 What's Included
+
+- ✅ Complete synth template (WASM + AudioWorklet + React)
+- ✅ Shared UI component library (12+ components)
+- ✅ SST/Airwindows/ChowDSP integration patterns
+- ✅ Web Audio + Web MIDI bridge
+- ✅ Build scripts (new-synth.sh, build-all.sh)
+- ✅ Production Dockerfile (multi-stage)
+- ✅ Synth browser website
+- ✅ Comprehensive documentation
+- ✅ AI agent team (7 specialized agents)
+
+---
+
+## 🚧 Getting Help
+
+**Documentation:**
+- Read `CLAUDE.md` for complete workflow
+- Check `docs/` for technical references
+- Browse `core/ui/COMPONENT_LIBRARY.md` for UI components
+
+**AI Assistance:**
+```
+@project-coordinator
+[Describe what you want to build]
 ```
 
-### Creating a New Plugin Manually
+The agents know the entire system and can guide you through any task.
 
-```bash
-./scripts/new-plugin.sh "My Synth" "MySynth" "MySy"
-```
+---
 
-## Documentation
-
-- `docs/LLM_SYNTH_PROGRAMMING_GUIDE.md` - Complete synth design manual
-- `docs/SST_LIBRARIES_INDEX.md` - All SST library components
-- `docs/TYPESCRIPT_COMPONENT_DEVELOPER_GUIDE.md` - React component guide
-- `CLAUDE.md` - Full system documentation for Claude Code
-
-## License
+## 📄 License
 
 MIT
+
+---
+
+**AutoSynth** - Build professional synthesizers for the web.
+
+No plugins. No installers. No compatibility hell. Just a URL.

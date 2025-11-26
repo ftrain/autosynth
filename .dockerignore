@@ -34,3 +34,42 @@ coverage/
 
 # Storybook build
 storybook-static/
+
+# WASM builds (will be generated during Docker build)
+*.wasm
+*.js.mem
+
+# Docker files
+Dockerfile
+Dockerfile.*
+docker-compose*.yml
+
+# Tests
+tests/
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Documentation (except main README)
+*.md
+!README.md
+docs/
+
+# Old plugin-based builds (JUCE)
+plugins/
+templates/plugin-template/
+
+# Temporary files
+tmp/
+temp/
+cache/
+
+# Development scripts
+scripts/dev.sh
+scripts/docker-run.sh
