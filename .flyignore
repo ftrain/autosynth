@@ -1,0 +1,13 @@
+# Prevent fly.io from auto-detecting this as a Vite app
+# The root package.json is for component library development only
+# Production build uses multi-stage Docker (see Dockerfile)
+
+package.json
+vite.config.ts
+tsconfig.json
+
+# Also ignore development files
+node_modules/
+.git/
+.vscode/
+.idea/

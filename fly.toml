@@ -4,8 +4,9 @@ app = "autosynth"
 primary_region = "sjc"  # San Jose - change to your preferred region
 
 [build]
-  dockerfile = "Dockerfile.production"
+  dockerfile = "Dockerfile"
   ignorefile = ".dockerignore"
+  builder = "docker"
 
 [env]
   PORT = "80"
