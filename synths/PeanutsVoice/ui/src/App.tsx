@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAudioEngine } from './hooks/useAudioEngine';
 import {
   SynthKnob,
   SynthRow,
   SynthADSR,
   SynthLFO,
+  SynthSequencer,
 } from '../../../core/ui/components';
 
 /**
@@ -72,6 +73,60 @@ const App: React.FC = () => {
   const [ampRelease, setAmpRelease] = useState(300);
 
   const [masterVolume, setMasterVolume] = useState(0.8);
+
+  // Sequencer state
+  const [sequencerEnabled, setSequencerEnabled] = useState(false);
+  const [sequencerSteps, setSequencerSteps] = useState(8);
+  const [sequencerTempo, setSequencerTempo] = useState(120); // BPM
+  const [currentStep, setCurrentStep] = useState(-1);
+  const [stepPitches, setStepPitches] = useState<number[]>([
+    60, 60, 60, 60, 60, 60, 60, 60, // All C4 by default
+  ]);
+  const [stepGates, setStepGates] = useState<boolean[]>([
+    true, true, true, false, true, true, true, false, // Pattern: on on on off...
+  ]);
+
+  // Sequencer timing
+  const stepIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Sequencer playback
+  useEffect(() => {
+    if (!isReady || !sequencerEnabled) {
+      if (stepIntervalRef.current) {
+        clearInterval(stepIntervalRef.current);
+        stepIntervalRef.current = null;
+      }
+      setCurrentStep(-1);
+      return;
+    }
+
+    // Calculate step duration from tempo
+    const stepDuration = (60 / sequencerTempo) * 1000 / 4; // 16th notes
+
+    let step = 0;
+    stepIntervalRef.current = setInterval(() => {
+      setCurrentStep(step);
+
+      // Trigger note if gate is on
+      if (stepGates[step]) {
+        const note = stepPitches[step];
+        const velocity = 0.8;
+
+        // Send note on
+        setParameter(ParamID.OSC_LEVEL, velocity);
+        // Note: In a real implementation, we'd send MIDI note on/off
+        // For now, just trigger the envelope
+      }
+
+      step = (step + 1) % sequencerSteps;
+    }, stepDuration);
+
+    return () => {
+      if (stepIntervalRef.current) {
+        clearInterval(stepIntervalRef.current);
+      }
+    };
+  }, [isReady, sequencerEnabled, sequencerTempo, sequencerSteps, stepGates, stepPitches, setParameter]);
 
   // Error state
   if (error) {
@@ -390,6 +445,74 @@ const App: React.FC = () => {
         maxRelease={3000}
         showTabs={false}
       />
+
+      {/* Sequencer Section */}
+      <div style={{ marginTop: '40px' }}>
+        <SynthRow label="SEQUENCER ('Wah Wah Wah' Patterns)" theme="orange">
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+            <button
+              onClick={() => setSequencerEnabled(!sequencerEnabled)}
+              style={{
+                padding: '12px 24px',
+                background: sequencerEnabled ? '#00ff88' : '#333',
+                color: sequencerEnabled ? '#0a0a0a' : '#fff',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                fontSize: '14px',
+                fontFamily: 'monospace',
+              }}
+            >
+              {sequencerEnabled ? '⏸ STOP' : '▶ PLAY'}
+            </button>
+            <SynthKnob
+              label="TEMPO"
+              min={60}
+              max={240}
+              value={sequencerTempo}
+              onChange={setSequencerTempo}
+              formatValue={(v) => `${Math.round(v)} BPM`}
+            />
+            <SynthKnob
+              label="STEPS"
+              min={4}
+              max={16}
+              step={1}
+              value={sequencerSteps}
+              onChange={(v) => {
+                const newSteps = Math.round(v);
+                setSequencerSteps(newSteps);
+                // Resize arrays if needed
+                if (stepPitches.length < newSteps) {
+                  setStepPitches([...stepPitches, ...Array(newSteps - stepPitches.length).fill(60)]);
+                  setStepGates([...stepGates, ...Array(newSteps - stepGates.length).fill(true)]);
+                }
+              }}
+              formatValue={(v) => `${Math.round(v)}`}
+            />
+          </div>
+        </SynthRow>
+
+        <SynthSequencer
+          steps={sequencerSteps}
+          pitchValues={stepPitches}
+          gateValues={stepGates}
+          currentStep={currentStep}
+          onPitchChange={(step, pitch) => {
+            const newPitches = [...stepPitches];
+            newPitches[step] = pitch;
+            setStepPitches(newPitches);
+          }}
+          onGateChange={(step, gate) => {
+            const newGates = [...stepGates];
+            newGates[step] = gate;
+            setStepGates(newGates);
+          }}
+          minPitch={36}  // C1
+          maxPitch={84}  // C6
+        />
+      </div>
 
       {/* Master Section */}
       <SynthRow label="MASTER" theme="orange">
