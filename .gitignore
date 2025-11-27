@@ -1,0 +1,36 @@
+# Build directories
+build/
+dist/
+dist-plugin/
+dist-plugin-linux/
+node_modules/
+plugin/build/
+
+# Generated files
+plugin/Source/EmbeddedUI.h
+dist/bundled.html
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.bak
+
+*storybook.log
+storybook-static
+
+# Docker persistent state (auth, etc.)
+.docker-state/
